@@ -2,10 +2,8 @@
   box-sizing: border-box;
 }
 
-
 html,
 body {
-
   margin: 0;
   padding: 0;
 
@@ -16,7 +14,6 @@ body {
     Arial,
     Helvetica,
     sans-serif;
-
 }
 
 
@@ -29,8 +26,7 @@ body {
   width: 80vw;
 
   margin:
-    20px auto
-    40px;
+    20px auto 40px;
 
   display: flex;
 
@@ -39,14 +35,11 @@ body {
 
   align-items:
     flex-start;
-
 }
 
 
 #menu-wrapper {
-
   position: relative;
-
 }
 
 
@@ -55,55 +48,41 @@ body {
   border: 0;
 
   padding: 0;
-
   margin: 0;
 
   background:
     transparent;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
   font-family:
     Arial,
     Helvetica,
     sans-serif;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 #torre-title:hover,
 #lab-title:hover {
-
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
 #lab-title {
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  text-decoration:
-    none;
+  text-decoration: none;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
-  line-height:
-    1;
-
+  line-height: 1;
 }
 
 
@@ -113,86 +92,61 @@ body {
 
 #category-menu {
 
-  position:
-    absolute;
+  position: absolute;
 
-  top:
-    28px;
+  top: 28px;
+  left: -8px;
 
-  left:
-    -8px;
+  display: none;
 
-  display:
-    none;
+  flex-direction: column;
 
-  flex-direction:
-    column;
+  gap: 7px;
 
-  gap:
-    7px;
+  padding: 10px 12px;
 
-  padding:
-    10px 12px;
-
-  background:
-    #ffffff;
+  background: #ffffff;
 
   border:
     2px solid #0000ff;
 
-  z-index:
-    1000;
-
+  z-index: 1000;
 }
 
 
 #category-menu.open {
-
-  display:
-    flex;
-
+  display: flex;
 }
 
 
 .category-button {
 
-  border:
-    0;
+  border: 0;
 
-  padding:
-    0;
+  padding: 0;
 
   background:
     transparent;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
   font-family:
     Arial,
     Helvetica,
     sans-serif;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
-  text-align:
-    left;
+  text-align: left;
 
-  white-space:
-    nowrap;
+  white-space: nowrap;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 .category-button:hover {
-
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
@@ -202,12 +156,10 @@ body {
 
 #archive {
 
-  width:
-    80vw;
+  width: 80vw;
 
   margin:
     0 auto;
-
 }
 
 
@@ -216,76 +168,66 @@ body {
   margin:
     0 0 20px 0;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
-  line-height:
-    1;
+  line-height: 1;
 
   font-weight:
     normal;
-
 }
 
 
 #grid-wrapper {
 
-  position:
-    relative;
+  position: relative;
 
-  width:
-    100%;
-
+  width: 100%;
 }
 
 
 #grid {
-
-  width:
-    100%;
-
+  width: 100%;
 }
 
 
 /* =========================================================
-   LINHAS
+   ROW
 ========================================================= */
 
 .archive-row {
 
-  position:
-    relative;
+  position: relative;
 
-  width:
-    100%;
+  width: 100%;
 
-  display:
-    grid;
-
-  grid-template-columns:
-    42px
-    repeat(var(--columns), minmax(0, 1fr));
+  display: grid;
 
   align-items:
     stretch;
-
 }
 
 
 /* =========================================================
-   NUMERO
+   INVENTORY NUMBER
 ========================================================= */
 
 .row-number {
 
+  position: absolute;
+
+  right:
+    calc(100% + 10px);
+
+  top: 0;
+
+  width: 42px;
+
   min-height:
     1.5cm;
 
-  display:
-    flex;
+  display: flex;
 
   align-items:
     flex-start;
@@ -294,45 +236,27 @@ body {
     flex-end;
 
   padding:
-    7px 10px 6px 0;
+    7px 0 6px 0;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    11px;
+  font-size: 11px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  border-bottom:
-    2px solid #0000ff;
+  border: 0;
 
-}
-
-
-/*
-  Primeira linha:
-  pequeno limite superior
-*/
-
-.archive-row:first-child
-.row-number {
-
-  border-top:
-    2px solid #0000ff;
-
+  white-space: nowrap;
 }
 
 
 /* =========================================================
-   CELULAS
+   CELLS
 ========================================================= */
 
 .cell {
 
-  min-width:
-    0;
+  min-width: 0;
 
   min-height:
     1.5cm;
@@ -343,102 +267,78 @@ body {
   border-bottom:
     2px solid #0000ff;
 
-  border-left:
-    0;
+  border-top: 0;
 
-  border-top:
-    0;
+  border-left: 0;
 
-  background:
-    #ffffff;
+  background: #ffffff;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  padding:
-    6px;
+  padding: 6px;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  line-height:
-    1.25;
+  line-height: 1.25;
 
-  outline:
-    none;
+  outline: none;
 
-  overflow:
-    hidden;
+  overflow: hidden;
 
   word-break:
     break-word;
 
+  position: relative;
 }
 
 
 /*
-  Primeira célula da grelha
-*/
+ * Fechar a grelha à esquerda.
+ */
 
-.archive-row
-.cell:first-of-type {
-
+.archive-row .cell:first-child {
   border-left:
     2px solid #0000ff;
-
 }
 
 
 /*
-  Topo da grelha
-*/
+ * Fechar a grelha em cima.
+ */
 
-.archive-row:first-child
-.cell {
-
+.archive-row:first-child .cell {
   border-top:
     2px solid #0000ff;
-
 }
 
-
-/* =========================================================
-   TEXTO
-========================================================= */
 
 .cell[contenteditable="true"] {
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
   caret-color:
     #0000ff;
-
 }
 
 
 .cell[contenteditable="true"]:focus {
 
-  outline:
-    none;
+  outline: none;
 
   background:
     #ffffff;
-
 }
 
 
 /* =========================================================
-   IMAGENS
+   IMAGES
 ========================================================= */
 
 .image-cell {
 
-  padding:
-    0;
+  padding: 0;
 
-  display:
-    flex;
+  display: flex;
 
   align-items:
     flex-start;
@@ -449,28 +349,22 @@ body {
   background:
     #ffffff;
 
-  cursor:
-    pointer;
+  cursor: pointer;
 
-  overflow:
-    hidden;
+  overflow: hidden;
 
-  position:
-    relative;
-
+  position: relative;
 }
 
 
 .image-placeholder {
 
-  width:
-    100%;
+  width: 100%;
 
   min-height:
     1.5cm;
 
-  display:
-    flex;
+  display: flex;
 
   align-items:
     center;
@@ -478,39 +372,28 @@ body {
   justify-content:
     center;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  user-select:
-    none;
-
+  user-select: none;
 }
 
 
 .image-placeholder:hover {
-
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
 .image-cell img {
 
-  display:
-    block;
+  display: block;
 
-  width:
-    100%;
+  width: 100%;
 
-  height:
-    auto;
+  height: auto;
 
   max-height:
     500px;
@@ -520,165 +403,157 @@ body {
 
   transition:
     transform 0.2s ease;
-
 }
 
 
 .image-cell:hover img {
-
   transform:
     scale(1.03);
-
 }
 
 
 /* =========================================================
-   X DA LINHA
+   COLUMN RESIZE
+========================================================= */
+
+.column-resize-handle {
+
+  position: absolute;
+
+  top: 0;
+
+  right: -5px;
+
+  width: 10px;
+
+  height: 100%;
+
+  cursor:
+    col-resize;
+
+  z-index: 20;
+}
+
+
+.column-resize-handle:hover {
+
+  background:
+    #0000ff;
+
+  opacity: 0.15;
+}
+
+
+/* =========================================================
+   DELETE ROW
 ========================================================= */
 
 .delete-row {
 
-  position:
-    absolute;
+  position: absolute;
 
   left:
     calc(100% + 8px);
 
-  top:
-    50%;
+  top: 50%;
 
   transform:
     translateY(-50%);
 
-  border:
-    0;
+  border: 0;
 
   background:
     transparent;
 
-  padding:
-    0;
+  padding: 0;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 .delete-row:hover {
-
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
 /* =========================================================
-   COLUMN CONTROLS
+   COLUMN / ROW CONTROLS
 ========================================================= */
 
 #column-controls {
 
-  display:
-    flex;
+  display: flex;
 
   justify-content:
     flex-end;
 
-  gap:
-    14px;
+  gap: 14px;
 
-  margin-top:
-    8px;
+  margin-top: 8px;
+}
 
+
+#row-controls {
+
+  display: flex;
+
+  justify-content:
+    flex-end;
+
+  gap: 14px;
+
+  margin-top: 8px;
 }
 
 
 #column-controls button,
 #row-controls button {
 
-  border:
-    0;
+  border: 0;
 
   background:
     transparent;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
   font-family:
     Arial,
     Helvetica,
     sans-serif;
 
-  padding:
-    0;
+  padding: 0;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 #column-controls button:hover,
 #row-controls button:hover {
 
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
 /* =========================================================
-   ROW CONTROLS
-========================================================= */
-
-#row-controls {
-
-  display:
-    flex;
-
-  justify-content:
-    flex-end;
-
-  gap:
-    14px;
-
-  margin-top:
-    8px;
-
-}
-
-
-/* =========================================================
-   LOG / CHAT
+   LOG
 ========================================================= */
 
 #log-panel {
 
-  position:
-    fixed;
+  position: fixed;
 
-  left:
-    20px;
+  left: 20px;
+  bottom: 20px;
 
-  bottom:
-    20px;
-
-  width:
-    300px;
+  width: 300px;
 
   background:
     #ffffff;
@@ -686,22 +561,18 @@ body {
   border:
     2px solid #0000ff;
 
-  z-index:
-    5000;
-
+  z-index: 5000;
 }
 
 
 #log-header {
 
-  height:
-    30px;
+  height: 30px;
 
   padding:
     5px 8px;
 
-  display:
-    flex;
+  display: flex;
 
   align-items:
     center;
@@ -712,61 +583,40 @@ body {
   border-bottom:
     2px solid #0000ff;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    13px;
-
+  font-size: 13px;
 }
 
 
 #toggle-log {
 
-  border:
-    0;
+  border: 0;
 
   background:
     transparent;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  padding:
-    0;
+  padding: 0;
 
-  font-size:
-    16px;
+  font-size: 16px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 #log-content {
-
-  display:
-    block;
-
+  display: block;
 }
 
 
-#log-panel.collapsed
-#log-content {
-
-  display:
-    none;
-
+#log-panel.collapsed #log-content {
+  display: none;
 }
 
-
-/* =========================================================
-   LOG LIST
-========================================================= */
 
 #log-list {
 
@@ -776,67 +626,47 @@ body {
   overflow-y:
     auto;
 
-  padding:
-    8px;
-
+  padding: 8px;
 }
 
 
 .log-entry {
 
+  position: relative;
+
   padding:
-    7px 0;
+    7px 22px 7px 0;
 
   border-bottom:
     1px solid #0000ff;
 
-  font-size:
-    12px;
+  font-size: 12px;
 
-  line-height:
-    1.3;
-
+  line-height: 1.3;
 }
 
 
 .log-entry:last-child {
-
-  border-bottom:
-    0;
-
+  border-bottom: 0;
 }
 
 
 .log-meta {
 
-  display:
-    flex;
+  display: flex;
 
   justify-content:
     space-between;
 
-  margin-bottom:
-    4px;
+  margin-bottom: 4px;
 
-  font-size:
-    10px;
-
+  font-size: 10px;
 }
 
 
-.log-date-display {
-
-  color:
-    #0000ff;
-
-}
-
-
+.log-date-display,
 .log-number-display {
-
-  color:
-    #0000ff;
-
+  color: #0000ff;
 }
 
 
@@ -844,7 +674,35 @@ body {
 
   white-space:
     pre-wrap;
+}
 
+
+.delete-log {
+
+  position: absolute;
+
+  right: 0;
+  top: 7px;
+
+  border: 0;
+
+  background:
+    transparent;
+
+  color: #0000ff;
+
+  padding: 0;
+
+  font-size: 15px;
+
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+
+.delete-log:hover {
+  opacity: 0.5;
 }
 
 
@@ -857,83 +715,63 @@ body {
   border-top:
     2px solid #0000ff;
 
-  padding:
-    8px;
+  padding: 8px;
 
-  display:
-    grid;
+  display: grid;
 
   grid-template-columns:
     1fr 70px;
 
-  gap:
-    7px;
-
+  gap: 7px;
 }
 
 
 .log-field {
 
-  display:
-    flex;
+  display: flex;
 
   flex-direction:
     column;
 
-  gap:
-    3px;
-
+  gap: 3px;
 }
 
 
 .log-field label {
-
-  font-size:
-    10px;
-
+  font-size: 10px;
 }
 
 
 .log-field input,
 .log-field textarea {
 
-  width:
-    100%;
+  width: 100%;
 
   border:
     1px solid #0000ff;
 
-  border-radius:
-    0;
+  border-radius: 0;
 
   background:
     #ffffff;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
   font-family:
     Arial,
     Helvetica,
     sans-serif;
 
-  font-size:
-    12px;
+  font-size: 12px;
 
-  padding:
-    4px;
+  padding: 4px;
 
-  outline:
-    none;
-
+  outline: none;
 }
 
 
 .log-field textarea {
-
-  resize:
-    vertical;
-
+  resize: vertical;
 }
 
 
@@ -942,55 +780,41 @@ body {
 
   outline:
     1px solid #0000ff;
-
 }
 
 
 .log-note {
-
   grid-column:
     1 / 3;
-
 }
 
 
 #save-log {
 
-  grid-column:
-    2;
+  grid-column: 2;
 
   justify-self:
     end;
 
-  border:
-    0;
+  border: 0;
 
   background:
     transparent;
 
-  color:
-    #0000ff;
+  color: #0000ff;
 
-  font-size:
-    22px;
+  font-size: 22px;
 
-  line-height:
-    1;
+  line-height: 1;
 
-  padding:
-    0;
+  padding: 0;
 
-  cursor:
-    pointer;
-
+  cursor: pointer;
 }
 
 
 #save-log:hover {
-
-  opacity:
-    0.5;
-
+  opacity: 0.5;
 }
 
 
@@ -1000,23 +824,17 @@ body {
 
 #image-viewer {
 
-  position:
-    fixed;
+  position: fixed;
 
-  inset:
-    0;
+  inset: 0;
 
-  width:
-    100vw;
-
-  height:
-    100vh;
+  width: 100vw;
+  height: 100vh;
 
   background:
     #0000ff;
 
-  display:
-    none;
+  display: none;
 
   align-items:
     center;
@@ -1024,23 +842,16 @@ body {
   justify-content:
     center;
 
-  z-index:
-    9999;
+  z-index: 9999;
 
-  cursor:
-    pointer;
+  cursor: pointer;
 
-  overflow:
-    hidden;
-
+  overflow: hidden;
 }
 
 
 #image-viewer.open {
-
-  display:
-    flex;
-
+  display: flex;
 }
 
 
@@ -1052,16 +863,51 @@ body {
   max-height:
     95vh;
 
-  width:
-    auto;
+  width: auto;
 
-  height:
-    auto;
+  height: auto;
 
   object-fit:
     contain;
 
   transform:
     scale(1.4);
+}
 
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+#footer {
+
+  width: 100%;
+
+  margin-top:
+    80px;
+
+  border-top:
+    2px solid #0000ff;
+
+  padding:
+    10px 0 12px;
+
+  text-align:
+    center;
+}
+
+
+#footer a {
+
+  color: #0000ff;
+
+  text-decoration:
+    none;
+
+  font-size: 14px;
+}
+
+
+#footer a:hover {
+  opacity: 0.5;
 }
