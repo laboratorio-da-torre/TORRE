@@ -2,124 +2,148 @@
   box-sizing: border-box;
 }
 
-
 html,
 body {
-
   margin: 0;
   padding: 0;
-
-  background: #001eff;
-
+  background: #0000ff;
   color: white;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 
-/* =========================
-   HEADER
-   ========================= */
+/* HEADER */
 
 #header {
-
   width: 80vw;
-
   margin: 20px auto 40px;
 
   display: flex;
-
   justify-content: space-between;
-
   align-items: flex-start;
-
 }
 
+#menu-wrapper {
+  position: relative;
+}
 
-#header a {
+#torre-title {
+  border: 0;
+  padding: 0;
+  margin: 0;
 
+  background: transparent;
   color: white;
 
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+#torre-title:hover {
+  opacity: 0.5;
+}
+
+#lab-title {
+  color: white;
   text-decoration: none;
 
   font-size: 18px;
-
   line-height: 1;
-
 }
 
-
-#header a:hover {
-
+#lab-title:hover {
   opacity: 0.5;
-
 }
 
 
-/* =========================
-   ARQUIVO
-   ========================= */
+/* MENU */
+
+#category-menu {
+  position: absolute;
+
+  top: 28px;
+  left: 0;
+
+  display: none;
+
+  flex-direction: column;
+  gap: 6px;
+
+  z-index: 1000;
+}
+
+#category-menu.open {
+  display: flex;
+}
+
+.category-button {
+  border: 0;
+  padding: 0;
+
+  background: transparent;
+  color: white;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.1;
+
+  text-align: left;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.category-button:hover {
+  opacity: 0.5;
+}
+
+
+/* ARCHIVE */
 
 #archive {
-
   width: 80vw;
-
   margin: 0 auto;
+}
 
+#category-title {
+  margin: 0 0 20px 0;
+
+  color: white;
+
+  font-size: 18px;
+  line-height: 1;
+  font-weight: normal;
 }
 
 
-/* =========================
-   GRELHA
-   ========================= */
+/* GRID */
 
 #grid {
-
   width: 100%;
-
 }
 
-
-/* =========================
-   CADA ROW
-   ========================= */
-
 .archive-row {
-
   position: relative;
 
   width: 100%;
 
   display: grid;
-
-  grid-template-columns:
-    repeat(var(--columns), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
 
   align-items: stretch;
-
 }
 
-
-/* =========================
-   CÉLULAS
-   ========================= */
-
 .cell {
-
   min-width: 0;
-
   min-height: 1.5cm;
 
   border-right: 2px solid black;
-
   border-bottom: 2px solid black;
 
   background: white;
-
   color: white;
 
   padding: 6px;
@@ -129,38 +153,25 @@ body {
   outline: none;
 
   overflow: hidden;
-
   word-break: break-word;
-
 }
-
 
 .cell:first-child {
-
   border-left: 2px solid black;
-
 }
-
 
 .archive-row:first-child .cell {
-
   border-top: 2px solid black;
-
 }
 
 
-/* =========================
-   IMAGEM
-   ========================= */
+/* IMAGE */
 
 .image-cell {
-
   padding: 0;
 
   display: flex;
-
   align-items: flex-start;
-
   justify-content: center;
 
   background: white;
@@ -168,160 +179,109 @@ body {
   cursor: pointer;
 
   overflow: hidden;
-
 }
 
-
 .image-cell img {
-
   display: block;
 
   width: 100%;
-
   height: auto;
 
   max-height: 500px;
 
   object-fit: contain;
 
-  transition:
-    transform 0.2s ease;
-
+  transition: transform 0.2s ease;
 }
-
 
 .image-cell:hover img {
-
   transform: scale(1.03);
-
 }
 
 
-/* =========================
-   BOTÃO X
-   ========================= */
+/* DELETE ROW */
 
 .delete-row {
-
   position: absolute;
 
   left: calc(100% + 8px);
-
   top: 50%;
 
   transform: translateY(-50%);
 
   border: 0;
-
   background: transparent;
 
   padding: 0;
-
   margin: 0;
 
   color: white;
 
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
-
   line-height: 1;
 
   cursor: pointer;
-
 }
-
 
 .delete-row:hover {
-
   opacity: 0.5;
-
 }
 
 
-/* =========================
-   CONTROLOS
-   ========================= */
+/* CONTROLS */
 
 #controls {
-
   display: flex;
 
   justify-content: flex-end;
-
   align-items: center;
 
   gap: 15px;
 
   margin-top: 10px;
-
 }
 
-
 #controls button {
-
   border: 0;
-
   background: transparent;
 
   color: white;
 
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 
   cursor: pointer;
-
   padding: 0;
-
 }
-
 
 #add-row {
-
   font-size: 24px;
-
 }
-
 
 #add-column {
-
   font-size: 14px;
-
 }
-
 
 #controls button:hover {
-
   opacity: 0.5;
-
 }
 
 
-/* =========================
-   VISUALIZADOR
-   ========================= */
+/* IMAGE VIEWER */
 
 #image-viewer {
-
   position: fixed;
 
   inset: 0;
 
   width: 100vw;
-
   height: 100vh;
 
-  background: #001eff;
+  background: #0000ff;
 
   display: none;
 
   align-items: center;
-
   justify-content: center;
 
   z-index: 9999;
@@ -329,29 +289,20 @@ body {
   cursor: pointer;
 
   overflow: hidden;
-
 }
-
 
 #image-viewer.open {
-
   display: flex;
-
 }
 
-
 #viewer-image {
-
   max-width: 95vw;
-
   max-height: 95vh;
 
   width: auto;
-
   height: auto;
 
   object-fit: contain;
 
   transform: scale(1.4);
-
 }
