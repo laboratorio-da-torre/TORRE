@@ -1,8 +1,8 @@
 const SUPABASE_URL =
-  "COLOCA_AQUI_O_TEU_PROJECT_URL";
+  "https://rvfdobjhfwjdvufwrirp.supabase.co/rest/v1/";
 
 const SUPABASE_KEY =
-  "COLOCA_AQUI_A_TUA_PUBLISHABLE_KEY";
+  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
 
 const BUCKET = "images";
 
