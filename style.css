@@ -1,4 +1,6 @@
-/* Página */
+/* =========================
+   BASE
+========================= */
 
 * {
   box-sizing: border-box;
@@ -8,26 +10,30 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #00FF66 !important;
+  background: #0057ff;
   color: black;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 
-/* Título */
+/* =========================
+   TÍTULO
+========================= */
 
 body::before {
   content: "log/torre";
   display: block;
 
-  margin: 20px 0 0 20px;
+  margin: 20px;
 
   font-size: 18px;
   line-height: 1;
 }
 
 
-/* Área principal */
+/* =========================
+   ARQUIVO
+========================= */
 
 #archive {
   width: 80vw;
@@ -36,47 +42,86 @@ body::before {
 }
 
 
-/* Grelha */
+/* =========================
+   GRELHA
+========================= */
 
 #grid {
   width: 100%;
+
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+
+  grid-template-columns:
+    repeat(5, 1fr);
+
+  grid-auto-rows: 1.5cm;
 }
 
 
-/* Cada célula */
+/* =========================
+   CÉLULAS
+========================= */
 
 .cell {
-  height: 1.5cm;
+  min-width: 0;
 
-  border-right: 1.5px solid black;
-  border-bottom: 1.5px solid black;
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
 
-  background: #00FF66;
+  background: #0057ff;
 
   padding: 6px;
+
   font-size: 14px;
 
   outline: none;
+
+  overflow: hidden;
 }
 
 
-/* Linha esquerda */
+/* primeira coluna */
 
 .cell:nth-child(5n + 1) {
-  border-left: 1.5px solid black;
+  border-left: 2px solid black;
 }
 
 
-/* Linha superior */
+/* primeira linha */
 
 .cell:nth-child(-n + 5) {
-  border-top: 1.5px solid black;
+  border-top: 2px solid black;
 }
 
 
-/* Botão + */
+/* =========================
+   IMAGENS
+========================= */
+
+.image-cell {
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.image-cell img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+/* =========================
+   BOTÃO +
+========================= */
 
 #add-row {
   position: absolute;
@@ -92,12 +137,46 @@ body::before {
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 20px;
+
   line-height: 1;
 
   color: black;
+
   cursor: pointer;
 }
 
 #add-row:hover {
   opacity: 0.5;
+}
+
+
+/* =========================
+   FULLSCREEN DA IMAGEM
+========================= */
+
+#image-viewer {
+  position: fixed;
+
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: #0057ff;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+
+  cursor: pointer;
+}
+
+#image-viewer img {
+  max-width: 95vw;
+  max-height: 95vh;
+
+  object-fit: contain;
 }
