@@ -1,5 +1,5 @@
 const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co/rest/v1/";
+  "https://rvfdobjhfwjdvufwrirp.supabase.co";
 
 const SUPABASE_KEY =
   "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
@@ -870,7 +870,38 @@ async function uploadImage(file) {
     const error =
       await response.text();
 
-    console.error(error);
+  async function supabaseRequest(endpoint, options = {}) {
+
+  const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+
+  console.log("TORRE REQUEST:", url);
+
+  const response = await fetch(url, {
+    ...options,
+
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+
+    console.error(
+      "TORRE SUPABASE ERROR:",
+      response.status,
+      url,
+      error
+    );
+
+    throw new Error(error);
+  }
+
+  return response;
+}
 
     throw new Error(
       "Upload falhou"
