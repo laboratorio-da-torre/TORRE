@@ -1,84 +1,103 @@
-/* =========================
-   BASE
-========================= */
-
 * {
   box-sizing: border-box;
 }
+
+
+/* =========================
+   PÁGINA
+   ========================= */
 
 html,
 body {
   margin: 0;
   padding: 0;
+
   background: #0057ff;
   color: white;
+
   font-family: Arial, Helvetica, sans-serif;
 }
 
 
 /* =========================
    TÍTULO
-========================= */
+   ========================= */
 
 body::before {
   content: "log/torre";
+
   display: block;
 
   margin: 20px;
 
   font-size: 18px;
   line-height: 1;
-   color: white;
+
+  color: white;
 }
 
 
 /* =========================
    ARQUIVO
-========================= */
+   ========================= */
 
 #archive {
+
   width: 80vw;
+
   margin: 40px auto;
+
   position: relative;
 }
 
 
 /* =========================
    GRELHA
-========================= */
+   ========================= */
 
 #grid {
+
   width: 100%;
+
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-auto-rows: 1.5cm;
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
+
+  align-items: start;
 }
 
 
 /* =========================
    CÉLULAS
-========================= */
+   ========================= */
 
 .cell {
+
   min-width: 0;
 
   border-right: 2px solid black;
   border-bottom: 2px solid black;
-  border-left: 0;
 
   background: white;
 
   padding: 6px;
 
   font-size: 14px;
+
   color: white;
 
   outline: none;
 
   overflow: hidden;
+
+  min-height: 1.5cm;
+
+  word-break: break-word;
 }
 
-/* primeira coluna */
+
+/* primeira célula de cada linha */
 
 .cell:nth-child(6n + 1) {
   border-left: 2px solid black;
@@ -87,70 +106,67 @@ body::before {
 
 /* primeira linha */
 
-.cell:nth-child(-n + 5) {
+.cell:nth-child(-n + 6) {
   border-top: 2px solid black;
 }
 
 
 /* =========================
-   IMAGENS
-========================= */
+   CÉLULA DE IMAGEM
+   ========================= */
 
 .image-cell {
+
   padding: 0;
 
   display: flex;
 
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 
+  overflow: hidden;
+
   cursor: pointer;
+
+  background: white;
 }
+
+
+/* imagem */
 
 .image-cell img {
+
+  display: block;
+
   width: 100%;
-  height: 100%;
 
-  object-fit: cover;
+  height: auto;
 
-  display: block;
+  max-height: 500px;
+
+  object-fit: contain;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+
+/* pequeno efeito ao passar o rato */
+
+.image-cell:hover img {
+
+  transform: scale(1.03);
+
 }
 
 
 /* =========================
-   BOTÃO +
-========================= */
-
-#add-row {
-  display: block;
-
-  margin-left: auto;
-  margin-top: 8px;
-
-  border: none;
-  background: transparent;
-
-  padding: 0;
-
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 22px;
-  line-height: 1;
-
-  color: white;
-
-  cursor: pointer;
-}
-
-#add-row:hover {
-  opacity: 0.5;
-}
-
-
-/* =========================
-   FULLSCREEN DA IMAGEM
-========================= */
+   IMAGEM AMPLIADA
+   ========================= */
 
 #image-viewer {
+
   position: fixed;
 
   inset: 0;
@@ -168,11 +184,62 @@ body::before {
   z-index: 9999;
 
   cursor: pointer;
+
+  overflow: hidden;
 }
 
+
+/* imagem ampliada */
+
 #image-viewer img {
+
   max-width: 95vw;
+
   max-height: 95vh;
 
+  width: auto;
+  height: auto;
+
   object-fit: contain;
+
+  transform: scale(1.4);
+
+  transform-origin: center center;
+}
+
+
+/* =========================
+   BOTÃO +
+   ========================= */
+
+#add-row {
+
+  display: block;
+
+  margin-left: auto;
+
+  margin-top: 8px;
+
+  border: none;
+
+  background: transparent;
+
+  padding: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-size: 22px;
+
+  line-height: 1;
+
+  color: white;
+
+  cursor: pointer;
+}
+
+
+#add-row:hover {
+
+  opacity: 0.5;
+
 }
