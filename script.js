@@ -6,7 +6,19 @@ const addRowButton = document.getElementById("add-row");
 function addRow() {
   for (let i = 0; i < 5; i++) {
     const cell = document.createElement("div");
+
     cell.className = "cell";
+
+    // Permite escrever dentro da célula
+    cell.contentEditable = "true";
+
+    // Evita que o Enter crie uma nova linha dentro da célula
+    cell.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        cell.blur();
+      }
+    });
 
     grid.appendChild(cell);
   }
@@ -19,5 +31,5 @@ for (let i = 0; i < 20; i++) {
 }
 
 
-// O botão + adiciona uma nova linha
+// O + adiciona uma nova linha
 addRowButton.addEventListener("click", addRow);
