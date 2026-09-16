@@ -1,6 +1,12 @@
-const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL = "COLOCA_AQUI_O_PROJECT_URL";
+const SUPABASE_KEY = "COLOCA_AQUI_O_PUBLISHABLE_KEY";
 const BUCKET = "images";
+
+
 /* =========================================================
    GOOGLE SHEETS
 ========================================================= */
@@ -13,20 +19,21 @@ const GOOGLE_SHEETS_URL =
    ELEMENTOS
 ========================================================= */
 
-const grid =
-  document.getElementById("archive");
+const menuButton = document.getElementById("menu-button");
+const menu = document.getElementById("menu");
 
-const addRowButton =
-  document.getElementById("add-row");
+const archive = document.getElementById("archive");
 
-const removeRowButton =
-  document.getElementById("remove-row");
+const addRowButton = document.getElementById("add-row");
+const removeRowButton = document.getElementById("remove-row");
 
-const addColumnButton =
-  document.getElementById("add-column");
+const addColumnButton = document.getElementById("add-column");
+const removeColumnButton = document.getElementById("remove-column");
 
-const removeColumnButton =
-  document.getElementById("remove-column");
+const categoryTitle = document.getElementById("category-title");
+
+const imageFileInput =
+  document.getElementById("image-file-input");
 
 const viewer =
   document.getElementById("image-viewer");
@@ -34,22 +41,7 @@ const viewer =
 const viewerImage =
   document.getElementById("viewer-image");
 
-const torreTitle =
-  document.getElementById("menu-button");
-
-const categoryMenu =
-  document.getElementById("menu");
-
-const categoryTitle =
-  document.getElementById("category-title");
-
-const imageFileInput =
-  document.getElementById("image-file-input");
-
-const logPanel =
-  document.getElementById("logs-section");
-
-const logList =
+const logs =
   document.getElementById("logs");
 
 const logForm =
@@ -64,9 +56,6 @@ const logNumber =
 const logNote =
   document.getElementById("log-note");
 
-const toggleLog =
-  document.getElementById("toggle-log");
-
 const sheetsLink =
   document.getElementById("sheets-link");
 
@@ -76,11 +65,8 @@ const sheetsLink =
 ========================================================= */
 
 let categories = [];
-
 let columns = [];
-
 let rows = [];
-
 let currentCategory = null;
 
 
@@ -88,39 +74,21 @@ let currentCategory = null;
    SUPABASE REQUEST
 ========================================================= */
 
-async function supabaseRequest(
-  endpoint,
-  options = {}
-) {
+async function supabaseRequest(endpoint, options = {}) {
 
-  const url =
-    `${SUPABASE_URL}/rest/v1/${endpoint}`;
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/${endpoint}`,
+    {
+      ...options,
 
-  console.log(
-    "TORRE REQUEST:",
-    url
-  );
-
-  const response =
-    await fetch(
-      url,
-      {
-        ...options,
-
-        headers: {
-          "apikey":
-            SUPABASE_KEY,
-
-          "Authorization":
-            `Bearer ${SUPABASE_KEY}`,
-
-          "Content-Type":
-            "application/json",
-
-          ...(options.headers || {})
-        }
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        ...(options.headers || {})
       }
-    );
+    }
+  );
 
   if (!response.ok) {
 
@@ -128,15 +96,12 @@ async function supabaseRequest(
       await response.text();
 
     console.error(
-      "TORRE SUPABASE ERROR:",
+      "SUPABASE ERROR:",
       response.status,
-      url,
       error
     );
 
-    throw new Error(
-      error
-    );
+    throw new Error(error);
   }
 
   return response;
@@ -158,7 +123,6 @@ async function loadCategories() {
     await response.json();
 
   if (!categories.length) {
-
     throw new Error(
       "Não existem categorias no Supabase."
     );
@@ -168,42 +132,36 @@ async function loadCategories() {
 
 function renderCategoryMenu() {
 
-  categoryMenu.innerHTML =
-    "";
+  menu.innerHTML = "";
 
-  categories.forEach(
-    category => {
+  categories.forEach(category => {
 
-      const button =
-        document.createElement(
-          "button"
-        );
+    const button =
+      document.createElement("button");
 
-      button.className =
-        "category-button";
+    button.className =
+      "category-button";
 
-      button.textContent =
-        category.name;
+    button.textContent =
+      category.name;
 
-      button.addEventListener(
-        "click",
-        async function() {
+    button.dataset.category =
+      category.slug;
 
-          categoryMenu.classList.remove(
-            "open"
-          );
+    button.addEventListener(
+      "click",
+      async function(event) {
 
-          await selectCategory(
-            category
-          );
-        }
-      );
+        event.stopPropagation();
 
-      categoryMenu.appendChild(
-        button
-      );
-    }
-  );
+        menu.classList.remove("open");
+
+        await selectCategory(category);
+      }
+    );
+
+    menu.appendChild(button);
+  });
 }
 
 
@@ -211,9 +169,7 @@ function renderCategoryMenu() {
    SELECCIONAR CATEGORIA
 ========================================================= */
 
-async function selectCategory(
-  category
-) {
+async function selectCategory(category) {
 
   currentCategory =
     category;
@@ -222,11 +178,9 @@ async function selectCategory(
     category.name;
 
   columns = [];
-
   rows = [];
 
   await loadColumns();
-
   await loadRows();
 
   await ensureRows();
@@ -255,20 +209,16 @@ async function loadColumns() {
   columns =
     await response.json();
 
+
   if (!columns.length) {
 
-    for (
-      let i = 0;
-      i < 6;
-      i++
-    ) {
+    for (let i = 0; i < 6; i++) {
 
       const response =
         await supabaseRequest(
           "torre_columns",
           {
-            method:
-              "POST",
+            method: "POST",
 
             headers: {
               "Prefer":
@@ -298,17 +248,15 @@ async function loadColumns() {
     }
   }
 
-  columns =
-    columns.map(
-      column => ({
-        ...column,
 
-        width_px:
-          Number(
-            column.width_px
-          ) || 180
-      })
-    );
+  columns =
+    columns.map(column => ({
+      ...column,
+
+      width_px:
+        Number(column.width_px) ||
+        180
+    }));
 }
 
 
@@ -332,21 +280,14 @@ async function loadRows() {
 
 async function ensureRows() {
 
-  if (
-    rows.length >= 20
-  ) {
+  if (rows.length >= 20) {
     return;
   }
 
   const missing =
     20 - rows.length;
 
-  for (
-    let i = 0;
-    i < missing;
-    i++
-  ) {
-
+  for (let i = 0; i < missing; i++) {
     await createRow();
   }
 
@@ -362,28 +303,23 @@ async function createRow() {
 
   const existingNumbers =
     rows
-      .map(
-        row =>
-          Number(
-            row.inventory_number
-          )
+      .map(row =>
+        Number(row.inventory_number)
       )
-      .filter(
-        number =>
-          Number.isFinite(
-            number
-          )
+      .filter(number =>
+        Number.isFinite(number)
       );
+
 
   const highestNumber =
     existingNumbers.length
-      ? Math.max(
-          ...existingNumbers
-        )
+      ? Math.max(...existingNumbers)
       : 0;
+
 
   const inventoryNumber =
     highestNumber + 1;
+
 
   const position =
     rows.length;
@@ -393,8 +329,7 @@ async function createRow() {
     await supabaseRequest(
       "torre_rows",
       {
-        method:
-          "POST",
+        method: "POST",
 
         headers: {
           "Prefer":
@@ -406,7 +341,8 @@ async function createRow() {
             category_id:
               currentCategory.id,
 
-            position,
+            position:
+              position,
 
             inventory_number:
               inventoryNumber
@@ -421,20 +357,15 @@ async function createRow() {
   const row =
     inserted[0];
 
-  rows.push(
-    row
-  );
+  rows.push(row);
 
 
-  for (
-    const column of columns
-  ) {
+  for (const column of columns) {
 
     await supabaseRequest(
       "torre_cells",
       {
-        method:
-          "POST",
+        method: "POST",
 
         body:
           JSON.stringify({
@@ -450,6 +381,7 @@ async function createRow() {
       }
     );
   }
+
 
   return row;
 }
@@ -471,33 +403,6 @@ async function loadCells() {
 
 
 /* =========================================================
-   APPLY COLUMN WIDTHS
-========================================================= */
-
-function applyColumnWidths() {
-
-  const template =
-    columns
-      .map(
-        column =>
-          `${column.width_px || 180}px`
-      )
-      .join(" ");
-
-
-  document
-    .querySelectorAll(".archive-row")
-    .forEach(
-      rowElement => {
-
-        rowElement.style.gridTemplateColumns =
-          template;
-      }
-    );
-}
-
-
-/* =========================================================
    RENDER
 ========================================================= */
 
@@ -506,29 +411,23 @@ async function render() {
   const cells =
     await loadCells();
 
-  grid.innerHTML =
-    "";
+  archive.innerHTML = "";
 
   const cellMap =
     new Map();
 
 
-  cells.forEach(
-    cell => {
+  cells.forEach(cell => {
 
-      cellMap.set(
-        `${cell.row_id}-${cell.column_id}`,
-        cell
-      );
-    }
-  );
+    cellMap.set(
+      `${cell.row_id}-${cell.column_id}`,
+      cell
+    );
+  });
 
 
   rows.forEach(
-    (
-      row,
-      rowIndex
-    ) => {
+    (row, rowIndex) => {
 
       createRowElement(
         row,
@@ -537,9 +436,6 @@ async function render() {
       );
     }
   );
-
-
-  applyColumnWidths();
 }
 
 
@@ -554,35 +450,24 @@ function createRowElement(
 ) {
 
   const rowElement =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   rowElement.className =
     "archive-row";
 
 
-  /*
-   * Larguras das colunas
-   */
-
   rowElement.style.gridTemplateColumns =
     columns
-      .map(
-        column =>
-          `${column.width_px || 180}px`
+      .map(column =>
+        `${column.width_px || 180}px`
       )
       .join(" ");
 
 
-  /*
-   * Número
-   */
+  /* INVENTORY NUMBER */
 
   const number =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   number.className =
     "row-number";
@@ -590,30 +475,18 @@ function createRowElement(
   number.textContent =
     String(
       row.inventory_number
-    ).padStart(
-      3,
-      "0"
-    );
+    ).padStart(3, "0");
 
-  rowElement.appendChild(
-    number
-  );
+  rowElement.appendChild(number);
 
 
-  /*
-   * Colunas
-   */
+  /* CELLS */
 
   columns.forEach(
-    (
-      column,
-      columnIndex
-    ) => {
+    (column, columnIndex) => {
 
       const cell =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
       cell.className =
         "cell";
@@ -625,13 +498,9 @@ function createRowElement(
         );
 
 
-      /*
-       * PRIMEIRA COLUNA = IMAGEM
-       */
+      /* IMAGE COLUMN */
 
-      if (
-        columnIndex === 0
-      ) {
+      if (columnIndex === 0) {
 
         cell.classList.add(
           "image-cell"
@@ -640,19 +509,10 @@ function createRowElement(
         cell.contentEditable =
           "false";
 
-        cell.tabIndex =
-          0;
-
-        cell.setAttribute(
-          "role",
-          "button"
-        );
+        cell.tabIndex = 0;
 
 
-        if (
-          data &&
-          data.value
-        ) {
+        if (data && data.value) {
 
           createImage(
             data.value,
@@ -688,9 +548,7 @@ function createRowElement(
           function(event) {
 
             const image =
-              cell.querySelector(
-                "img"
-              );
+              cell.querySelector("img");
 
             if (image) {
 
@@ -714,9 +572,7 @@ function createRowElement(
 
       } else {
 
-        /*
-         * TEXTO
-         */
+        /* TEXT CELL */
 
         cell.contentEditable =
           "true";
@@ -729,11 +585,18 @@ function createRowElement(
           "blur",
           async function() {
 
-            await saveCell(
-              row.id,
-              column.id,
-              cell.textContent
-            );
+            try {
+
+              await saveCell(
+                row.id,
+                column.id,
+                cell.textContent
+              );
+
+            } catch (error) {
+
+              console.error(error);
+            }
           }
         );
 
@@ -742,9 +605,7 @@ function createRowElement(
           "keydown",
           function(event) {
 
-            if (
-              event.key === "Enter"
-            ) {
+            if (event.key === "Enter") {
 
               event.preventDefault();
 
@@ -755,13 +616,7 @@ function createRowElement(
       }
 
 
-      /*
-       * Resize handle
-       *
-       * O handle fica apenas na
-       * primeira linha para não
-       * criar vários separadores.
-       */
+      /* RESIZE */
 
       if (
         rowIndex === 0 &&
@@ -771,29 +626,21 @@ function createRowElement(
 
         createResizeHandle(
           cell,
-          column
+          column,
+          rowElement
         );
       }
 
 
-      rowElement.appendChild(
-        cell
-      );
+      rowElement.appendChild(cell);
     }
   );
 
 
-  /*
-   * APAGAR LINHA
-   *
-   * Fica fora da grid através
-   * de position:absolute no CSS.
-   */
+  /* DELETE ROW */
 
   const deleteButton =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
   deleteButton.className =
     "delete-row";
@@ -833,38 +680,33 @@ function createRowElement(
     deleteButton
   );
 
-
-  grid.appendChild(
+  archive.appendChild(
     rowElement
   );
 }
 
 
 /* =========================================================
-   RESIZE COLUMN
+   RESIZE COLUMNS
 ========================================================= */
 
 function createResizeHandle(
   cell,
-  column
+  column,
+  rowElement
 ) {
 
   const handle =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   handle.className =
     "column-resize-handle";
 
 
-  cell.appendChild(
-    handle
-  );
+  cell.appendChild(handle);
 
 
   let startX = 0;
-
   let startWidth = 0;
 
 
@@ -873,7 +715,6 @@ function createResizeHandle(
     function(event) {
 
       event.preventDefault();
-
       event.stopPropagation();
 
 
@@ -882,16 +723,8 @@ function createResizeHandle(
 
 
       startWidth =
-        Number(
-          column.width_px
-        ) ||
-        cell.getBoundingClientRect()
-          .width;
-
-
-      handle.classList.add(
-        "dragging"
-      );
+        Number(column.width_px) ||
+        cell.getBoundingClientRect().width;
 
 
       handle.setPointerCapture(
@@ -899,9 +732,7 @@ function createResizeHandle(
       );
 
 
-      function move(
-        moveEvent
-      ) {
+      function move(moveEvent) {
 
         const delta =
           moveEvent.clientX -
@@ -912,8 +743,7 @@ function createResizeHandle(
           Math.max(
             80,
             Math.round(
-              startWidth +
-              delta
+              startWidth + delta
             )
           );
 
@@ -922,16 +752,16 @@ function createResizeHandle(
           newWidth;
 
 
-        applyColumnWidths();
+        rowElement.style.gridTemplateColumns =
+          columns
+            .map(item =>
+              `${item.width_px || 180}px`
+            )
+            .join(" ");
       }
 
 
       async function end() {
-
-        handle.classList.remove(
-          "dragging"
-        );
-
 
         handle.removeEventListener(
           "pointermove",
@@ -948,10 +778,8 @@ function createResizeHandle(
 
           await supabaseRequest(
             `torre_columns?id=eq.${column.id}`,
-
             {
-              method:
-                "PATCH",
+              method: "PATCH",
 
               headers: {
                 "Prefer":
@@ -968,9 +796,7 @@ function createResizeHandle(
 
         } catch (error) {
 
-          console.error(
-            error
-          );
+          console.error(error);
         }
       }
 
@@ -1000,9 +826,7 @@ function createImagePlaceholder(
 ) {
 
   const placeholder =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   placeholder.className =
     "image-placeholder";
@@ -1080,10 +904,7 @@ imageFileInput.addEventListener(
     try {
 
       const optimized =
-        await optimizeImage(
-          file
-        );
-
+        await optimizeImage(file);
 
       const imageUrl =
         await uploadImage(
@@ -1106,9 +927,7 @@ imageFileInput.addEventListener(
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       alert(
         "Erro ao carregar a imagem."
@@ -1116,8 +935,7 @@ imageFileInput.addEventListener(
     }
 
 
-    imageFileInput.value =
-      "";
+    imageFileInput.value = "";
   }
 );
 
@@ -1137,9 +955,7 @@ async function handleImagePaste(
     event.clipboardData.items;
 
 
-  for (
-    const item of items
-  ) {
+  for (const item of items) {
 
     if (
       !item.type.startsWith(
@@ -1165,9 +981,7 @@ async function handleImagePaste(
     try {
 
       const optimized =
-        await optimizeImage(
-          file
-        );
+        await optimizeImage(file);
 
 
       const imageUrl =
@@ -1191,9 +1005,7 @@ async function handleImagePaste(
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       alert(
         "Erro ao carregar a imagem."
@@ -1215,21 +1027,8 @@ function createImage(
   cell
 ) {
 
-  /*
-   * Guardar o separador antes
-   * de limpar a célula.
-   */
-
-  const resizeHandle =
-    cell.querySelector(
-      ".column-resize-handle"
-    );
-
-
   const image =
-    document.createElement(
-      "img"
-    );
+    document.createElement("img");
 
   image.src =
     src;
@@ -1251,25 +1050,11 @@ function createImage(
   );
 
 
-  cell.innerHTML =
-    "";
+  cell.innerHTML = "";
 
   cell.appendChild(
     image
   );
-
-
-  /*
-   * Voltar a colocar o
-   * separador da coluna.
-   */
-
-  if (resizeHandle) {
-
-    cell.appendChild(
-      resizeHandle
-    );
-  }
 }
 
 
@@ -1277,15 +1062,10 @@ function createImage(
    IMAGE OPTIMIZATION
 ========================================================= */
 
-function optimizeImage(
-  file
-) {
+function optimizeImage(file) {
 
   return new Promise(
-    (
-      resolve,
-      reject
-    ) => {
+    (resolve, reject) => {
 
       const reader =
         new FileReader();
@@ -1371,7 +1151,7 @@ function optimizeImage(
 
                     reject(
                       new Error(
-                        "Erro ao comprimir"
+                        "Erro ao comprimir imagem."
                       )
                     );
 
@@ -1423,9 +1203,7 @@ function optimizeImage(
    UPLOAD IMAGE
 ========================================================= */
 
-async function uploadImage(
-  file
-) {
+async function uploadImage(file) {
 
   const filename =
     `${Date.now()}-` +
@@ -1439,13 +1217,10 @@ async function uploadImage(
       `${SUPABASE_URL}` +
       `/storage/v1/object/` +
       `${BUCKET}/${filename}`,
-
       {
-        method:
-          "POST",
+        method: "POST",
 
         headers: {
-
           "apikey":
             SUPABASE_KEY,
 
@@ -1467,12 +1242,10 @@ async function uploadImage(
     const error =
       await response.text();
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     throw new Error(
-      "Upload falhou"
+      "Upload falhou."
     );
   }
 
@@ -1495,26 +1268,27 @@ async function saveCell(
   value
 ) {
 
-  await supabaseRequest(
-    `torre_cells?` +
-    `row_id=eq.${rowId}` +
-    `&column_id=eq.${columnId}`,
+  const response =
+    await supabaseRequest(
+      `torre_cells?` +
+      `row_id=eq.${rowId}` +
+      `&column_id=eq.${columnId}`,
+      {
+        method: "PATCH",
 
-    {
-      method:
-        "PATCH",
+        headers: {
+          "Prefer":
+            "return=minimal"
+        },
 
-      headers: {
-        "Prefer":
-          "return=minimal"
-      },
+        body:
+          JSON.stringify({
+            value
+          })
+      }
+    );
 
-      body:
-        JSON.stringify({
-          value
-        })
-    }
-  );
+  return response;
 }
 
 
@@ -1529,8 +1303,7 @@ async function deleteRow(
   await supabaseRequest(
     `torre_rows?id=eq.${rowId}`,
     {
-      method:
-        "DELETE"
+      method: "DELETE"
     }
   );
 
@@ -1542,6 +1315,12 @@ async function deleteRow(
     );
 
 
+  /*
+   * IMPORTANTE:
+   * Não alteramos inventory_number.
+   * Os números existentes ficam estáveis.
+   */
+
   for (
     let i = 0;
     i < rows.length;
@@ -1550,10 +1329,8 @@ async function deleteRow(
 
     await supabaseRequest(
       `torre_rows?id=eq.${rows[i].id}`,
-
       {
-        method:
-          "PATCH",
+        method: "PATCH",
 
         headers: {
           "Prefer":
@@ -1562,8 +1339,7 @@ async function deleteRow(
 
         body:
           JSON.stringify({
-            position:
-              i
+            position: i
           })
       }
     );
@@ -1594,9 +1370,7 @@ addRowButton.addEventListener(
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       alert(
         "Erro ao criar linha."
@@ -1614,9 +1388,7 @@ removeRowButton.addEventListener(
   "click",
   async function() {
 
-    if (
-      rows.length <= 1
-    ) {
+    if (rows.length <= 1) {
 
       alert(
         "É necessário manter pelo menos uma linha."
@@ -1627,9 +1399,7 @@ removeRowButton.addEventListener(
 
 
     const lastRow =
-      rows[
-        rows.length - 1
-      ];
+      rows[rows.length - 1];
 
 
     const confirmed =
@@ -1664,8 +1434,7 @@ async function addColumn() {
     await supabaseRequest(
       "torre_columns",
       {
-        method:
-          "POST",
+        method: "POST",
 
         headers: {
           "Prefer":
@@ -1699,15 +1468,12 @@ async function addColumn() {
   );
 
 
-  for (
-    const row of rows
-  ) {
+  for (const row of rows) {
 
     await supabaseRequest(
       "torre_cells",
       {
-        method:
-          "POST",
+        method: "POST",
 
         body:
           JSON.stringify({
@@ -1735,9 +1501,7 @@ async function addColumn() {
 
 async function removeColumn() {
 
-  if (
-    columns.length <= 1
-  ) {
+  if (columns.length <= 1) {
 
     alert(
       "É necessário manter pelo menos uma coluna."
@@ -1767,8 +1531,7 @@ async function removeColumn() {
   await supabaseRequest(
     `torre_columns?id=eq.${column.id}`,
     {
-      method:
-        "DELETE"
+      method: "DELETE"
     }
   );
 
@@ -1788,10 +1551,8 @@ async function removeColumn() {
 
     await supabaseRequest(
       `torre_columns?id=eq.${columns[i].id}`,
-
       {
-        method:
-          "PATCH",
+        method: "PATCH",
 
         headers: {
           "Prefer":
@@ -1800,8 +1561,7 @@ async function removeColumn() {
 
         body:
           JSON.stringify({
-            position:
-              i
+            position: i
           })
       }
     );
@@ -1828,9 +1588,7 @@ addColumnButton.addEventListener(
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       alert(
         "Erro ao criar coluna."
@@ -1850,9 +1608,7 @@ removeColumnButton.addEventListener(
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
       alert(
         "Erro ao remover coluna."
@@ -1866,13 +1622,13 @@ removeColumnButton.addEventListener(
    MENU
 ========================================================= */
 
-torreTitle.addEventListener(
+menuButton.addEventListener(
   "click",
   function(event) {
 
     event.stopPropagation();
 
-    categoryMenu.classList.toggle(
+    menu.classList.toggle(
       "open"
     );
   }
@@ -1889,7 +1645,7 @@ document.addEventListener(
       )
     ) {
 
-      categoryMenu.classList.remove(
+      menu.classList.remove(
         "open"
       );
     }
@@ -1909,15 +1665,12 @@ viewer.addEventListener(
       "open"
     );
 
-    viewerImage.src =
-      "";
+    viewerImage.src = "";
   }
 );
 
 
-function openImage(
-  src
-) {
+function openImage(src) {
 
   viewerImage.src =
     src;
@@ -1971,9 +1724,7 @@ function setTodayAsDefaultDate() {
 
 async function loadLogs() {
 
-  if (
-    !currentCategory
-  ) {
+  if (!currentCategory) {
     return;
   }
 
@@ -1986,12 +1737,12 @@ async function loadLogs() {
     );
 
 
-  const logs =
+  const logData =
     await response.json();
 
 
   renderLogs(
-    logs
+    logData
   );
 }
 
@@ -2000,15 +1751,12 @@ async function loadLogs() {
    RENDER LOGS
 ========================================================= */
 
-function renderLogs(
-  logs
-) {
+function renderLogs(logData) {
 
-  logList.innerHTML =
-    "";
+  logs.innerHTML = "";
 
 
-  if (!logs.length) {
+  if (!logData.length) {
 
     const empty =
       document.createElement(
@@ -2021,7 +1769,7 @@ function renderLogs(
     empty.textContent =
       "sem registos";
 
-    logList.appendChild(
+    logs.appendChild(
       empty
     );
 
@@ -2029,7 +1777,7 @@ function renderLogs(
   }
 
 
-  logs.forEach(
+  logData.forEach(
     log => {
 
       const entry =
@@ -2102,10 +1850,6 @@ function renderLogs(
         log.note;
 
 
-      /*
-       * DELETE LOG
-       */
-
       const deleteButton =
         document.createElement(
           "button"
@@ -2116,11 +1860,6 @@ function renderLogs(
 
       deleteButton.textContent =
         "×";
-
-      deleteButton.setAttribute(
-        "aria-label",
-        "Apagar nota"
-      );
 
 
       deleteButton.addEventListener(
@@ -2143,8 +1882,7 @@ function renderLogs(
             await supabaseRequest(
               `torre_logs?id=eq.${log.id}`,
               {
-                method:
-                  "DELETE"
+                method: "DELETE"
               }
             );
 
@@ -2178,7 +1916,7 @@ function renderLogs(
       );
 
 
-      logList.appendChild(
+      logs.appendChild(
         entry
       );
     }
@@ -2195,14 +1933,10 @@ function formatDate(
 ) {
 
   const parts =
-    dateString.split(
-      "-"
-    );
+    dateString.split("-");
 
 
-  if (
-    parts.length !== 3
-  ) {
+  if (parts.length !== 3) {
     return dateString;
   }
 
@@ -2278,8 +2012,7 @@ logForm.addEventListener(
       await supabaseRequest(
         "torre_logs",
         {
-          method:
-            "POST",
+          method: "POST",
 
           headers: {
             "Prefer":
@@ -2288,6 +2021,7 @@ logForm.addEventListener(
 
           body:
             JSON.stringify({
+
               category_id:
                 currentCategory.id,
 
@@ -2328,33 +2062,7 @@ logForm.addEventListener(
 
 
 /* =========================================================
-   TOGGLE LOG
-========================================================= */
-
-if (toggleLog) {
-
-  toggleLog.addEventListener(
-    "click",
-    function() {
-
-      logPanel.classList.toggle(
-        "collapsed"
-      );
-
-
-      toggleLog.textContent =
-        logPanel.classList.contains(
-          "collapsed"
-        )
-          ? "+"
-          : "−";
-    }
-  );
-}
-
-
-/* =========================================================
-   GOOGLE SHEETS LINK
+   GOOGLE SHEETS
 ========================================================= */
 
 sheetsLink.href =
@@ -2393,14 +2101,11 @@ async function init() {
         background:#0000ff;
         min-height:100vh;
       ">
-        <h2>
-          TORRE — erro
-        </h2>
+        <h2>TORRE — erro</h2>
 
         <pre style="
           white-space:pre-wrap;
         ">${error.message}</pre>
-
       </div>
     `;
   }
