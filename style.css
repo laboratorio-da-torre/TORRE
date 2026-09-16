@@ -1,0 +1,81 @@
+/* Página */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: white;
+  color: black;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* Área principal */
+
+#archive {
+  width: 80vw;
+  margin: 40px auto;
+  position: relative;
+}
+
+
+/* Grelha */
+
+#grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+
+/* Cada célula */
+
+.cell {
+  height: 1.5cm;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+
+/* Linha esquerda da grelha */
+
+.cell:nth-child(5n + 1) {
+  border-left: 1px solid black;
+}
+
+
+/* Linha superior */
+
+.cell:nth-child(-n + 5) {
+  border-top: 1px solid black;
+}
+
+
+/* Botão + */
+
+#add-row {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 0;
+
+  border: none;
+  background: transparent;
+
+  padding: 0;
+  margin: 0;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  line-height: 1;
+
+  color: black;
+  cursor: pointer;
+}
+
+#add-row:hover {
+  opacity: 0.5;
+}
