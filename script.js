@@ -3,10 +3,10 @@
 ========================================================= */
 
 const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co";
+  "COLOCA_AQUI_O_TEU_PROJECT_URL";
 
 const SUPABASE_KEY =
-  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+  "COLOCA_AQUI_A_TUA_PUBLISHABLE_KEY";
 
 const BUCKET = "images";
 
@@ -15,13 +15,20 @@ const BUCKET = "images";
    ELEMENTOS
 ========================================================= */
 
-const grid = document.getElementById("grid");
+const grid =
+  document.getElementById("grid");
 
 const addRowButton =
   document.getElementById("add-row");
 
+const removeRowButton =
+  document.getElementById("remove-row");
+
 const addColumnButton =
   document.getElementById("add-column");
+
+const removeColumnButton =
+  document.getElementById("remove-column");
 
 const viewer =
   document.getElementById("image-viewer");
@@ -37,6 +44,9 @@ const categoryMenu =
 
 const categoryTitle =
   document.getElementById("category-title");
+
+const imageFileInput =
+  document.getElementById("image-file-input");
 
 
 /* =========================================================
@@ -56,38 +66,48 @@ let currentCategory = null;
    SUPABASE REQUEST
 ========================================================= */
 
-async function supabaseRequest(endpoint, options = {}) {
+async function supabaseRequest(
+  endpoint,
+  options = {}
+) {
 
   const url =
     `${SUPABASE_URL}/rest/v1/${endpoint}`;
 
-  console.log("TORRE REQUEST:", url);
 
-  const response = await fetch(url, {
+  console.log(
+    "TORRE REQUEST:",
+    url
+  );
 
-    ...options,
 
-    headers: {
+  const response =
+    await fetch(
+      url,
+      {
+        ...options,
 
-      "apikey": SUPABASE_KEY,
+        headers: {
+          "apikey":
+            SUPABASE_KEY,
 
-      "Authorization":
-        `Bearer ${SUPABASE_KEY}`,
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`,
 
-      "Content-Type":
-        "application/json",
+          "Content-Type":
+            "application/json",
 
-      ...(options.headers || {})
-
-    }
-
-  });
+          ...(options.headers || {})
+        }
+      }
+    );
 
 
   if (!response.ok) {
 
     const error =
       await response.text();
+
 
     console.error(
       "TORRE SUPABASE ERROR:",
@@ -96,11 +116,14 @@ async function supabaseRequest(endpoint, options = {}) {
       error
     );
 
+
     throw new Error(error);
+
   }
 
 
   return response;
+
 }
 
 
@@ -125,7 +148,9 @@ async function loadCategories() {
     throw new Error(
       "Não existem categorias no Supabase."
     );
+
   }
+
 }
 
 
@@ -138,37 +163,46 @@ function renderCategoryMenu() {
   categoryMenu.innerHTML = "";
 
 
-  categories.forEach(category => {
+  categories.forEach(
+    category => {
 
-    const button =
-      document.createElement("button");
-
-
-    button.className =
-      "category-button";
-
-
-    button.textContent =
-      category.name;
-
-
-    button.addEventListener(
-      "click",
-      async function() {
-
-        categoryMenu.classList.remove(
-          "open"
+      const button =
+        document.createElement(
+          "button"
         );
 
-        await selectCategory(category);
 
-      }
-    );
+      button.className =
+        "category-button";
 
 
-    categoryMenu.appendChild(button);
+      button.textContent =
+        category.name;
 
-  });
+
+      button.addEventListener(
+        "click",
+        async function() {
+
+          categoryMenu.classList.remove(
+            "open"
+          );
+
+
+          await selectCategory(
+            category
+          );
+
+        }
+      );
+
+
+      categoryMenu.appendChild(
+        button
+      );
+
+    }
+  );
 
 }
 
@@ -177,9 +211,12 @@ function renderCategoryMenu() {
    SELECCIONAR CATEGORIA
 ========================================================= */
 
-async function selectCategory(category) {
+async function selectCategory(
+  category
+) {
 
-  currentCategory = category;
+  currentCategory =
+    category;
 
 
   categoryTitle.textContent =
@@ -187,6 +224,7 @@ async function selectCategory(category) {
 
 
   columns = [];
+
   rows = [];
 
 
@@ -202,7 +240,7 @@ async function selectCategory(category) {
 
 
 /* =========================================================
-   COLUNAS
+   CARREGAR COLUNAS
 ========================================================= */
 
 async function loadColumns() {
@@ -222,13 +260,17 @@ async function loadColumns() {
 
 
   /*
-    Se a categoria ainda não tiver
-    colunas, criamos as 6 iniciais.
+    Se não houver colunas,
+    criar as 6 iniciais.
   */
 
   if (!columns.length) {
 
-    for (let i = 0; i < 6; i++) {
+    for (
+      let i = 0;
+      i < 6;
+      i++
+    ) {
 
       const response =
         await supabaseRequest(
@@ -269,7 +311,7 @@ async function loadColumns() {
 
 
 /* =========================================================
-   LINHAS
+   CARREGAR LINHAS
 ========================================================= */
 
 async function loadRows() {
@@ -297,8 +339,8 @@ async function loadRows() {
 async function ensureRows() {
 
   /*
-    Mantemos 20 linhas disponíveis
-    em cada categoria.
+    Apenas para a primeira configuração
+    de cada categoria, criamos 20 linhas.
   */
 
   if (rows.length >= 20) {
@@ -370,15 +412,19 @@ async function createRow() {
     inserted[0];
 
 
-  rows.push(row);
+  rows.push(
+    row
+  );
 
 
   /*
-    Criar uma célula para
-    cada coluna da categoria.
+    Criar uma célula
+    para cada coluna.
   */
 
-  for (const column of columns) {
+  for (
+    const column of columns
+  ) {
 
     await supabaseRequest(
 
@@ -389,7 +435,8 @@ async function createRow() {
 
         body: JSON.stringify({
 
-          row_id: row.id,
+          row_id:
+            row.id,
 
           column_id:
             column.id,
@@ -443,21 +490,26 @@ async function render() {
     new Map();
 
 
-  cells.forEach(cell => {
+  cells.forEach(
+    cell => {
 
-    cellMap.set(
+      cellMap.set(
 
-      `${cell.row_id}-${cell.column_id}`,
+        `${cell.row_id}-${cell.column_id}`,
 
-      cell
+        cell
 
-    );
+      );
 
-  });
+    }
+  );
 
 
   rows.forEach(
-    (row, rowIndex) => {
+    (
+      row,
+      rowIndex
+    ) => {
 
       createRowElement(
         row,
@@ -472,7 +524,7 @@ async function render() {
 
 
 /* =========================================================
-   CRIAR ELEMENTO DA LINHA
+   CRIAR LINHA VISUAL
 ========================================================= */
 
 function createRowElement(
@@ -482,7 +534,9 @@ function createRowElement(
 ) {
 
   const rowElement =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
 
   rowElement.className =
@@ -496,10 +550,15 @@ function createRowElement(
 
 
   columns.forEach(
-    (column, columnIndex) => {
+    (
+      column,
+      columnIndex
+    ) => {
 
       const cell =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       cell.className =
@@ -512,11 +571,13 @@ function createRowElement(
         );
 
 
-      /* =====================================
+      /* =====================================================
          PRIMEIRA COLUNA = IMAGEM
-      ===================================== */
+      ===================================================== */
 
-      if (columnIndex === 0) {
+      if (
+        columnIndex === 0
+      ) {
 
         cell.classList.add(
           "image-cell"
@@ -538,13 +599,13 @@ function createRowElement(
 
         cell.setAttribute(
           "aria-label",
-          "Colar imagem"
+          "Escolher imagem"
         );
 
 
         /*
-          Se já existir uma imagem,
-          mostramos a imagem.
+          Se existe imagem,
+          mostrar imagem.
         */
 
         if (
@@ -559,9 +620,24 @@ function createRowElement(
 
         }
 
+        /*
+          Se não existe imagem,
+          mostrar >img<
+        */
+
+        else {
+
+          createImagePlaceholder(
+            cell,
+            row.id,
+            column.id
+          );
+
+        }
+
 
         /*
-          COLAR IMAGEM
+          Cmd+V / Ctrl+V
         */
 
         cell.addEventListener(
@@ -580,15 +656,22 @@ function createRowElement(
 
 
         /*
-          Clique na célula
+          Clique
         */
 
         cell.addEventListener(
           "click",
-          function() {
+          function(event) {
+
+            /*
+              Se houver imagem,
+              abrir imagem.
+            */
 
             const image =
-              cell.querySelector("img");
+              cell.querySelector(
+                "img"
+              );
 
 
             if (image) {
@@ -597,11 +680,24 @@ function createRowElement(
                 image.src
               );
 
-            } else {
-
-              cell.focus();
+              return;
 
             }
+
+
+            /*
+              Se estiver vazia,
+              abrir Finder.
+            */
+
+            event.preventDefault();
+
+
+            openFilePicker(
+              row.id,
+              column.id,
+              cell
+            );
 
           }
         );
@@ -609,9 +705,10 @@ function createRowElement(
 
       }
 
-      /* =====================================
+
+      /* =====================================================
          RESTANTES COLUNAS = TEXTO
-      ===================================== */
+      ===================================================== */
 
       else {
 
@@ -622,11 +719,6 @@ function createRowElement(
         cell.textContent =
           data?.value || "";
 
-
-        /*
-          Guardar texto quando
-          saímos da célula.
-        */
 
         cell.addEventListener(
           "blur",
@@ -645,10 +737,6 @@ function createRowElement(
           }
         );
 
-
-        /*
-          Enter termina a edição
-        */
 
         cell.addEventListener(
           "keydown",
@@ -678,12 +766,14 @@ function createRowElement(
   );
 
 
-  /* =====================================
-     BOTÃO APAGAR LINHA
-  ===================================== */
+  /* =====================================================
+     X DA LINHA
+  ===================================================== */
 
   const deleteButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
 
   deleteButton.className =
@@ -727,9 +817,7 @@ function createRowElement(
 
 
   /*
-    IMPORTANTE:
-    este botão fica fora
-    das colunas do grid.
+    O X fica fora da grelha.
   */
 
   rowElement.appendChild(
@@ -745,87 +833,173 @@ function createRowElement(
 
 
 /* =========================================================
-   GUARDAR CELULA
+   PLACEHOLDER >IMG<
 ========================================================= */
 
-async function saveCell(
+function createImagePlaceholder(
+  cell,
   rowId,
-  columnId,
-  value
+  columnId
 ) {
 
-  await supabaseRequest(
-
-    `torre_cells?` +
-    `row_id=eq.${rowId}` +
-    `&column_id=eq.${columnId}`,
-
-    {
-
-      method: "PATCH",
-
-      headers: {
-        "Prefer":
-          "return=minimal"
-      },
-
-      body: JSON.stringify({
-        value
-      })
-
-    }
-
-  );
-
-}
+  const placeholder =
+    document.createElement(
+      "div"
+    );
 
 
-/* =========================================================
-   CRIAR IMAGEM
-========================================================= */
-
-function createImage(
-  src,
-  cell
-) {
-
-  const image =
-    document.createElement("img");
+  placeholder.className =
+    "image-placeholder";
 
 
-  image.src = src;
+  placeholder.textContent =
+    ">img<";
 
 
-  image.alt =
-    "Imagem";
-
-
-  image.addEventListener(
+  placeholder.addEventListener(
     "click",
     function(event) {
 
       event.stopPropagation();
 
-      openImage(
-        image.src
+
+      openFilePicker(
+        rowId,
+        columnId,
+        cell
       );
 
     }
   );
 
 
-  cell.innerHTML = "";
-
-
   cell.appendChild(
-    image
+    placeholder
   );
 
 }
 
 
 /* =========================================================
-   PASTE DE IMAGEM
+   FILE PICKER
+========================================================= */
+
+function openFilePicker(
+  rowId,
+  columnId,
+  cell
+) {
+
+  /*
+    Guardamos temporariamente
+    a célula onde a imagem
+    deve aparecer.
+  */
+
+  imageFileInput.dataset.rowId =
+    rowId;
+
+
+  imageFileInput.dataset.columnId =
+    columnId;
+
+
+  imageFileInput._targetCell =
+    cell;
+
+
+  /*
+    Isto abre o Finder.
+  */
+
+  imageFileInput.click();
+
+}
+
+
+/* =========================================================
+   ESCOLHER IMAGEM DO FINDER
+========================================================= */
+
+imageFileInput.addEventListener(
+  "change",
+  async function() {
+
+    const file =
+      imageFileInput.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const rowId =
+      imageFileInput.dataset.rowId;
+
+
+    const columnId =
+      imageFileInput.dataset.columnId;
+
+
+    const cell =
+      imageFileInput._targetCell;
+
+
+    try {
+
+      const optimized =
+        await optimizeImage(
+          file
+        );
+
+
+      const imageUrl =
+        await uploadImage(
+          optimized
+        );
+
+
+      await saveCell(
+        rowId,
+        columnId,
+        imageUrl
+      );
+
+
+      createImage(
+        imageUrl,
+        cell
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        "Erro ao carregar a imagem."
+      );
+
+    }
+
+
+    /*
+      Permite escolher novamente
+      o mesmo ficheiro.
+    */
+
+    imageFileInput.value = "";
+
+  }
+);
+
+
+/* =========================================================
+   PASTE IMAGEM
 ========================================================= */
 
 async function handleImagePaste(
@@ -868,21 +1042,11 @@ async function handleImagePaste(
 
     try {
 
-      /*
-        Comprimir antes
-        do upload.
-      */
-
       const optimized =
         await optimizeImage(
           file
         );
 
-
-      /*
-        Upload para
-        Supabase Storage.
-      */
 
       const imageUrl =
         await uploadImage(
@@ -890,21 +1054,12 @@ async function handleImagePaste(
         );
 
 
-      /*
-        Guardar URL
-        na célula.
-      */
-
       await saveCell(
         rowId,
         columnId,
         imageUrl
       );
 
-
-      /*
-        Mostrar imediatamente.
-      */
 
       createImage(
         imageUrl,
@@ -929,6 +1084,54 @@ async function handleImagePaste(
     break;
 
   }
+
+}
+
+
+/* =========================================================
+   CRIAR IMAGEM
+========================================================= */
+
+function createImage(
+  src,
+  cell
+) {
+
+  const image =
+    document.createElement(
+      "img"
+    );
+
+
+  image.src =
+    src;
+
+
+  image.alt =
+    "Imagem";
+
+
+  image.addEventListener(
+    "click",
+    function(event) {
+
+      event.stopPropagation();
+
+
+      openImage(
+        image.src
+      );
+
+    }
+  );
+
+
+  cell.innerHTML = "";
+
+
+  cell.appendChild(
+    image
+  );
 
 }
 
@@ -964,11 +1167,6 @@ function optimizeImage(file) {
                 image.naturalHeight;
 
 
-              /*
-                Máximo:
-                2000 px no lado maior.
-              */
-
               const MAX_SIZE =
                 2000;
 
@@ -980,8 +1178,11 @@ function optimizeImage(file) {
 
                 const ratio =
                   Math.min(
+
                     MAX_SIZE / width,
+
                     MAX_SIZE / height
+
                   );
 
 
@@ -1104,10 +1305,12 @@ function optimizeImage(file) {
 
 
 /* =========================================================
-   UPLOAD SUPABASE STORAGE
+   UPLOAD IMAGE
 ========================================================= */
 
-async function uploadImage(file) {
+async function uploadImage(
+  file
+) {
 
   const filename =
 
@@ -1125,12 +1328,6 @@ async function uploadImage(file) {
     `/storage/v1/object/` +
 
     `${BUCKET}/${filename}`;
-
-
-  console.log(
-    "TORRE IMAGE UPLOAD:",
-    url
-  );
 
 
   const response =
@@ -1195,6 +1392,44 @@ async function uploadImage(file) {
 
 
 /* =========================================================
+   GUARDAR CELULA
+========================================================= */
+
+async function saveCell(
+  rowId,
+  columnId,
+  value
+) {
+
+  await supabaseRequest(
+
+    `torre_cells?` +
+    `row_id=eq.${rowId}` +
+    `&column_id=eq.${columnId}`,
+
+    {
+
+      method: "PATCH",
+
+      headers: {
+
+        "Prefer":
+          "return=minimal"
+
+      },
+
+      body: JSON.stringify({
+        value
+      })
+
+    }
+
+  );
+
+}
+
+
+/* =========================================================
    APAGAR LINHA
 ========================================================= */
 
@@ -1239,12 +1474,16 @@ async function deleteRow(
         method: "PATCH",
 
         headers: {
+
           "Prefer":
             "return=minimal"
+
         },
 
         body: JSON.stringify({
+
           position: i
+
         })
 
       }
@@ -1259,6 +1498,101 @@ async function deleteRow(
   await render();
 
 }
+
+
+/* =========================================================
+   ADICIONAR ROW
+========================================================= */
+
+addRowButton.addEventListener(
+  "click",
+  async function() {
+
+    try {
+
+      await createRow();
+
+      await loadRows();
+
+      await render();
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        "Erro ao criar linha."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   REMOVER ROW
+========================================================= */
+
+removeRowButton.addEventListener(
+  "click",
+  async function() {
+
+    /*
+      Não permitir apagar a última
+      linha existente.
+    */
+
+    if (rows.length <= 1) {
+
+      alert(
+        "É necessário manter pelo menos uma linha."
+      );
+
+      return;
+
+    }
+
+
+    const lastRow =
+      rows[rows.length - 1];
+
+
+    const confirmed =
+      confirm(
+        "Apagar a última linha?"
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    try {
+
+      await deleteRow(
+        lastRow.id
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        "Erro ao remover linha."
+      );
+
+    }
+
+  }
+);
 
 
 /* =========================================================
@@ -1315,8 +1649,8 @@ async function addColumn() {
 
 
   /*
-    Criar uma célula
-    nova em todas as linhas.
+    Criar células para
+    todas as linhas.
   */
 
   for (
@@ -1356,40 +1690,134 @@ async function addColumn() {
 
 
 /* =========================================================
-   BOTÃO +
-   NOVA LINHA
+   REMOVER COLUNA
 ========================================================= */
 
-addRowButton.addEventListener(
-  "click",
-  async function() {
+async function removeColumn() {
 
-    try {
+  /*
+    Não permitir apagar
+    todas as colunas.
+  */
 
-      await createRow();
+  if (columns.length <= 1) {
 
-      await loadRows();
+    alert(
+      "É necessário manter pelo menos uma coluna."
+    );
 
-      await render();
+    return;
 
-    } catch (error) {
+  }
 
-      console.error(
-        error
+
+  /*
+    Removemos a última coluna.
+  */
+
+  const column =
+    columns[columns.length - 1];
+
+
+  const confirmed =
+    confirm(
+      "Apagar a última coluna?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    /*
+      Como torre_cells tem
+      ON DELETE CASCADE,
+      as células associadas
+      serão apagadas automaticamente.
+    */
+
+    await supabaseRequest(
+
+      `torre_columns?id=eq.${column.id}`,
+
+      {
+        method: "DELETE"
+      }
+
+    );
+
+
+    columns =
+      columns.slice(
+        0,
+        -1
       );
 
-      alert(
-        "Erro ao criar linha."
+
+    /*
+      Reorganizar posições.
+    */
+
+    for (
+      let i = 0;
+      i < columns.length;
+      i++
+    ) {
+
+      await supabaseRequest(
+
+        `torre_columns?id=eq.${columns[i].id}`,
+
+        {
+
+          method: "PATCH",
+
+          headers: {
+
+            "Prefer":
+              "return=minimal"
+
+          },
+
+          body: JSON.stringify({
+
+            position: i
+
+          })
+
+        }
+
       );
 
     }
 
+
+    await loadColumns();
+
+    await render();
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "Erro ao remover coluna."
+    );
+
   }
-);
+
+}
 
 
 /* =========================================================
-   BOTÃO + COLUMN
+   BOTÃO ADICIONAR COLUNA
 ========================================================= */
 
 addColumnButton.addEventListener(
@@ -1406,6 +1834,7 @@ addColumnButton.addEventListener(
         error
       );
 
+
       alert(
         "Erro ao criar coluna."
       );
@@ -1417,7 +1846,21 @@ addColumnButton.addEventListener(
 
 
 /* =========================================================
-   ABRIR MENU
+   BOTÃO REMOVER COLUNA
+========================================================= */
+
+removeColumnButton.addEventListener(
+  "click",
+  async function() {
+
+    await removeColumn();
+
+  }
+);
+
+
+/* =========================================================
+   MENU
 ========================================================= */
 
 torreTitle.addEventListener(
@@ -1426,6 +1869,7 @@ torreTitle.addEventListener(
 
     event.stopPropagation();
 
+
     categoryMenu.classList.toggle(
       "open"
     );
@@ -1433,10 +1877,6 @@ torreTitle.addEventListener(
   }
 );
 
-
-/* =========================================================
-   FECHAR MENU
-========================================================= */
 
 document.addEventListener(
   "click",
@@ -1459,7 +1899,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   FECHAR IMAGE VIEWER
+   IMAGE VIEWER
 ========================================================= */
 
 viewer.addEventListener(
@@ -1470,15 +1910,12 @@ viewer.addEventListener(
       "open"
     );
 
+
     viewerImage.src = "";
 
   }
 );
 
-
-/* =========================================================
-   ABRIR IMAGE VIEWER
-========================================================= */
 
 function openImage(src) {
 
@@ -1506,8 +1943,9 @@ async function init() {
     renderCategoryMenu();
 
     /*
-      Começar na primeira categoria:
-      LIVROS.
+      Começar em LIVROS,
+      que deverá ser a primeira
+      categoria.
     */
 
     await selectCategory(
