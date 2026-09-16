@@ -1,11 +1,19 @@
+/* =========================================================
+   SUPABASE
+========================================================= */
+
 const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co";
+  "COLOCA_AQUI_O_TEU_PROJECT_URL";
 
 const SUPABASE_KEY =
-  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+  "COLOCA_AQUI_A_TUA_PUBLISHABLE_KEY";
 
 const BUCKET = "images";
 
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
 
 const grid = document.getElementById("grid");
 
@@ -31,37 +39,49 @@ const categoryTitle =
   document.getElementById("category-title");
 
 
+/* =========================================================
+   ESTADO
+========================================================= */
+
 let categories = [];
+
 let columns = [];
+
 let rows = [];
 
 let currentCategory = null;
 
 
-/* ---------------------------
-   SUPABASE
----------------------------- */
+/* =========================================================
+   SUPABASE REQUEST
+========================================================= */
 
 async function supabaseRequest(endpoint, options = {}) {
 
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/${endpoint}`,
-    {
-      ...options,
+  const url =
+    `${SUPABASE_URL}/rest/v1/${endpoint}`;
 
-      headers: {
-        "apikey": SUPABASE_KEY,
+  console.log("TORRE REQUEST:", url);
 
-        "Authorization":
-          `Bearer ${SUPABASE_KEY}`,
+  const response = await fetch(url, {
 
-        "Content-Type":
-          "application/json",
+    ...options,
 
-        ...(options.headers || {})
-      }
+    headers: {
+
+      "apikey": SUPABASE_KEY,
+
+      "Authorization":
+        `Bearer ${SUPABASE_KEY}`,
+
+      "Content-Type":
+        "application/json",
+
+      ...(options.headers || {})
+
     }
-  );
+
+  });
 
 
   if (!response.ok) {
@@ -69,7 +89,12 @@ async function supabaseRequest(endpoint, options = {}) {
     const error =
       await response.text();
 
-    console.error(error);
+    console.error(
+      "TORRE SUPABASE ERROR:",
+      response.status,
+      url,
+      error
+    );
 
     throw new Error(error);
   }
@@ -79,9 +104,9 @@ async function supabaseRequest(endpoint, options = {}) {
 }
 
 
-/* ---------------------------
-   CATEGORIES
----------------------------- */
+/* =========================================================
+   CATEGORIAS
+========================================================= */
 
 async function loadCategories() {
 
@@ -90,17 +115,23 @@ async function loadCategories() {
       "torre_categories?select=*&order=position.asc"
     );
 
+
   categories =
     await response.json();
 
 
   if (!categories.length) {
+
     throw new Error(
       "Não existem categorias no Supabase."
     );
   }
 }
 
+
+/* =========================================================
+   MENU
+========================================================= */
 
 function renderCategoryMenu() {
 
@@ -112,8 +143,10 @@ function renderCategoryMenu() {
     const button =
       document.createElement("button");
 
+
     button.className =
       "category-button";
+
 
     button.textContent =
       category.name;
@@ -123,30 +156,38 @@ function renderCategoryMenu() {
       "click",
       async function() {
 
-        categoryMenu
-          .classList
-          .remove("open");
+        categoryMenu.classList.remove(
+          "open"
+        );
 
         await selectCategory(category);
+
       }
     );
 
 
     categoryMenu.appendChild(button);
+
   });
+
 }
 
 
-/* ---------------------------
-   CATEGORY SELECTION
----------------------------- */
+/* =========================================================
+   SELECCIONAR CATEGORIA
+========================================================= */
 
 async function selectCategory(category) {
 
   currentCategory = category;
 
+
   categoryTitle.textContent =
     category.name;
+
+
+  columns = [];
+  rows = [];
 
 
   await loadColumns();
@@ -156,27 +197,33 @@ async function selectCategory(category) {
   await ensureRows();
 
   await render();
+
 }
 
 
-/* ---------------------------
-   COLUMNS
----------------------------- */
+/* =========================================================
+   COLUNAS
+========================================================= */
 
 async function loadColumns() {
 
   const response =
     await supabaseRequest(
-      `torre_columns?select=*&category_id=eq.${currentCategory.id}&order=position.asc`
+
+      `torre_columns?select=*` +
+      `&category_id=eq.${currentCategory.id}` +
+      `&order=position.asc`
+
     );
+
 
   columns =
     await response.json();
 
 
   /*
-    Se a categoria ainda não tem
-    colunas, cria 6.
+    Se a categoria ainda não tiver
+    colunas, criamos as 6 iniciais.
   */
 
   if (!columns.length) {
@@ -195,10 +242,12 @@ async function loadColumns() {
             },
 
             body: JSON.stringify({
+
               category_id:
                 currentCategory.id,
 
               position: i
+
             })
           }
         );
@@ -207,29 +256,50 @@ async function loadColumns() {
       const inserted =
         await response.json();
 
-      columns.push(inserted[0]);
+
+      columns.push(
+        inserted[0]
+      );
+
     }
+
   }
+
 }
 
 
-/* ---------------------------
-   ROWS
----------------------------- */
+/* =========================================================
+   LINHAS
+========================================================= */
 
 async function loadRows() {
 
   const response =
     await supabaseRequest(
-      `torre_rows?select=*&category_id=eq.${currentCategory.id}&order=position.asc`
+
+      `torre_rows?select=*` +
+      `&category_id=eq.${currentCategory.id}` +
+      `&order=position.asc`
+
     );
+
 
   rows =
     await response.json();
+
 }
 
 
+/* =========================================================
+   GARANTIR LINHAS
+========================================================= */
+
 async function ensureRows() {
+
+  /*
+    Mantemos 20 linhas disponíveis
+    em cada categoria.
+  */
 
   if (rows.length >= 20) {
     return;
@@ -240,15 +310,25 @@ async function ensureRows() {
     20 - rows.length;
 
 
-  for (let i = 0; i < missing; i++) {
+  for (
+    let i = 0;
+    i < missing;
+    i++
+  ) {
 
     await createRow();
+
   }
 
 
   await loadRows();
+
 }
 
+
+/* =========================================================
+   CRIAR LINHA
+========================================================= */
 
 async function createRow() {
 
@@ -258,7 +338,9 @@ async function createRow() {
 
   const response =
     await supabaseRequest(
+
       "torre_rows",
+
       {
         method: "POST",
 
@@ -273,13 +355,16 @@ async function createRow() {
             currentCategory.id,
 
           position
+
         })
       }
+
     );
 
 
   const inserted =
     await response.json();
+
 
   const row =
     inserted[0];
@@ -288,35 +373,45 @@ async function createRow() {
   rows.push(row);
 
 
+  /*
+    Criar uma célula para
+    cada coluna da categoria.
+  */
+
   for (const column of columns) {
 
     await supabaseRequest(
+
       "torre_cells",
+
       {
         method: "POST",
 
         body: JSON.stringify({
 
-          row_id:
-            row.id,
+          row_id: row.id,
 
           column_id:
             column.id,
 
           value: null
+
         })
       }
+
     );
+
   }
 
 
   return row;
+
 }
 
 
-/* ---------------------------
-   CELLS
----------------------------- */
+/* =========================================================
+   CARREGAR CELULAS
+========================================================= */
 
 async function loadCells() {
 
@@ -325,13 +420,15 @@ async function loadCells() {
       "torre_cells?select=*"
     );
 
+
   return await response.json();
+
 }
 
 
-/* ---------------------------
+/* =========================================================
    RENDER
----------------------------- */
+========================================================= */
 
 async function render() {
 
@@ -349,9 +446,13 @@ async function render() {
   cells.forEach(cell => {
 
     cellMap.set(
+
       `${cell.row_id}-${cell.column_id}`,
+
       cell
+
     );
+
   });
 
 
@@ -363,10 +464,16 @@ async function render() {
         rowIndex,
         cellMap
       );
+
     }
   );
+
 }
 
+
+/* =========================================================
+   CRIAR ELEMENTO DA LINHA
+========================================================= */
 
 function createRowElement(
   row,
@@ -376,6 +483,7 @@ function createRowElement(
 
   const rowElement =
     document.createElement("div");
+
 
   rowElement.className =
     "archive-row";
@@ -393,6 +501,7 @@ function createRowElement(
       const cell =
         document.createElement("div");
 
+
       cell.className =
         "cell";
 
@@ -403,7 +512,9 @@ function createRowElement(
         );
 
 
-      /* PRIMEIRA COLUNA = IMAGEM */
+      /* =====================================
+         PRIMEIRA COLUNA = IMAGEM
+      ===================================== */
 
       if (columnIndex === 0) {
 
@@ -411,14 +522,30 @@ function createRowElement(
           "image-cell"
         );
 
+
+        cell.contentEditable =
+          "false";
+
+
         cell.tabIndex = 0;
 
-        cell.contentEditable = "false";
 
-  cell.setAttribute("role", "button");
-  cell.setAttribute("aria-label", "Colar imagem");
+        cell.setAttribute(
+          "role",
+          "button"
+        );
 
 
+        cell.setAttribute(
+          "aria-label",
+          "Colar imagem"
+        );
+
+
+        /*
+          Se já existir uma imagem,
+          mostramos a imagem.
+        */
 
         if (
           data &&
@@ -429,8 +556,13 @@ function createRowElement(
             data.value,
             cell
           );
+
         }
 
+
+        /*
+          COLAR IMAGEM
+        */
 
         cell.addEventListener(
           "paste",
@@ -442,9 +574,14 @@ function createRowElement(
               row.id,
               column.id
             );
+
           }
         );
 
+
+        /*
+          Clique na célula
+        */
 
         cell.addEventListener(
           "click",
@@ -463,32 +600,55 @@ function createRowElement(
             } else {
 
               cell.focus();
+
             }
+
           }
         );
 
 
-      } else {
+      }
+
+      /* =====================================
+         RESTANTES COLUNAS = TEXTO
+      ===================================== */
+
+      else {
 
         cell.contentEditable =
           "true";
 
+
         cell.textContent =
           data?.value || "";
 
+
+        /*
+          Guardar texto quando
+          saímos da célula.
+        */
 
         cell.addEventListener(
           "blur",
           async function() {
 
             await saveCell(
+
               row.id,
+
               column.id,
+
               cell.textContent
+
             );
+
           }
         );
 
+
+        /*
+          Enter termina a edição
+        */
 
         cell.addEventListener(
           "keydown",
@@ -501,27 +661,38 @@ function createRowElement(
               event.preventDefault();
 
               cell.blur();
+
             }
+
           }
         );
+
       }
 
 
-      rowElement.appendChild(cell);
+      rowElement.appendChild(
+        cell
+      );
+
     }
   );
 
 
-  /* BOTÃO X */
+  /* =====================================
+     BOTÃO APAGAR LINHA
+  ===================================== */
 
   const deleteButton =
     document.createElement("button");
 
+
   deleteButton.className =
     "delete-row";
 
+
   deleteButton.textContent =
     "×";
+
 
   deleteButton.setAttribute(
     "aria-label",
@@ -547,10 +718,19 @@ function createRowElement(
       }
 
 
-      await deleteRow(row.id);
+      await deleteRow(
+        row.id
+      );
+
     }
   );
 
+
+  /*
+    IMPORTANTE:
+    este botão fica fora
+    das colunas do grid.
+  */
 
   rowElement.appendChild(
     deleteButton
@@ -560,12 +740,13 @@ function createRowElement(
   grid.appendChild(
     rowElement
   );
+
 }
 
 
-/* ---------------------------
-   SAVE CELL
----------------------------- */
+/* =========================================================
+   GUARDAR CELULA
+========================================================= */
 
 async function saveCell(
   rowId,
@@ -574,8 +755,13 @@ async function saveCell(
 ) {
 
   await supabaseRequest(
-    `torre_cells?row_id=eq.${rowId}&column_id=eq.${columnId}`,
+
+    `torre_cells?` +
+    `row_id=eq.${rowId}` +
+    `&column_id=eq.${columnId}`,
+
     {
+
       method: "PATCH",
 
       headers: {
@@ -586,14 +772,17 @@ async function saveCell(
       body: JSON.stringify({
         value
       })
+
     }
+
   );
+
 }
 
 
-/* ---------------------------
-   IMAGES
----------------------------- */
+/* =========================================================
+   CRIAR IMAGEM
+========================================================= */
 
 function createImage(
   src,
@@ -606,7 +795,9 @@ function createImage(
 
   image.src = src;
 
-  image.alt = "Imagem";
+
+  image.alt =
+    "Imagem";
 
 
   image.addEventListener(
@@ -618,17 +809,24 @@ function createImage(
       openImage(
         image.src
       );
+
     }
   );
 
 
   cell.innerHTML = "";
 
+
   cell.appendChild(
     image
   );
+
 }
 
+
+/* =========================================================
+   PASTE DE IMAGEM
+========================================================= */
 
 async function handleImagePaste(
   event,
@@ -650,7 +848,9 @@ async function handleImagePaste(
         "image/"
       )
     ) {
+
       continue;
+
     }
 
 
@@ -668,11 +868,21 @@ async function handleImagePaste(
 
     try {
 
+      /*
+        Comprimir antes
+        do upload.
+      */
+
       const optimized =
         await optimizeImage(
           file
         );
 
+
+      /*
+        Upload para
+        Supabase Storage.
+      */
 
       const imageUrl =
         await uploadImage(
@@ -680,12 +890,21 @@ async function handleImagePaste(
         );
 
 
+      /*
+        Guardar URL
+        na célula.
+      */
+
       await saveCell(
         rowId,
         columnId,
         imageUrl
       );
 
+
+      /*
+        Mostrar imediatamente.
+      */
 
       createImage(
         imageUrl,
@@ -695,18 +914,28 @@ async function handleImagePaste(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
+
 
       alert(
         "Erro ao carregar a imagem."
       );
+
     }
 
 
     break;
+
   }
+
 }
 
+
+/* =========================================================
+   OTIMIZAR IMAGEM
+========================================================= */
 
 function optimizeImage(file) {
 
@@ -730,9 +959,15 @@ function optimizeImage(file) {
               let width =
                 image.naturalWidth;
 
+
               let height =
                 image.naturalHeight;
 
+
+              /*
+                Máximo:
+                2000 px no lado maior.
+              */
 
               const MAX_SIZE =
                 2000;
@@ -755,10 +990,12 @@ function optimizeImage(file) {
                     width * ratio
                   );
 
+
                 height =
                   Math.round(
                     height * ratio
                   );
+
               }
 
 
@@ -771,6 +1008,7 @@ function optimizeImage(file) {
               canvas.width =
                 width;
 
+
               canvas.height =
                 height;
 
@@ -782,15 +1020,20 @@ function optimizeImage(file) {
 
 
               context.drawImage(
+
                 image,
+
                 0,
                 0,
+
                 width,
                 height
+
               );
 
 
               canvas.toBlob(
+
                 function(blob) {
 
                   if (!blob) {
@@ -802,60 +1045,104 @@ function optimizeImage(file) {
                     );
 
                     return;
+
                   }
 
 
-                  resolve(
+                  const optimizedFile =
                     new File(
+
                       [blob],
+
                       "torre.jpg",
+
                       {
                         type:
                           "image/jpeg"
                       }
-                    )
+
+                    );
+
+
+                  resolve(
+                    optimizedFile
                   );
+
                 },
+
                 "image/jpeg",
+
                 0.85
+
               );
+
             };
 
 
           image.onerror =
             reject;
 
+
           image.src =
             event.target.result;
+
         };
 
 
       reader.onerror =
         reject;
 
+
       reader.readAsDataURL(
         file
       );
+
     }
   );
+
 }
 
+
+/* =========================================================
+   UPLOAD SUPABASE STORAGE
+========================================================= */
 
 async function uploadImage(file) {
 
   const filename =
-    `${Date.now()}-${Math.random()
+
+    `${Date.now()}-` +
+
+    `${Math.random()
       .toString(36)
       .substring(2)}.jpg`;
 
 
+  const url =
+
+    `${SUPABASE_URL}` +
+
+    `/storage/v1/object/` +
+
+    `${BUCKET}/${filename}`;
+
+
+  console.log(
+    "TORRE IMAGE UPLOAD:",
+    url
+  );
+
+
   const response =
     await fetch(
-      `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`,
+
+      url,
+
       {
         method: "POST",
 
         headers: {
+
           "apikey":
             SUPABASE_KEY,
 
@@ -864,10 +1151,13 @@ async function uploadImage(file) {
 
           "Content-Type":
             "image/jpeg"
+
         },
 
         body: file
+
       }
+
     );
 
 
@@ -876,64 +1166,50 @@ async function uploadImage(file) {
     const error =
       await response.text();
 
-  async function supabaseRequest(endpoint, options = {}) {
-
-  const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
-
-  console.log("TORRE REQUEST:", url);
-
-  const response = await fetch(url, {
-    ...options,
-
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": `Bearer ${SUPABASE_KEY}`,
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    }
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
 
     console.error(
-      "TORRE SUPABASE ERROR:",
+      "TORRE STORAGE ERROR:",
       response.status,
-      url,
       error
     );
 
-    throw new Error(error);
-  }
-
-  return response;
-}
 
     throw new Error(
       "Upload falhou"
     );
+
   }
 
 
   return (
-    `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`
+
+    `${SUPABASE_URL}` +
+
+    `/storage/v1/object/public/` +
+
+    `${BUCKET}/${filename}`
+
   );
+
 }
 
 
-/* ---------------------------
-   DELETE ROW
----------------------------- */
+/* =========================================================
+   APAGAR LINHA
+========================================================= */
 
 async function deleteRow(
   rowId
 ) {
 
   await supabaseRequest(
+
     `torre_rows?id=eq.${rowId}`,
+
     {
       method: "DELETE"
     }
+
   );
 
 
@@ -944,6 +1220,10 @@ async function deleteRow(
     );
 
 
+  /*
+    Reorganizar posições.
+  */
+
   for (
     let i = 0;
     i < rows.length;
@@ -951,8 +1231,11 @@ async function deleteRow(
   ) {
 
     await supabaseRequest(
+
       `torre_rows?id=eq.${rows[i].id}`,
+
       {
+
         method: "PATCH",
 
         headers: {
@@ -963,20 +1246,24 @@ async function deleteRow(
         body: JSON.stringify({
           position: i
         })
+
       }
+
     );
+
   }
 
 
   await loadRows();
 
   await render();
+
 }
 
 
-/* ---------------------------
-   ADD COLUMN
----------------------------- */
+/* =========================================================
+   ADICIONAR COLUNA
+========================================================= */
 
 async function addColumn() {
 
@@ -986,13 +1273,18 @@ async function addColumn() {
 
   const response =
     await supabaseRequest(
+
       "torre_columns",
+
       {
+
         method: "POST",
 
         headers: {
+
           "Prefer":
             "return=representation"
+
         },
 
         body: JSON.stringify({
@@ -1001,8 +1293,11 @@ async function addColumn() {
             currentCategory.id,
 
           position
+
         })
+
       }
+
     );
 
 
@@ -1019,13 +1314,21 @@ async function addColumn() {
   );
 
 
+  /*
+    Criar uma célula
+    nova em todas as linhas.
+  */
+
   for (
     const row of rows
   ) {
 
     await supabaseRequest(
+
       "torre_cells",
+
       {
+
         method: "POST",
 
         body: JSON.stringify({
@@ -1037,45 +1340,85 @@ async function addColumn() {
             column.id,
 
           value: null
+
         })
+
       }
+
     );
+
   }
 
 
   await render();
+
 }
 
 
-/* ---------------------------
-   BUTTONS
----------------------------- */
+/* =========================================================
+   BOTÃO +
+   NOVA LINHA
+========================================================= */
 
 addRowButton.addEventListener(
   "click",
   async function() {
 
-    await createRow();
+    try {
 
-    await loadRows();
+      await createRow();
 
-    await render();
+      await loadRows();
+
+      await render();
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao criar linha."
+      );
+
+    }
+
   }
 );
 
+
+/* =========================================================
+   BOTÃO + COLUMN
+========================================================= */
 
 addColumnButton.addEventListener(
   "click",
   async function() {
 
-    await addColumn();
+    try {
+
+      await addColumn();
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao criar coluna."
+      );
+
+    }
+
   }
 );
 
 
-/* ---------------------------
-   MENU
----------------------------- */
+/* =========================================================
+   ABRIR MENU
+========================================================= */
 
 torreTitle.addEventListener(
   "click",
@@ -1086,9 +1429,14 @@ torreTitle.addEventListener(
     categoryMenu.classList.toggle(
       "open"
     );
+
   }
 );
 
+
+/* =========================================================
+   FECHAR MENU
+========================================================= */
 
 document.addEventListener(
   "click",
@@ -1103,14 +1451,16 @@ document.addEventListener(
       categoryMenu.classList.remove(
         "open"
       );
+
     }
+
   }
 );
 
 
-/* ---------------------------
-   IMAGE VIEWER
----------------------------- */
+/* =========================================================
+   FECHAR IMAGE VIEWER
+========================================================= */
 
 viewer.addEventListener(
   "click",
@@ -1121,23 +1471,31 @@ viewer.addEventListener(
     );
 
     viewerImage.src = "";
+
   }
 );
 
 
+/* =========================================================
+   ABRIR IMAGE VIEWER
+========================================================= */
+
 function openImage(src) {
 
-  viewerImage.src = src;
+  viewerImage.src =
+    src;
+
 
   viewer.classList.add(
     "open"
   );
+
 }
 
 
-/* ---------------------------
-   INIT
----------------------------- */
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
 
 async function init() {
 
@@ -1147,9 +1505,15 @@ async function init() {
 
     renderCategoryMenu();
 
+    /*
+      Começar na primeira categoria:
+      LIVROS.
+    */
+
     await selectCategory(
       categories[0]
     );
+
 
   } catch (error) {
 
@@ -1160,17 +1524,29 @@ async function init() {
 
 
     document.body.innerHTML = `
+
       <div style="
         padding:40px;
-        font-family:Arial;
-        color:white;
+        font-family:Arial, Helvetica, sans-serif;
+        color:#ffffff;
         background:#0000ff;
+        min-height:100vh;
       ">
-        <h2>TORRE — erro</h2>
-        <pre>${error.message}</pre>
+
+        <h2>
+          TORRE — erro
+        </h2>
+
+        <pre style="
+          white-space:pre-wrap;
+        ">${error.message}</pre>
+
       </div>
+
     `;
+
   }
+
 }
 
 
