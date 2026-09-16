@@ -20,6 +20,7 @@ body {
 
 #header {
   width: 80vw;
+
   margin: 20px auto 40px;
 
   display: flex;
@@ -28,13 +29,10 @@ body {
 }
 
 
-/* =========================
-   MENU
-========================= */
-
 #menu-wrapper {
   position: relative;
 }
+
 
 #torre-title {
   border: 0;
@@ -51,10 +49,30 @@ body {
   cursor: pointer;
 }
 
+
 #torre-title:hover {
   opacity: 0.5;
 }
 
+
+#lab-title {
+  color: #0000ff;
+
+  text-decoration: none;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+
+#lab-title:hover {
+  opacity: 0.5;
+}
+
+
+/* =========================
+   CATEGORY MENU
+========================= */
 
 #category-menu {
   position: absolute;
@@ -70,10 +88,12 @@ body {
   padding: 10px 12px;
 
   background: #ffffff;
+
   border: 2px solid #0000ff;
 
   z-index: 1000;
 }
+
 
 #category-menu.open {
   display: flex;
@@ -97,25 +117,8 @@ body {
   cursor: pointer;
 }
 
+
 .category-button:hover {
-  opacity: 0.5;
-}
-
-
-/* =========================
-   LABORATÓRIO
-========================= */
-
-#lab-title {
-  color: #0000ff;
-
-  text-decoration: none;
-
-  font-size: 18px;
-  line-height: 1;
-}
-
-#lab-title:hover {
   opacity: 0.5;
 }
 
@@ -143,13 +146,24 @@ body {
 
 
 /* =========================
-   GRID
+   GRID WRAPPER
 ========================= */
+
+#grid-wrapper {
+  position: relative;
+
+  width: 100%;
+}
+
 
 #grid {
   width: 100%;
 }
 
+
+/* =========================
+   ROW
+========================= */
 
 .archive-row {
   position: relative;
@@ -191,14 +205,10 @@ body {
 }
 
 
-/* primeira coluna */
-
 .cell:first-child {
   border-left: 2px solid #0000ff;
 }
 
-
-/* primeira linha */
 
 .archive-row:first-child .cell {
   border-top: 2px solid #0000ff;
@@ -213,6 +223,7 @@ body {
   color: #0000ff;
   caret-color: #0000ff;
 }
+
 
 .cell[contenteditable="true"]:focus {
   outline: none;
@@ -237,8 +248,38 @@ body {
   cursor: pointer;
 
   overflow: hidden;
+
+  position: relative;
 }
 
+
+/* texto que aparece quando não existe imagem */
+
+.image-placeholder {
+  width: 100%;
+  min-height: 1.5cm;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #0000ff;
+
+  font-size: 14px;
+  line-height: 1;
+
+  user-select: none;
+
+  cursor: pointer;
+}
+
+
+.image-placeholder:hover {
+  opacity: 0.5;
+}
+
+
+/* imagem */
 
 .image-cell img {
   display: block;
@@ -250,7 +291,8 @@ body {
 
   object-fit: contain;
 
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.2s ease;
 }
 
 
@@ -288,28 +330,32 @@ body {
   cursor: pointer;
 }
 
+
 .delete-row:hover {
   opacity: 0.5;
 }
 
 
 /* =========================
-   CONTROLS
+   COLUMN CONTROLS
 ========================= */
 
-#controls {
+#column-controls {
   display: flex;
 
   justify-content: flex-end;
   align-items: center;
 
-  gap: 15px;
+  gap: 14px;
 
-  margin-top: 10px;
+  margin-top: 8px;
+
+  padding-right: 0;
 }
 
 
-#controls button {
+#column-controls button,
+#row-controls button {
   border: 0;
 
   background: transparent;
@@ -317,24 +363,41 @@ body {
 
   font-family: Arial, Helvetica, sans-serif;
 
-  cursor: pointer;
-
   padding: 0;
+
+  cursor: pointer;
 }
 
 
-#add-row {
-  font-size: 24px;
-}
-
-
-#add-column {
+#column-controls button {
   font-size: 14px;
 }
 
 
-#controls button:hover {
+#column-controls button:hover,
+#row-controls button:hover {
   opacity: 0.5;
+}
+
+
+/* =========================
+   ROW CONTROLS
+========================= */
+
+#row-controls {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 14px;
+
+  margin-top: 8px;
+}
+
+
+#row-controls button {
+  font-size: 14px;
 }
 
 
