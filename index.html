@@ -1,32 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>TORRE</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
 </head>
+
 
 <body>
 
+
+  <header id="header">
+
+    <a
+      id="torre-title"
+      href="./"
+    >
+      log/torre
+    </a>
+
+
+    <a
+      id="lab-title"
+      href="https://laia.pt/TORRE"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      LABORATÓRIO DA TORRE
+    </a>
+
+  </header>
+
+
+
   <main id="archive">
+
+
+    <!-- CABEÇALHO DAS COLUNAS -->
+
+    <div id="column-controls"></div>
+
+
+
+    <!-- GRELHA -->
 
     <div id="grid"></div>
 
-    <button id="add-row" aria-label="Adicionar linha">+</button>
+
+
+    <!-- CONTROLOS -->
+
+    <div id="controls">
+
+      <button
+        id="add-row"
+        type="button"
+      >
+        +
+      </button>
+
+
+      <button
+        id="add-column"
+        type="button"
+      >
+        + column
+      </button>
+
+    </div>
+
 
   </main>
 
 
-  <!-- VISUALIZADOR DE IMAGEM -->
 
-  <div id="image-viewer">
+  <!-- VISUALIZADOR -->
 
-    <img id="viewer-image" src="" alt="Imagem ampliada">
+  <div
+    id="image-viewer"
+    aria-hidden="true"
+  >
+
+    <img
+      id="viewer-image"
+      src=""
+      alt=""
+    >
 
   </div>
+
 
 
   <script src="script.js"></script>
