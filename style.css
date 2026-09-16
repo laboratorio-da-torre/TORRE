@@ -6,8 +6,10 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #0000ff;
-  color: white;
+
+  background: #ffffff;
+  color: #00f0ff;
+
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -33,7 +35,7 @@ body {
   margin: 0;
 
   background: transparent;
-  color: white;
+  color: #00f0ff;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -47,7 +49,7 @@ body {
 }
 
 #lab-title {
-  color: white;
+  color: #00f0ff;
   text-decoration: none;
 
   font-size: 18px;
@@ -65,12 +67,18 @@ body {
   position: absolute;
 
   top: 28px;
-  left: 0;
+  left: -8px;
 
   display: none;
 
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+
+  border: 2px solid #00f0ff;
 
   z-index: 1000;
 }
@@ -84,7 +92,7 @@ body {
   padding: 0;
 
   background: transparent;
-  color: white;
+  color: #00f0ff;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -111,7 +119,7 @@ body {
 #category-title {
   margin: 0 0 20px 0;
 
-  color: white;
+  color: #00f0ff;
 
   font-size: 18px;
   line-height: 1;
@@ -131,7 +139,8 @@ body {
   width: 100%;
 
   display: grid;
-  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  grid-template-columns:
+    repeat(var(--columns), minmax(0, 1fr));
 
   align-items: stretch;
 }
@@ -140,15 +149,18 @@ body {
   min-width: 0;
   min-height: 1.5cm;
 
-  border-right: 2px solid black;
-  border-bottom: 2px solid black;
+  border-right: 2px solid #00f0ff;
+  border-bottom: 2px solid #00f0ff;
+  border-left: 0;
+  border-top: 0;
 
-  background: white;
-  color: white;
+  background: #ffffff;
+  color: #00f0ff;
 
   padding: 6px;
 
   font-size: 14px;
+  line-height: 1.25;
 
   outline: none;
 
@@ -157,15 +169,29 @@ body {
 }
 
 .cell:first-child {
-  border-left: 2px solid black;
+  border-left: 2px solid #00f0ff;
 }
 
 .archive-row:first-child .cell {
-  border-top: 2px solid black;
+  border-top: 2px solid #00f0ff;
 }
 
 
-/* IMAGE */
+/* TEXTO EDITÁVEL */
+
+.cell[contenteditable="true"] {
+  color: #00f0ff;
+
+  caret-color: #00f0ff;
+}
+
+.cell[contenteditable="true"]:focus {
+  outline: none;
+  background: #ffffff;
+}
+
+
+/* IMAGENS */
 
 .image-cell {
   padding: 0;
@@ -174,7 +200,7 @@ body {
   align-items: flex-start;
   justify-content: center;
 
-  background: white;
+  background: #ffffff;
 
   cursor: pointer;
 
@@ -191,7 +217,8 @@ body {
 
   object-fit: contain;
 
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.2s ease;
 }
 
 .image-cell:hover img {
@@ -199,7 +226,7 @@ body {
 }
 
 
-/* DELETE ROW */
+/* DELETE */
 
 .delete-row {
   position: absolute;
@@ -215,7 +242,7 @@ body {
   padding: 0;
   margin: 0;
 
-  color: white;
+  color: #00f0ff;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -244,9 +271,9 @@ body {
 
 #controls button {
   border: 0;
-  background: transparent;
 
-  color: white;
+  background: transparent;
+  color: #00f0ff;
 
   font-family: Arial, Helvetica, sans-serif;
 
@@ -277,7 +304,7 @@ body {
   width: 100vw;
   height: 100vh;
 
-  background: #0000ff;
+  background: #00f0ff;
 
   display: none;
 
