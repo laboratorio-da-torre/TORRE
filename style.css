@@ -3,37 +3,60 @@
 }
 
 
-/* =========================
-   PÁGINA
-   ========================= */
-
 html,
 body {
+
   margin: 0;
   padding: 0;
 
-  background: #0057ff;
+  background: #001eff;
+
   color: white;
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
 }
 
 
 /* =========================
-   TÍTULO
+   HEADER
    ========================= */
 
-body::before {
-  content: "log/torre";
+#header {
 
-  display: block;
+  width: 80vw;
 
-  margin: 20px;
+  margin: 20px auto 40px;
 
-  font-size: 18px;
-  line-height: 1;
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+}
+
+
+#header a {
 
   color: white;
+
+  text-decoration: none;
+
+  font-size: 18px;
+
+  line-height: 1;
+
+}
+
+
+#header a:hover {
+
+  opacity: 0.5;
+
 }
 
 
@@ -45,9 +68,8 @@ body::before {
 
   width: 80vw;
 
-  margin: 40px auto;
+  margin: 0 auto;
 
-  position: relative;
 }
 
 
@@ -59,12 +81,26 @@ body::before {
 
   width: 100%;
 
+}
+
+
+/* =========================
+   CADA ROW
+   ========================= */
+
+.archive-row {
+
+  position: relative;
+
+  width: 100%;
+
   display: grid;
 
   grid-template-columns:
-    repeat(6, minmax(0, 1fr));
+    repeat(var(--columns), minmax(0, 1fr));
 
-  align-items: start;
+  align-items: stretch;
+
 }
 
 
@@ -76,59 +112,65 @@ body::before {
 
   min-width: 0;
 
+  min-height: 1.5cm;
+
   border-right: 2px solid black;
+
   border-bottom: 2px solid black;
 
   background: white;
+
+  color: white;
 
   padding: 6px;
 
   font-size: 14px;
 
-  color: white;
-
   outline: none;
 
   overflow: hidden;
 
-  min-height: 1.5cm;
-
   word-break: break-word;
+
 }
 
 
-/* primeira célula de cada linha */
+.cell:first-child {
 
-.cell:nth-child(6n + 1) {
   border-left: 2px solid black;
+
 }
 
 
-/* primeira linha */
+.archive-row:first-child .cell {
 
-.cell:nth-child(-n + 6) {
   border-top: 2px solid black;
+
 }
 
 
 /* =========================
-   CÉLULA DE IMAGEM
+   IMAGEM
    ========================= */
 
-.image-cell img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: contain;
-  transition: transform 0.2s ease;
+.image-cell {
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: center;
+
+  background: white;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
 }
 
-.image-cell:hover img {
-  transform: scale(1.03);
-}
-
-/* imagem */
 
 .image-cell img {
 
@@ -143,12 +185,10 @@ body::before {
   object-fit: contain;
 
   transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
+    transform 0.2s ease;
+
 }
 
-
-/* pequeno efeito ao passar o rato */
 
 .image-cell:hover img {
 
@@ -158,7 +198,112 @@ body::before {
 
 
 /* =========================
-   IMAGEM AMPLIADA
+   BOTÃO X
+   ========================= */
+
+.delete-row {
+
+  position: absolute;
+
+  left: calc(100% + 8px);
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  border: 0;
+
+  background: transparent;
+
+  padding: 0;
+
+  margin: 0;
+
+  color: white;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 18px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+}
+
+
+.delete-row:hover {
+
+  opacity: 0.5;
+
+}
+
+
+/* =========================
+   CONTROLOS
+   ========================= */
+
+#controls {
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-top: 10px;
+
+}
+
+
+#controls button {
+
+  border: 0;
+
+  background: transparent;
+
+  color: white;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  cursor: pointer;
+
+  padding: 0;
+
+}
+
+
+#add-row {
+
+  font-size: 24px;
+
+}
+
+
+#add-column {
+
+  font-size: 14px;
+
+}
+
+
+#controls button:hover {
+
+  opacity: 0.5;
+
+}
+
+
+/* =========================
+   VISUALIZADOR
    ========================= */
 
 #image-viewer {
@@ -168,13 +313,15 @@ body::before {
   inset: 0;
 
   width: 100vw;
+
   height: 100vh;
 
-  background: #0057ff;
+  background: #001eff;
 
   display: none;
 
   align-items: center;
+
   justify-content: center;
 
   z-index: 9999;
@@ -182,60 +329,29 @@ body::before {
   cursor: pointer;
 
   overflow: hidden;
+
 }
 
 
-/* imagem ampliada */
+#image-viewer.open {
 
-#image-viewer img {
+  display: flex;
+
+}
+
+
+#viewer-image {
 
   max-width: 95vw;
 
   max-height: 95vh;
 
   width: auto;
+
   height: auto;
 
   object-fit: contain;
 
   transform: scale(1.4);
-
-  transform-origin: center center;
-}
-
-
-/* =========================
-   BOTÃO +
-   ========================= */
-
-#add-row {
-
-  display: block;
-
-  margin-left: auto;
-
-  margin-top: 8px;
-
-  border: none;
-
-  background: transparent;
-
-  padding: 0;
-
-  font-family: Arial, Helvetica, sans-serif;
-
-  font-size: 22px;
-
-  line-height: 1;
-
-  color: white;
-
-  cursor: pointer;
-}
-
-
-#add-row:hover {
-
-  opacity: 0.5;
 
 }
