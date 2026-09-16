@@ -413,6 +413,12 @@ function createRowElement(
 
         cell.tabIndex = 0;
 
+        cell.contentEditable = "false";
+
+  cell.setAttribute("role", "button");
+  cell.setAttribute("aria-label", "Colar imagem");
+
+
 
         if (
           data &&
