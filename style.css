@@ -18,7 +18,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
   color: #0000ff;
 }
@@ -37,16 +38,19 @@ button {
 
 #header {
   width: 100%;
-  padding: 16px 20px;
+  padding: 18px 24px;
+
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+
   position: relative;
   z-index: 20;
 }
 
 #menu-button {
   color: #0000ff;
+  font-size: 16px;
 }
 
 #menu-button:hover {
@@ -56,6 +60,7 @@ button {
 #laboratorio-link {
   color: #0000ff;
   text-decoration: none;
+  font-size: 16px;
 }
 
 #laboratorio-link:hover {
@@ -69,14 +74,19 @@ button {
 
 #menu {
   display: none;
+
   position: absolute;
-  top: 42px;
-  left: 20px;
+  top: 48px;
+  left: 24px;
+
   background: #ffffff;
   border: 1px solid #0000ff;
+
   padding: 8px 12px;
+
   flex-direction: column;
   align-items: flex-start;
+
   z-index: 100;
 }
 
@@ -102,7 +112,7 @@ button {
 
 main {
   width: 100%;
-  padding: 35px 20px 120px 20px;
+  padding: 35px 24px 120px;
 }
 
 #category-title {
@@ -116,14 +126,17 @@ main {
 
 #archive-section {
   width: 80vw;
-  max-width: none;
+  margin: 0 auto;
 }
 
 #archive-wrapper {
   width: 100%;
+
   overflow-x: auto;
   overflow-y: visible;
+
   padding-left: 58px;
+  padding-right: 40px;
 }
 
 #archive {
@@ -138,7 +151,9 @@ main {
 
 .archive-row {
   position: relative;
+
   display: grid;
+
   width: max-content;
   min-width: 100%;
 }
@@ -149,11 +164,15 @@ main {
 
 .cell {
   position: relative;
+
   min-width: 40px;
   min-height: 1.5cm;
-  padding: 7px 8px 6px 8px;
+
+  padding: 7px 8px 6px;
+
   border-right: 1px solid #0000ff;
   border-bottom: 1px solid #0000ff;
+
   overflow: visible;
 }
 
@@ -168,21 +187,26 @@ main {
 
 .row-number {
   position: absolute;
+
   right: calc(100% + 10px);
   top: 0;
 
   width: 42px;
+  height: 100%;
   min-height: 1.5cm;
 
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
 
-  padding: 7px 0 6px 0;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
 
   color: #0000ff;
+
   font-size: 14px;
   font-weight: 700;
+
   line-height: 1;
 
   white-space: nowrap;
@@ -200,10 +224,13 @@ main {
 
 .image-cell img {
   display: block;
+
   width: 100%;
   height: auto;
   max-width: 100%;
+
   object-fit: contain;
+
   transition: transform 0.15s ease;
 }
 
@@ -224,6 +251,7 @@ main {
 
 .column-resize-handle {
   position: absolute;
+
   top: 0;
   right: -5px;
 
@@ -231,6 +259,7 @@ main {
   height: 100%;
 
   cursor: col-resize;
+
   z-index: 50;
 }
 
@@ -247,8 +276,9 @@ main {
    DELETE ROW
 ========================= */
 
-.row-delete {
+.delete-row {
   position: absolute;
+
   left: calc(100% + 10px);
   top: 0;
 
@@ -256,23 +286,23 @@ main {
   height: 100%;
 
   display: flex;
-  align-items: flex-start;
+
+  align-items: center;
   justify-content: center;
 
-  padding-top: 7px;
+  padding: 0;
 
   color: #0000ff;
+
   font-size: 14px;
   line-height: 1;
 
   cursor: pointer;
 
-  /* IMPORTANT:
-     does not participate in the grid */
   z-index: 20;
 }
 
-.row-delete:hover {
+.delete-row:hover {
   text-decoration: underline;
 }
 
@@ -284,6 +314,7 @@ main {
 #row-controls,
 #column-controls {
   margin-top: 12px;
+
   display: flex;
   gap: 14px;
 }
@@ -310,38 +341,61 @@ main {
 
 #logs-section {
   position: fixed;
-  left: 20px;
-  bottom: 18px;
 
-  width: 360px;
+  left: 24px;
+  bottom: 20px;
+
+  width: 500px;
 
   background: #ffffff;
+
+  border: 1px solid #0000ff;
+
+  padding: 12px;
+
   z-index: 30;
 }
 
 #logs-title {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  font-size: 16px;
 }
 
 #log-form {
   display: grid;
-  grid-template-columns: 105px 50px 1fr 24px;
-  gap: 6px;
-  margin-bottom: 8px;
+
+  grid-template-columns: 105px 55px 1fr 24px;
+
+  gap: 7px;
+
+  margin-bottom: 12px;
 }
 
-#log-form input {
+#log-form input,
+#log-form textarea {
   border: 0;
   border-bottom: 1px solid #0000ff;
+
   border-radius: 0;
+
   outline: none;
+
   background: transparent;
-  padding: 2px 0;
+
+  padding: 4px 0;
+
   min-width: 0;
+
+  resize: vertical;
+}
+
+#log-note {
+  min-height: 65px;
 }
 
 #log-form button {
   text-align: center;
+  align-self: end;
 }
 
 #log-form button:hover {
@@ -350,28 +404,38 @@ main {
 
 .log-entry {
   display: flex;
+
   gap: 8px;
+
   align-items: flex-start;
-  margin-bottom: 4px;
+
+  margin-bottom: 5px;
 }
 
-.log-date {
+.log-meta {
+  display: flex;
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.log-date-display {
   width: 80px;
-  flex-shrink: 0;
 }
 
-.log-number {
-  width: 30px;
-  flex-shrink: 0;
+.log-number-display {
+  width: 36px;
 }
 
-.log-note {
+.log-note-display {
   flex: 1;
 }
 
 .delete-log {
   width: 18px;
+
   flex-shrink: 0;
+
   cursor: pointer;
 }
 
@@ -389,6 +453,7 @@ main {
   inset: 0;
 
   display: none;
+
   align-items: center;
   justify-content: center;
 
@@ -404,7 +469,10 @@ main {
 #viewer-image {
   max-width: 90vw;
   max-height: 90vh;
+
   object-fit: contain;
+
+  transform: scale(1.4);
 }
 
 
@@ -414,13 +482,13 @@ main {
 
 #footer {
   width: 100%;
+
   padding: 20px;
 
   display: flex;
+
   justify-content: center;
   align-items: center;
-
-  border: 0;
 }
 
 #footer a {
@@ -443,8 +511,9 @@ main {
     padding: 14px;
   }
 
+  #menu-button,
   #laboratorio-link {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   main {
@@ -454,6 +523,7 @@ main {
 
   #archive-wrapper {
     padding-left: 48px;
+    padding-right: 30px;
   }
 
   #archive-section {
@@ -462,6 +532,12 @@ main {
 
   #logs-section {
     left: 14px;
+    bottom: 14px;
+
     width: calc(100vw - 28px);
+  }
+
+  #log-form {
+    grid-template-columns: 90px 50px 1fr 24px;
   }
 }
