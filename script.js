@@ -1,2348 +1,1130 @@
-const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co";
+const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
 
-const SUPABASE_KEY =
-  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+const GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1FO_BRYjuPgpVs3tVaeioE1YjDGEBtgrS5776_Q9-12I/edit?gid=1510436497#gid=1510436497S";
 
-const BUCKET =
-  "images";
-
-
-/* =========================================================
-   GOOGLE SHEETS
-========================================================= */
-
-const GOOGLE_SHEETS_URL =
-  "COLOCA_AQUI_O_LINK_DO_GOOGLE_SHEETS";
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 
-/* =========================================================
-   ELEMENTOS
-========================================================= */
-
-const grid =
-  document.getElementById("grid");
-
-const addRowButton =
-  document.getElementById("add-row");
-
-const removeRowButton =
-  document.getElementById("remove-row");
-
-const addColumnButton =
-  document.getElementById("add-column");
-
-const removeColumnButton =
-  document.getElementById("remove-column");
-
-const viewer =
-  document.getElementById("image-viewer");
-
-const viewerImage =
-  document.getElementById("viewer-image");
-
-const torreTitle =
-  document.getElementById("torre-title");
-
-const categoryMenu =
-  document.getElementById("category-menu");
-
-const categoryTitle =
-  document.getElementById("category-title");
-
-const imageFileInput =
-  document.getElementById("image-file-input");
-
-const logPanel =
-  document.getElementById("log-panel");
-
-const logList =
-  document.getElementById("log-list");
-
-const logForm =
-  document.getElementById("log-form");
-
-const logDate =
-  document.getElementById("log-date");
-
-const logNumber =
-  document.getElementById("log-number");
-
-const logNote =
-  document.getElementById("log-note");
-
-const toggleLog =
-  document.getElementById("toggle-log");
-
-const sheetsLink =
-  document.getElementById("sheets-link");
-
-
-/* =========================================================
-   ESTADO
-========================================================= */
+/* =========================
+   STATE
+========================= */
 
 let categories = [];
-
-let columns = [];
-
-let rows = [];
-
 let currentCategory = null;
 
+let columns = [];
+let rows = [];
+let logs = [];
 
-/* =========================================================
-   SUPABASE REQUEST
-========================================================= */
+let selectedImageCell = null;
+let resizing = null;
 
-async function supabaseRequest(
-  endpoint,
-  options = {}
-) {
 
-  const url =
-    `${SUPABASE_URL}/rest/v1/${endpoint}`;
+/* =========================
+   ELEMENTS
+========================= */
 
-  console.log(
-    "TORRE REQUEST:",
-    url
-  );
+const menuButton = document.getElementById("menu-button");
+const menu = document.getElementById("menu");
 
-  const response =
-    await fetch(
-      url,
-      {
-        ...options,
+const categoryTitle = document.getElementById("category-title");
+const archive = document.getElementById("archive");
 
-        headers: {
-          "apikey":
-            SUPABASE_KEY,
+const addRowButton = document.getElementById("add-row");
+const removeRowButton = document.getElementById("remove-row");
 
-          "Authorization":
-            `Bearer ${SUPABASE_KEY}`,
+const addColumnButton = document.getElementById("add-column");
+const removeColumnButton = document.getElementById("remove-column");
 
-          "Content-Type":
-            "application/json",
+const fileInput = document.getElementById("file-input");
 
-          ...(options.headers || {})
-        }
+const imageViewer = document.getElementById("image-viewer");
+const viewerImage = document.getElementById("viewer-image");
+
+const sheetsLink = document.getElementById("sheets-link");
+
+const logDate = document.getElementById("log-date");
+const logNumber = document.getElementById("log-number");
+const logNote = document.getElementById("log-note");
+const saveLogButton = document.getElementById("save-log");
+const logsContainer = document.getElementById("logs");
+
+
+/* =========================
+   INITIALISE
+========================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  sheetsLink.href = GOOGLE_SHEETS_URL;
+
+  menuButton.addEventListener("click", () => {
+    menu.classList.toggle("open");
+  });
+
+  document.querySelectorAll(".category-button").forEach(button => {
+    button.addEventListener("click", async () => {
+
+      const slug = button.dataset.category;
+
+      menu.classList.remove("open");
+
+      const category = categories.find(
+        item => item.slug === slug
+      );
+
+      if (category) {
+        await selectCategory(category);
       }
-    );
+    });
+  });
 
-  if (!response.ok) {
+  addRowButton.addEventListener("click", addRow);
+  removeRowButton.addEventListener("click", removeRow);
 
-    const error =
-      await response.text();
+  addColumnButton.addEventListener("click", addColumn);
+  removeColumnButton.addEventListener("click", removeColumn);
 
-    console.error(
-      "TORRE SUPABASE ERROR:",
-      response.status,
-      url,
-      error
-    );
+  saveLogButton.addEventListener("click", saveLog);
 
-    throw new Error(
-      error
-    );
-  }
+  fileInput.addEventListener("change", handleFileInput);
 
-  return response;
-}
+  imageViewer.addEventListener("click", closeImageViewer);
+
+  document.addEventListener("mousemove", handleResizeMove);
+  document.addEventListener("mouseup", handleResizeEnd);
+
+  await loadCategories();
+});
 
 
-/* =========================================================
-   CATEGORIAS
-========================================================= */
+/* =========================
+   CATEGORIES
+========================= */
 
 async function loadCategories() {
 
-  const response =
-    await supabaseRequest(
-      "torre_categories?select=*&order=position.asc"
-    );
+  const { data, error } = await supabaseClient
+    .from("torre_categories")
+    .select("*")
+    .order("position", { ascending: true });
 
-  categories =
-    await response.json();
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  categories = data || [];
 
   if (!categories.length) {
-
-    throw new Error(
-      "Não existem categorias no Supabase."
-    );
+    showError("Não existem categorias.");
+    return;
   }
+
+  await selectCategory(categories[0]);
 }
 
 
-function renderCategoryMenu() {
+async function selectCategory(category) {
 
-  categoryMenu.innerHTML =
-    "";
+  currentCategory = category;
 
-  categories.forEach(
-    category => {
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-      button.className =
-        "category-button";
-
-      button.textContent =
-        category.name;
-
-      button.addEventListener(
-        "click",
-        async function() {
-
-          categoryMenu.classList.remove(
-            "open"
-          );
-
-          await selectCategory(
-            category
-          );
-        }
-      );
-
-      categoryMenu.appendChild(
-        button
-      );
-    }
-  );
-}
-
-
-/* =========================================================
-   SELECCIONAR CATEGORIA
-========================================================= */
-
-async function selectCategory(
-  category
-) {
-
-  currentCategory =
-    category;
-
-  categoryTitle.textContent =
-    category.name;
-
-  columns = [];
-
-  rows = [];
+  categoryTitle.textContent = category.name;
 
   await loadColumns();
-
-  await loadRows();
-
   await ensureRows();
-
-  await render();
-
+  await loadRows();
   await loadLogs();
 
-  setTodayAsDefaultDate();
+  render();
 }
 
 
-/* =========================================================
-   COLUNAS
-========================================================= */
+/* =========================
+   COLUMNS
+========================= */
 
 async function loadColumns() {
 
-  const response =
-    await supabaseRequest(
-      `torre_columns?select=*` +
-      `&category_id=eq.${currentCategory.id}` +
-      `&order=position.asc`
-    );
+  const { data, error } = await supabaseClient
+    .from("torre_columns")
+    .select("*")
+    .eq("category_id", currentCategory.id)
+    .order("position", { ascending: true });
 
-  columns =
-    await response.json();
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  columns = data || [];
 
   if (!columns.length) {
 
-    for (
-      let i = 0;
-      i < 6;
-      i++
-    ) {
-
-      const response =
-        await supabaseRequest(
-          "torre_columns",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Prefer":
-                "return=representation"
-            },
-
-            body:
-              JSON.stringify({
-                category_id:
-                  currentCategory.id,
-
-                position:
-                  i,
-
-                width_px:
-                  180
-              })
-          }
-        );
-
-      const inserted =
-        await response.json();
-
-      columns.push(
-        inserted[0]
-      );
-    }
-  }
-
-  columns =
-    columns.map(
-      column => ({
-        ...column,
-
-        width_px:
-          Number(
-            column.width_px
-          ) || 180
+    const newColumns = Array.from(
+      { length: 6 },
+      (_, index) => ({
+        category_id: currentCategory.id,
+        position: index,
+        width_px: 180
       })
     );
+
+    const { data: inserted, error: insertError } =
+      await supabaseClient
+        .from("torre_columns")
+        .insert(newColumns)
+        .select();
+
+    if (insertError) {
+      showError(insertError);
+      return;
+    }
+
+    columns = inserted || [];
+  }
+
+  columns = columns
+    .sort((a, b) => a.position - b.position)
+    .map(column => ({
+      ...column,
+      width_px: Number(column.width_px) || 180
+    }));
 }
 
 
-/* =========================================================
-   LINHAS
-========================================================= */
-
-async function loadRows() {
-
-  const response =
-    await supabaseRequest(
-      `torre_rows?select=*` +
-      `&category_id=eq.${currentCategory.id}` +
-      `&order=position.asc`
-    );
-
-  rows =
-    await response.json();
-}
-
+/* =========================
+   ROWS
+========================= */
 
 async function ensureRows() {
 
-  if (
-    rows.length >= 20
-  ) {
+  const { count, error } = await supabaseClient
+    .from("torre_rows")
+    .select("*", {
+      count: "exact",
+      head: true
+    })
+    .eq("category_id", currentCategory.id);
+
+  if (error) {
+    showError(error);
     return;
   }
 
-  const missing =
-    20 - rows.length;
-
-  for (
-    let i = 0;
-    i < missing;
-    i++
-  ) {
-    await createRow();
+  if (count && count > 0) {
+    return;
   }
 
-  await loadRows();
-}
-
-
-/* =========================================================
-   CRIAR LINHA
-========================================================= */
-
-async function createRow() {
-
-  const existingNumbers =
-    rows
-      .map(
-        row =>
-          Number(
-            row.inventory_number
-          )
-      )
-      .filter(
-        number =>
-          Number.isFinite(
-            number
-          )
-      );
-
-  const highestNumber =
-    existingNumbers.length
-      ? Math.max(
-          ...existingNumbers
-        )
-      : 0;
-
-  const inventoryNumber =
-    highestNumber + 1;
-
-  const position =
-    rows.length;
-
-
-  const response =
-    await supabaseRequest(
-      "torre_rows",
-      {
-        method:
-          "POST",
-
-        headers: {
-          "Prefer":
-            "return=representation"
-        },
-
-        body:
-          JSON.stringify({
-            category_id:
-              currentCategory.id,
-
-            position,
-
-            inventory_number:
-              inventoryNumber
-          })
-      }
-    );
-
-
-  const inserted =
-    await response.json();
-
-  const row =
-    inserted[0];
-
-  rows.push(
-    row
+  const newRows = Array.from(
+    { length: 20 },
+    (_, index) => ({
+      category_id: currentCategory.id,
+      position: index,
+      inventory_number: index + 1
+    })
   );
 
+  const { data: insertedRows, error: insertError } =
+    await supabaseClient
+      .from("torre_rows")
+      .insert(newRows)
+      .select();
 
-  for (
-    const column of columns
-  ) {
-
-    await supabaseRequest(
-      "torre_cells",
-      {
-        method:
-          "POST",
-
-        body:
-          JSON.stringify({
-            row_id:
-              row.id,
-
-            column_id:
-              column.id,
-
-            value:
-              null
-          })
-      }
-    );
+  if (insertError) {
+    showError(insertError);
+    return;
   }
 
-  return row;
+  const cells = [];
+
+  (insertedRows || []).forEach(row => {
+    columns.forEach(column => {
+      cells.push({
+        row_id: row.id,
+        column_id: column.id,
+        value: ""
+      });
+    });
+  });
+
+  if (cells.length) {
+
+    const { error: cellError } =
+      await supabaseClient
+        .from("torre_cells")
+        .insert(cells);
+
+    if (cellError) {
+      showError(cellError);
+    }
+  }
 }
 
 
-/* =========================================================
-   CELLS
-========================================================= */
+async function loadRows() {
 
-async function loadCells() {
+  const { data: rowData, error: rowError } =
+    await supabaseClient
+      .from("torre_rows")
+      .select("*")
+      .eq("category_id", currentCategory.id)
+      .order("position", { ascending: true });
 
-  const response =
-    await supabaseRequest(
-      "torre_cells?select=*"
-    );
+  if (rowError) {
+    showError(rowError);
+    return;
+  }
 
-  return await response.json();
+  const { data: cellData, error: cellError } =
+    await supabaseClient
+      .from("torre_cells")
+      .select("*");
+
+  if (cellError) {
+    showError(cellError);
+    return;
+  }
+
+  rows = (rowData || []).map(row => {
+
+    const rowCells = {};
+
+    (cellData || [])
+      .filter(cell => cell.row_id === row.id)
+      .forEach(cell => {
+        rowCells[cell.column_id] = cell;
+      });
+
+    return {
+      ...row,
+      cells: rowCells
+    };
+  });
 }
 
 
-/* =========================================================
+/* =========================
    RENDER
-========================================================= */
+========================= */
 
-async function render() {
+function render() {
 
-  const cells =
-    await loadCells();
+  archive.innerHTML = "";
 
-  grid.innerHTML =
-    "";
+  const template = getColumnTemplate();
 
-  const cellMap =
-    new Map();
+  rows.forEach((row, rowIndex) => {
 
+    const rowElement = document.createElement("div");
 
-  cells.forEach(
-    cell => {
+    rowElement.className = "archive-row";
 
-      cellMap.set(
-        `${cell.row_id}-${cell.column_id}`,
-        cell
-      );
-    }
-  );
+    rowElement.dataset.rowId = row.id;
 
+    rowElement.style.gridTemplateColumns = template;
 
-  rows.forEach(
-    (
-      row,
-      rowIndex
-    ) => {
+    /* number OUTSIDE the grid */
+    const numberElement = document.createElement("div");
 
-      createRowElement(
-        row,
-        rowIndex,
-        cellMap
-      );
-    }
-  );
-}
+    numberElement.className = "row-number";
+    numberElement.textContent =
+      String(row.inventory_number).padStart(3, "0");
+
+    rowElement.appendChild(numberElement);
 
 
-/* =========================================================
-   ROW ELEMENT
-========================================================= */
+    columns.forEach((column, columnIndex) => {
 
-function createRowElement(
-  row,
-  rowIndex,
-  cellMap
-) {
+      const cell = document.createElement("div");
 
-  const rowElement =
-    document.createElement(
-      "div"
-    );
+      cell.className = "cell";
 
-  rowElement.className =
-    "archive-row";
+      cell.dataset.rowId = row.id;
+      cell.dataset.columnId = column.id;
 
 
-  /*
-   * Larguras das colunas
-   */
+      if (columnIndex === 0) {
 
-  rowElement.style.gridTemplateColumns =
-    columns
-      .map(
-        column =>
-          `${column.width_px || 180}px`
-      )
-      .join(" ");
+        cell.classList.add("image-cell");
 
+        const value = row.cells[column.id]?.value || "";
 
-  /*
-   * Número
-   */
-
-  const number =
-    document.createElement(
-      "div"
-    );
-
-  number.className =
-    "row-number";
-
-  number.textContent =
-    String(
-      row.inventory_number
-    ).padStart(
-      3,
-      "0"
-    );
-
-  rowElement.appendChild(
-    number
-  );
-
-
-  /*
-   * Colunas
-   */
-
-  columns.forEach(
-    (
-      column,
-      columnIndex
-    ) => {
-
-      const cell =
-        document.createElement(
-          "div"
-        );
-
-      cell.className =
-        "cell";
-
-
-      const data =
-        cellMap.get(
-          `${row.id}-${column.id}`
-        );
-
-
-      /*
-       * PRIMEIRA COLUNA = IMAGEM
-       */
-
-      if (
-        columnIndex === 0
-      ) {
-
-        cell.classList.add(
-          "image-cell"
-        );
-
-        cell.contentEditable =
-          "false";
-
-        cell.tabIndex =
-          0;
-
-        cell.setAttribute(
-          "role",
-          "button"
-        );
-
-
-        if (
-          data &&
-          data.value
-        ) {
-
-          createImage(
-            data.value,
-            cell
-          );
-
+        if (value) {
+          createImage(cell, value);
         } else {
-
-          createImagePlaceholder(
-            cell,
-            row.id,
-            column.id
-          );
+          createImagePlaceholder(cell, row.id, column.id);
         }
-
-
-        cell.addEventListener(
-          "paste",
-          function(event) {
-
-            handleImagePaste(
-              event,
-              cell,
-              row.id,
-              column.id
-            );
-          }
-        );
-
-
-        cell.addEventListener(
-          "click",
-          function(event) {
-
-            const image =
-              cell.querySelector(
-                "img"
-              );
-
-            if (image) {
-
-              openImage(
-                image.src
-              );
-
-              return;
-            }
-
-            event.preventDefault();
-
-            openFilePicker(
-              row.id,
-              column.id,
-              cell
-            );
-          }
-        );
-
 
       } else {
 
-        /*
-         * TEXTO
-         */
+        const value =
+          row.cells[column.id]?.value || "";
 
-        cell.contentEditable =
-          "true";
+        cell.contentEditable = "true";
+        cell.textContent = value;
 
-        cell.textContent =
-          data?.value || "";
-
-
-        cell.addEventListener(
-          "blur",
-          async function() {
-
-            await saveCell(
-              row.id,
-              column.id,
-              cell.textContent
-            );
-          }
-        );
-
-
-        cell.addEventListener(
-          "keydown",
-          function(event) {
-
-            if (
-              event.key === "Enter"
-            ) {
-
-              event.preventDefault();
-
-              cell.blur();
-            }
-          }
-        );
-      }
-
-
-      /*
-       * Resize handle
-       */
-
-      if (
-        rowIndex === 0 &&
-        columnIndex <
-          columns.length - 1
-      ) {
-
-        createResizeHandle(
-          cell,
-          column,
-          rowElement
-        );
-      }
-
-
-      rowElement.appendChild(
-        cell
-      );
-    }
-  );
-
-
-  /*
-   * APAGAR LINHA
-   */
-
-  const deleteButton =
-    document.createElement(
-      "button"
-    );
-
-  deleteButton.className =
-    "delete-row";
-
-  deleteButton.textContent =
-    "×";
-
-  deleteButton.setAttribute(
-    "aria-label",
-    "Apagar linha"
-  );
-
-
-  deleteButton.addEventListener(
-    "click",
-    async function(event) {
-
-      event.stopPropagation();
-
-      const confirmed =
-        confirm(
-          "Apagar esta linha?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      await deleteRow(
-        row.id
-      );
-    }
-  );
-
-
-  rowElement.appendChild(
-    deleteButton
-  );
-
-  grid.appendChild(
-    rowElement
-  );
-}
-
-
-/* =========================================================
-   RESIZE COLUMN
-========================================================= */
-
-function createResizeHandle(
-  cell,
-  column,
-  rowElement
-) {
-
-  const handle =
-    document.createElement(
-      "div"
-    );
-
-  handle.className =
-    "column-resize-handle";
-
-
-  cell.appendChild(
-    handle
-  );
-
-
-  let startX = 0;
-
-  let startWidth = 0;
-
-
-  handle.addEventListener(
-    "pointerdown",
-    function(event) {
-
-      event.preventDefault();
-
-      event.stopPropagation();
-
-
-      startX =
-        event.clientX;
-
-
-      startWidth =
-        Number(
-          column.width_px
-        ) ||
-        cell.getBoundingClientRect()
-          .width;
-
-
-      handle.setPointerCapture(
-        event.pointerId
-      );
-
-
-      function move(
-        moveEvent
-      ) {
-
-        const delta =
-          moveEvent.clientX -
-          startX;
-
-
-        const newWidth =
-          Math.max(
-            80,
-            Math.round(
-              startWidth +
-              delta
-            )
+        cell.addEventListener("blur", async () => {
+          await saveCell(
+            row.id,
+            column.id,
+            cell.textContent
           );
-
-
-        column.width_px =
-          newWidth;
-
-
-        rowElement.style.gridTemplateColumns =
-          columns
-            .map(
-              item =>
-                `${item.width_px || 180}px`
-            )
-            .join(" ");
+        });
       }
 
 
-      async function end() {
+      /* resize handles */
+      if (columnIndex < columns.length - 1) {
 
-        handle.removeEventListener(
-          "pointermove",
-          move
+        const handle = createResizeHandle(
+          column.id,
+          columnIndex
         );
 
-        handle.removeEventListener(
-          "pointerup",
-          end
-        );
-
-
-        try {
-
-          await supabaseRequest(
-            `torre_columns?id=eq.${column.id}`,
-            {
-              method:
-                "PATCH",
-
-              headers: {
-                "Prefer":
-                  "return=minimal"
-              },
-
-              body:
-                JSON.stringify({
-                  width_px:
-                    column.width_px
-                })
-            }
-          );
-
-        } catch (error) {
-
-          console.error(
-            error
-          );
-        }
+        cell.appendChild(handle);
       }
 
 
-      handle.addEventListener(
-        "pointermove",
-        move
-      );
-
-      handle.addEventListener(
-        "pointerup",
-        end
-      );
-    }
-  );
-}
+      rowElement.appendChild(cell);
+    });
 
 
-/* =========================================================
-   IMAGE PLACEHOLDER
-========================================================= */
+    /* delete button is NOT part of grid */
+    const deleteButton = document.createElement("button");
 
-function createImagePlaceholder(
-  cell,
-  rowId,
-  columnId
-) {
+    deleteButton.className = "row-delete";
+    deleteButton.textContent = "×";
 
-  const placeholder =
-    document.createElement(
-      "div"
-    );
-
-  placeholder.className =
-    "image-placeholder";
-
-  placeholder.textContent =
-    ">img<";
-
-
-  placeholder.addEventListener(
-    "click",
-    function(event) {
-
+    deleteButton.addEventListener("click", async event => {
       event.stopPropagation();
+      await deleteRow(row.id);
+    });
 
-      openFilePicker(
-        rowId,
-        columnId,
-        cell
-      );
-    }
-  );
+    rowElement.appendChild(deleteButton);
 
 
-  cell.appendChild(
-    placeholder
-  );
+    archive.appendChild(rowElement);
+  });
+
+  applyColumnWidths();
+
+  renderLogs();
 }
 
 
-/* =========================================================
-   FILE PICKER
-========================================================= */
+/* =========================
+   COLUMN WIDTHS
+========================= */
 
-function openFilePicker(
-  rowId,
-  columnId,
-  cell
-) {
+function getColumnTemplate() {
 
-  imageFileInput.dataset.rowId =
-    rowId;
-
-  imageFileInput.dataset.columnId =
-    columnId;
-
-  imageFileInput._targetCell =
-    cell;
-
-  imageFileInput.click();
+  return columns
+    .map(column => {
+      const width = Number(column.width_px) || 180;
+      return `${width}px`;
+    })
+    .join(" ");
 }
 
 
-imageFileInput.addEventListener(
-  "change",
-  async function() {
+/*
+  IMPORTANT:
+  Apply the same column widths to EVERY row.
+*/
+function applyColumnWidths() {
 
-    const file =
-      imageFileInput.files[0];
+  const template = getColumnTemplate();
 
-    if (!file) {
-      return;
-    }
-
-
-    const rowId =
-      imageFileInput.dataset.rowId;
-
-    const columnId =
-      imageFileInput.dataset.columnId;
-
-    const cell =
-      imageFileInput._targetCell;
+  document
+    .querySelectorAll(".archive-row")
+    .forEach(row => {
+      row.style.gridTemplateColumns = template;
+    });
+}
 
 
-    try {
+/* =========================
+   RESIZING
+========================= */
 
-      const optimized =
-        await optimizeImage(
-          file
-        );
+function createResizeHandle(columnId, columnIndex) {
 
+  const handle = document.createElement("div");
 
-      const imageUrl =
-        await uploadImage(
-          optimized
-        );
+  handle.className = "column-resize-handle";
 
-
-      await saveCell(
-        rowId,
-        columnId,
-        imageUrl
-      );
-
-
-      createImage(
-        imageUrl,
-        cell
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao carregar a imagem."
-      );
-    }
-
-
-    imageFileInput.value =
-      "";
-  }
-);
-
-
-/* =========================================================
-   PASTE IMAGE
-========================================================= */
-
-async function handleImagePaste(
-  event,
-  cell,
-  rowId,
-  columnId
-) {
-
-  const items =
-    event.clipboardData.items;
-
-
-  for (
-    const item of items
-  ) {
-
-    if (
-      !item.type.startsWith(
-        "image/"
-      )
-    ) {
-      continue;
-    }
-
+  handle.addEventListener("mousedown", event => {
 
     event.preventDefault();
-
-
-    const file =
-      item.getAsFile();
-
-
-    if (!file) {
-      return;
-    }
-
-
-    try {
-
-      const optimized =
-        await optimizeImage(
-          file
-        );
-
-
-      const imageUrl =
-        await uploadImage(
-          optimized
-        );
-
-
-      await saveCell(
-        rowId,
-        columnId,
-        imageUrl
-      );
-
-
-      createImage(
-        imageUrl,
-        cell
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao carregar a imagem."
-      );
-    }
-
-
-    break;
-  }
-}
-
-
-/* =========================================================
-   IMAGE
-========================================================= */
-
-function createImage(
-  src,
-  cell
-) {
-
-  const image =
-    document.createElement(
-      "img"
-    );
-
-  image.src =
-    src;
-
-  image.alt =
-    "Imagem";
-
-
-  image.addEventListener(
-    "click",
-    function(event) {
-
-      event.stopPropagation();
-
-      openImage(
-        image.src
-      );
-    }
-  );
-
-
-  cell.innerHTML =
-    "";
-
-  cell.appendChild(
-    image
-  );
-}
-
-
-/* =========================================================
-   IMAGE OPTIMIZATION
-========================================================= */
-
-function optimizeImage(
-  file
-) {
-
-  return new Promise(
-    (
-      resolve,
-      reject
-    ) => {
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload =
-        function(event) {
-
-          const image =
-            new Image();
-
-
-          image.onload =
-            function() {
-
-              let width =
-                image.naturalWidth;
-
-              let height =
-                image.naturalHeight;
-
-
-              const MAX_SIZE =
-                2000;
-
-
-              if (
-                width > MAX_SIZE ||
-                height > MAX_SIZE
-              ) {
-
-                const ratio =
-                  Math.min(
-                    MAX_SIZE / width,
-                    MAX_SIZE / height
-                  );
-
-
-                width =
-                  Math.round(
-                    width * ratio
-                  );
-
-                height =
-                  Math.round(
-                    height * ratio
-                  );
-              }
-
-
-              const canvas =
-                document.createElement(
-                  "canvas"
-                );
-
-
-              canvas.width =
-                width;
-
-              canvas.height =
-                height;
-
-
-              const context =
-                canvas.getContext(
-                  "2d"
-                );
-
-
-              context.drawImage(
-                image,
-                0,
-                0,
-                width,
-                height
-              );
-
-
-              canvas.toBlob(
-                function(blob) {
-
-                  if (!blob) {
-
-                    reject(
-                      new Error(
-                        "Erro ao comprimir"
-                      )
-                    );
-
-                    return;
-                  }
-
-
-                  resolve(
-                    new File(
-                      [blob],
-                      "torre.jpg",
-                      {
-                        type:
-                          "image/jpeg"
-                      }
-                    )
-                  );
-                },
-
-                "image/jpeg",
-
-                0.85
-              );
-            };
-
-
-          image.onerror =
-            reject;
-
-
-          image.src =
-            event.target.result;
-        };
-
-
-      reader.onerror =
-        reject;
-
-
-      reader.readAsDataURL(
-        file
-      );
-    }
-  );
-}
-
-
-/* =========================================================
-   UPLOAD IMAGE
-========================================================= */
-
-async function uploadImage(
-  file
-) {
-
-  const filename =
-    `${Date.now()}-` +
-    `${Math.random()
-      .toString(36)
-      .substring(2)}.jpg`;
-
-
-  const response =
-    await fetch(
-      `${SUPABASE_URL}` +
-      `/storage/v1/object/` +
-      `${BUCKET}/${filename}`,
-
-      {
-        method:
-          "POST",
-
-        headers: {
-
-          "apikey":
-            SUPABASE_KEY,
-
-          "Authorization":
-            `Bearer ${SUPABASE_KEY}`,
-
-          "Content-Type":
-            "image/jpeg"
-        },
-
-        body:
-          file
-      }
-    );
-
-
-  if (!response.ok) {
-
-    const error =
-      await response.text();
-
-    console.error(
-      error
-    );
-
-    throw new Error(
-      "Upload falhou"
-    );
-  }
-
-
-  return (
-    `${SUPABASE_URL}` +
-    `/storage/v1/object/public/` +
-    `${BUCKET}/${filename}`
-  );
-}
-
-
-/* =========================================================
-   SAVE CELL
-========================================================= */
-
-async function saveCell(
-  rowId,
-  columnId,
-  value
-) {
-
-  await supabaseRequest(
-    `torre_cells?` +
-    `row_id=eq.${rowId}` +
-    `&column_id=eq.${columnId}`,
-
-    {
-      method:
-        "PATCH",
-
-      headers: {
-        "Prefer":
-          "return=minimal"
-      },
-
-      body:
-        JSON.stringify({
-          value
-        })
-    }
-  );
-}
-
-
-/* =========================================================
-   DELETE ROW
-========================================================= */
-
-async function deleteRow(
-  rowId
-) {
-
-  await supabaseRequest(
-    `torre_rows?id=eq.${rowId}`,
-    {
-      method:
-        "DELETE"
-    }
-  );
-
-
-  rows =
-    rows.filter(
-      row =>
-        row.id !== rowId
-    );
-
-
-  for (
-    let i = 0;
-    i < rows.length;
-    i++
-  ) {
-
-    await supabaseRequest(
-      `torre_rows?id=eq.${rows[i].id}`,
-
-      {
-        method:
-          "PATCH",
-
-        headers: {
-          "Prefer":
-            "return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-            position:
-              i
-          })
-      }
-    );
-  }
-
-
-  await loadRows();
-
-  await render();
-}
-
-
-/* =========================================================
-   ADD ROW
-========================================================= */
-
-addRowButton.addEventListener(
-  "click",
-  async function() {
-
-    try {
-
-      await createRow();
-
-      await loadRows();
-
-      await render();
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao criar linha."
-      );
-    }
-  }
-);
-
-
-/* =========================================================
-   REMOVE ROW
-========================================================= */
-
-removeRowButton.addEventListener(
-  "click",
-  async function() {
-
-    if (
-      rows.length <= 1
-    ) {
-
-      alert(
-        "É necessário manter pelo menos uma linha."
-      );
-
-      return;
-    }
-
-
-    const lastRow =
-      rows[
-        rows.length - 1
-      ];
-
-
-    const confirmed =
-      confirm(
-        "Apagar a última linha?"
-      );
-
-
-    if (!confirmed) {
-      return;
-    }
-
-
-    await deleteRow(
-      lastRow.id
-    );
-  }
-);
-
-
-/* =========================================================
-   ADD COLUMN
-========================================================= */
-
-async function addColumn() {
-
-  const position =
-    columns.length;
-
-
-  const response =
-    await supabaseRequest(
-      "torre_columns",
-      {
-        method:
-          "POST",
-
-        headers: {
-          "Prefer":
-            "return=representation"
-        },
-
-        body:
-          JSON.stringify({
-            category_id:
-              currentCategory.id,
-
-            position,
-
-            width_px:
-              180
-          })
-      }
-    );
-
-
-  const inserted =
-    await response.json();
-
-
-  const column =
-    inserted[0];
-
-
-  columns.push(
-    column
-  );
-
-
-  for (
-    const row of rows
-  ) {
-
-    await supabaseRequest(
-      "torre_cells",
-      {
-        method:
-          "POST",
-
-        body:
-          JSON.stringify({
-            row_id:
-              row.id,
-
-            column_id:
-              column.id,
-
-            value:
-              null
-          })
-      }
-    );
-  }
-
-
-  await render();
-}
-
-
-/* =========================================================
-   REMOVE COLUMN
-========================================================= */
-
-async function removeColumn() {
-
-  if (
-    columns.length <= 1
-  ) {
-
-    alert(
-      "É necessário manter pelo menos uma coluna."
-    );
-
-    return;
-  }
-
-
-  const column =
-    columns[
-      columns.length - 1
-    ];
-
-
-  const confirmed =
-    confirm(
-      "Apagar a última coluna?"
-    );
-
-
-  if (!confirmed) {
-    return;
-  }
-
-
-  await supabaseRequest(
-    `torre_columns?id=eq.${column.id}`,
-    {
-      method:
-        "DELETE"
-    }
-  );
-
-
-  columns =
-    columns.slice(
-      0,
-      -1
-    );
-
-
-  for (
-    let i = 0;
-    i < columns.length;
-    i++
-  ) {
-
-    await supabaseRequest(
-      `torre_columns?id=eq.${columns[i].id}`,
-
-      {
-        method:
-          "PATCH",
-
-        headers: {
-          "Prefer":
-            "return=minimal"
-        },
-
-        body:
-          JSON.stringify({
-            position:
-              i
-          })
-      }
-    );
-  }
-
-
-  await loadColumns();
-
-  await render();
-}
-
-
-/* =========================================================
-   COLUMN BUTTONS
-========================================================= */
-
-addColumnButton.addEventListener(
-  "click",
-  async function() {
-
-    try {
-
-      await addColumn();
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao criar coluna."
-      );
-    }
-  }
-);
-
-
-removeColumnButton.addEventListener(
-  "click",
-  async function() {
-
-    try {
-
-      await removeColumn();
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao remover coluna."
-      );
-    }
-  }
-);
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-torreTitle.addEventListener(
-  "click",
-  function(event) {
-
     event.stopPropagation();
 
-    categoryMenu.classList.toggle(
-      "open"
-    );
-  }
-);
-
-
-document.addEventListener(
-  "click",
-  function(event) {
-
-    if (
-      !event.target.closest(
-        "#menu-wrapper"
-      )
-    ) {
-
-      categoryMenu.classList.remove(
-        "open"
-      );
-    }
-  }
-);
-
-
-/* =========================================================
-   IMAGE VIEWER
-========================================================= */
-
-viewer.addEventListener(
-  "click",
-  function() {
-
-    viewer.classList.remove(
-      "open"
+    const column = columns.find(
+      item => item.id === columnId
     );
 
-    viewerImage.src =
-      "";
-  }
-);
+    if (!column) return;
+
+    resizing = {
+      columnId,
+      columnIndex,
+      startX: event.clientX,
+      startWidth: Number(column.width_px) || 180
+    };
+
+    handle.classList.add("dragging");
+  });
+
+  return handle;
+}
 
 
-function openImage(
-  src
-) {
+function handleResizeMove(event) {
 
-  viewerImage.src =
-    src;
+  if (!resizing) return;
 
-  viewer.classList.add(
-    "open"
+  const column = columns.find(
+    item => item.id === resizing.columnId
   );
+
+  if (!column) return;
+
+  const difference =
+    event.clientX - resizing.startX;
+
+  const newWidth = Math.max(
+    60,
+    resizing.startWidth + difference
+  );
+
+  column.width_px = Math.round(newWidth);
+
+  /*
+    Reapply to ALL rows while dragging.
+  */
+  applyColumnWidths();
 }
 
 
-/* =========================================================
-   LOG DATE
-========================================================= */
+async function handleResizeEnd() {
 
-function setTodayAsDefaultDate() {
+  if (!resizing) return;
 
-  const today =
-    new Date();
+  const resizeState = resizing;
 
+  resizing = null;
 
-  const year =
-    today.getFullYear();
+  document
+    .querySelectorAll(".column-resize-handle.dragging")
+    .forEach(handle => {
+      handle.classList.remove("dragging");
+    });
 
+  const column = columns.find(
+    item => item.id === resizeState.columnId
+  );
 
-  const month =
-    String(
-      today.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
+  if (!column) return;
 
+  const { error } = await supabaseClient
+    .from("torre_columns")
+    .update({
+      width_px: column.width_px
+    })
+    .eq("id", column.id);
 
-  const day =
-    String(
-      today.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  logDate.value =
-    `${year}-${month}-${day}`;
+  if (error) {
+    console.error("Erro a guardar largura:", error);
+  }
 }
 
 
-/* =========================================================
-   LOAD LOGS
-========================================================= */
+/* =========================
+   CELLS
+========================= */
 
-async function loadLogs() {
+async function saveCell(rowId, columnId, value) {
 
-  if (
-    !currentCategory
-  ) {
+  const { data, error } =
+    await supabaseClient
+      .from("torre_cells")
+      .select("id")
+      .eq("row_id", rowId)
+      .eq("column_id", columnId)
+      .maybeSingle();
+
+  if (error) {
+    console.error(error);
     return;
   }
 
+  if (data) {
 
-  const response =
-    await supabaseRequest(
-      `torre_logs?select=*` +
-      `&category_id=eq.${currentCategory.id}` +
-      `&order=log_date.desc,created_at.desc`
-    );
+    await supabaseClient
+      .from("torre_cells")
+      .update({ value })
+      .eq("id", data.id);
 
+  } else {
 
-  const logs =
-    await response.json();
-
-
-  renderLogs(
-    logs
-  );
+    await supabaseClient
+      .from("torre_cells")
+      .insert({
+        row_id: rowId,
+        column_id: columnId,
+        value
+      });
+  }
 }
 
 
-/* =========================================================
-   RENDER LOGS
-========================================================= */
+/* =========================
+   IMAGES
+========================= */
 
-function renderLogs(
-  logs
-) {
+function createImage(cell, imageUrl) {
 
-  logList.innerHTML =
-    "";
+  /*
+    Preserve resize handle if the cell already has one.
+  */
+  const existingHandle =
+    cell.querySelector(".column-resize-handle");
+
+  cell.innerHTML = "";
+
+  const image = document.createElement("img");
+
+  image.src = imageUrl;
+  image.alt = "";
+
+  image.addEventListener("click", event => {
+    event.stopPropagation();
+    openImageViewer(imageUrl);
+  });
+
+  cell.appendChild(image);
+
+  if (existingHandle) {
+    cell.appendChild(existingHandle);
+  }
+}
 
 
-  if (!logs.length) {
+function createImagePlaceholder(cell, rowId, columnId) {
 
-    const empty =
-      document.createElement(
-        "div"
-      );
+  cell.innerHTML = "";
 
-    empty.className =
-      "log-entry";
+  const placeholder =
+    document.createElement("div");
 
-    empty.textContent =
-      "sem registos";
+  placeholder.className = "image-placeholder";
 
-    logList.appendChild(
-      empty
-    );
+  placeholder.addEventListener("click", () => {
 
+    selectedImageCell = {
+      cell,
+      rowId,
+      columnId
+    };
+
+    fileInput.value = "";
+    fileInput.click();
+  });
+
+  cell.appendChild(placeholder);
+}
+
+
+async function handleFileInput(event) {
+
+  const file = event.target.files?.[0];
+
+  if (!file || !selectedImageCell) {
     return;
   }
-
-
-  logs.forEach(
-    log => {
-
-      const entry =
-        document.createElement(
-          "div"
-        );
-
-      entry.className =
-        "log-entry";
-
-
-      const meta =
-        document.createElement(
-          "div"
-        );
-
-      meta.className =
-        "log-meta";
-
-
-      const date =
-        document.createElement(
-          "span"
-        );
-
-      date.className =
-        "log-date-display";
-
-      date.textContent =
-        formatDate(
-          log.log_date
-        );
-
-
-      const number =
-        document.createElement(
-          "span"
-        );
-
-      number.className =
-        "log-number-display";
-
-      number.textContent =
-        `#${String(
-          log.inventory_number
-        ).padStart(
-          3,
-          "0"
-        )}`;
-
-
-      meta.appendChild(
-        date
-      );
-
-      meta.appendChild(
-        number
-      );
-
-
-      const note =
-        document.createElement(
-          "div"
-        );
-
-      note.className =
-        "log-note-display";
-
-      note.textContent =
-        log.note;
-
-
-      /*
-       * DELETE LOG
-       */
-
-      const deleteButton =
-        document.createElement(
-          "button"
-        );
-
-      deleteButton.className =
-        "delete-log";
-
-      deleteButton.textContent =
-        "×";
-
-      deleteButton.setAttribute(
-        "aria-label",
-        "Apagar nota"
-      );
-
-
-      deleteButton.addEventListener(
-        "click",
-        async function() {
-
-          const confirmed =
-            confirm(
-              "Apagar esta nota?"
-            );
-
-
-          if (!confirmed) {
-            return;
-          }
-
-
-          try {
-
-            await supabaseRequest(
-              `torre_logs?id=eq.${log.id}`,
-              {
-                method:
-                  "DELETE"
-              }
-            );
-
-
-            await loadLogs();
-
-          } catch (error) {
-
-            console.error(
-              error
-            );
-
-            alert(
-              "Erro ao apagar a nota."
-            );
-          }
-        }
-      );
-
-
-      entry.appendChild(
-        meta
-      );
-
-      entry.appendChild(
-        note
-      );
-
-      entry.appendChild(
-        deleteButton
-      );
-
-
-      logList.appendChild(
-        entry
-      );
-    }
-  );
-}
-
-
-/* =========================================================
-   FORMAT DATE
-========================================================= */
-
-function formatDate(
-  dateString
-) {
-
-  const parts =
-    dateString.split(
-      "-"
-    );
-
-
-  if (
-    parts.length !== 3
-  ) {
-    return dateString;
-  }
-
-
-  return (
-    `${parts[2]}.` +
-    `${parts[1]}.` +
-    `${parts[0]}`
-  );
-}
-
-
-/* =========================================================
-   SAVE LOG
-========================================================= */
-
-logForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-
-    const date =
-      logDate.value;
-
-
-    const number =
-      Number(
-        logNumber.value
-      );
-
-
-    const note =
-      logNote.value.trim();
-
-
-    if (
-      !date ||
-      !number ||
-      !note
-    ) {
-
-      alert(
-        "É obrigatório indicar a data, o número do inventário e a nota."
-      );
-
-      return;
-    }
-
-
-    const rowExists =
-      rows.some(
-        row =>
-          Number(
-            row.inventory_number
-          ) === number
-      );
-
-
-    if (!rowExists) {
-
-      alert(
-        "Esse número de inventário não existe nesta categoria."
-      );
-
-      return;
-    }
-
-
-    try {
-
-      await supabaseRequest(
-        "torre_logs",
-        {
-          method:
-            "POST",
-
-          headers: {
-            "Prefer":
-              "return=representation"
-          },
-
-          body:
-            JSON.stringify({
-              category_id:
-                currentCategory.id,
-
-              inventory_number:
-                number,
-
-              log_date:
-                date,
-
-              note:
-                note
-            })
-        }
-      );
-
-
-      logNote.value =
-        "";
-
-      logNumber.value =
-        "";
-
-
-      await loadLogs();
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      alert(
-        "Erro ao guardar o log."
-      );
-    }
-  }
-);
-
-
-/* =========================================================
-   TOGGLE LOG
-========================================================= */
-
-toggleLog.addEventListener(
-  "click",
-  function() {
-
-    logPanel.classList.toggle(
-      "collapsed"
-    );
-
-
-    toggleLog.textContent =
-      logPanel.classList.contains(
-        "collapsed"
-      )
-        ? "+"
-        : "−";
-  }
-);
-
-
-/* =========================================================
-   GOOGLE SHEETS LINK
-========================================================= */
-
-sheetsLink.href =
-  GOOGLE_SHEETS_URL;
-
-
-/* =========================================================
-   INIT
-========================================================= */
-
-async function init() {
 
   try {
 
-    await loadCategories();
+    const compressed =
+      await compressImage(file);
 
-    renderCategoryMenu();
+    const filename =
+      `${crypto.randomUUID()}.jpg`;
 
-    await selectCategory(
-      categories[0]
+    const path =
+      `${currentCategory.slug}/${filename}`;
+
+    const { error: uploadError } =
+      await supabaseClient.storage
+        .from("images")
+        .upload(path, compressed, {
+          contentType: "image/jpeg",
+          upsert: false
+        });
+
+    if (uploadError) {
+      showError(uploadError);
+      return;
+    }
+
+    const { data: publicData } =
+      supabaseClient.storage
+        .from("images")
+        .getPublicUrl(path);
+
+    const imageUrl = publicData.publicUrl;
+
+    await saveCell(
+      selectedImageCell.rowId,
+      selectedImageCell.columnId,
+      imageUrl
+    );
+
+    selectedImageCell.cell.classList.add(
+      "image-cell"
+    );
+
+    createImage(
+      selectedImageCell.cell,
+      imageUrl
     );
 
   } catch (error) {
-
-    console.error(
-      "TORRE ERROR:",
-      error
-    );
-
-
-    document.body.innerHTML = `
-      <div style="
-        padding:40px;
-        font-family:Arial, Helvetica, sans-serif;
-        color:#ffffff;
-        background:#0000ff;
-        min-height:100vh;
-      ">
-        <h2>
-          TORRE — erro
-        </h2>
-
-        <pre style="
-          white-space:pre-wrap;
-        ">${error.message}</pre>
-
-      </div>
-    `;
+    showError(error);
   }
+
+  selectedImageCell = null;
 }
 
 
-init();
+function compressImage(file) {
+
+  return new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onload = event => {
+
+      const image = new Image();
+
+      image.onload = () => {
+
+        const maxSize = 2000;
+
+        let width = image.width;
+        let height = image.height;
+
+        if (width > maxSize || height > maxSize) {
+
+          if (width > height) {
+
+            height =
+              Math.round(
+                height * maxSize / width
+              );
+
+            width = maxSize;
+
+          } else {
+
+            width =
+              Math.round(
+                width * maxSize / height
+              );
+
+            height = maxSize;
+          }
+        }
+
+        const canvas =
+          document.createElement("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context =
+          canvas.getContext("2d");
+
+        context.drawImage(
+          image,
+          0,
+          0,
+          width,
+          height
+        );
+
+        canvas.toBlob(
+          blob => {
+
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(
+                new Error(
+                  "Não foi possível comprimir a imagem."
+                )
+              );
+            }
+
+          },
+          "image/jpeg",
+          0.85
+        );
+      };
+
+      image.onerror = reject;
+
+      image.src = event.target.result;
+    };
+
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+  });
+}
+
+
+/* =========================
+   IMAGE VIEWER
+========================= */
+
+function openImageViewer(url) {
+
+  viewerImage.src = url;
+
+  imageViewer.classList.add("open");
+}
+
+
+function closeImageViewer() {
+
+  imageViewer.classList.remove("open");
+
+  viewerImage.src = "";
+}
+
+
+/* =========================
+   ROWS
+========================= */
+
+async function addRow() {
+
+  const nextPosition =
+    rows.length
+      ? Math.max(...rows.map(row => row.position)) + 1
+      : 0;
+
+  const nextInventory =
+    rows.length
+      ? Math.max(
+          ...rows.map(
+            row => Number(row.inventory_number) || 0
+          )
+        ) + 1
+      : 1;
+
+  const { data: row, error } =
+    await supabaseClient
+      .from("torre_rows")
+      .insert({
+        category_id: currentCategory.id,
+        position: nextPosition,
+        inventory_number: nextInventory
+      })
+      .select()
+      .single();
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  const cells = columns.map(column => ({
+    row_id: row.id,
+    column_id: column.id,
+    value: ""
+  }));
+
+  if (cells.length) {
+
+    const { error: cellError } =
+      await supabaseClient
+        .from("torre_cells")
+        .insert(cells);
+
+    if (cellError) {
+      showError(cellError);
+      return;
+    }
+  }
+
+  await loadRows();
+  render();
+}
+
+
+async function removeRow() {
+
+  if (!rows.length) return;
+
+  const row = rows[rows.length - 1];
+
+  await deleteRow(row.id);
+}
+
+
+async function deleteRow(rowId) {
+
+  const { error } =
+    await supabaseClient
+      .from("torre_rows")
+      .delete()
+      .eq("id", rowId);
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  await loadRows();
+  render();
+}
+
+
+/* =========================
+   COLUMNS
+========================= */
+
+async function addColumn() {
+
+  const nextPosition =
+    columns.length
+      ? Math.max(...columns.map(column => column.position)) + 1
+      : 0;
+
+  const { data: column, error } =
+    await supabaseClient
+      .from("torre_columns")
+      .insert({
+        category_id: currentCategory.id,
+        position: nextPosition,
+        width_px: 180
+      })
+      .select()
+      .single();
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  const cells = rows.map(row => ({
+    row_id: row.id,
+    column_id: column.id,
+    value: ""
+  }));
+
+  if (cells.length) {
+
+    const { error: cellError } =
+      await supabaseClient
+        .from("torre_cells")
+        .insert(cells);
+
+    if (cellError) {
+      showError(cellError);
+      return;
+    }
+  }
+
+  await loadColumns();
+  await loadRows();
+
+  render();
+}
+
+
+async function removeColumn() {
+
+  if (columns.length <= 1) {
+    return;
+  }
+
+  const column =
+    columns[columns.length - 1];
+
+  const { error } =
+    await supabaseClient
+      .from("torre_columns")
+      .delete()
+      .eq("id", column.id);
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  await loadColumns();
+  await loadRows();
+
+  render();
+}
+
+
+/* =========================
+   LOGS
+========================= */
+
+async function loadLogs() {
+
+  const { data, error } =
+    await supabaseClient
+      .from("torre_logs")
+      .select("*")
+      .eq("category_id", currentCategory.id)
+      .order("log_date", {
+        ascending: false
+      })
+      .order("created_at", {
+        ascending: false
+      });
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  logs = data || [];
+}
+
+
+async function saveLog() {
+
+  const date = logDate.value;
+  const number =
+    Number(logNumber.value);
+
+  const note =
+    logNote.value.trim();
+
+  if (!date || !number || !note) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("torre_logs")
+      .insert({
+        category_id: currentCategory.id,
+        inventory_number: number,
+        log_date: date,
+        note
+      });
+
+  if (error) {
+    showError(error);
+    return;
+  }
+
+  logDate.value = "";
+  logNumber.value = "";
+  logNote.value = "";
+
+  await loadLogs();
+
+  renderLogs();
+}
+
+
+function renderLogs() {
+
+  logsContainer.innerHTML = "";
+
+  logs.forEach(log => {
+
+    const entry =
+      document.createElement("div");
+
+    entry.className = "log-entry";
+
+
+    const date =
+      document.createElement("div");
+
+    date.className = "log-date";
+    date.textContent = log.log_date;
+
+
+    const number =
+      document.createElement("div");
+
+    number.className = "log-number";
+
+    number.textContent =
+      String(log.inventory_number)
+        .padStart(3, "0");
+
+
+    const note =
+      document.createElement("div");
+
+    note.className = "log-note";
+    note.textContent = log.note;
+
+
+    const deleteButton =
+      document.createElement("button");
+
+    deleteButton.className = "delete-log";
+    deleteButton.textContent = "×";
+
+    deleteButton.addEventListener(
+      "click",
+      async () => {
+
+        const { error } =
+          await supabaseClient
+            .from("torre_logs")
+            .delete()
+            .eq("id", log.id);
+
+        if (error) {
+          showError(error);
+          return;
+        }
+
+        await loadLogs();
+        renderLogs();
+      }
+    );
+
+
+    entry.appendChild(date);
+    entry.appendChild(number);
+    entry.appendChild(note);
+    entry.appendChild(deleteButton);
+
+    logsContainer.appendChild(entry);
+  });
+}
+
+
+/* =========================
+   ERRORS
+========================= */
+
+function showError(error) {
+
+  console.error(error);
+
+  const message =
+    error?.message ||
+    String(error);
+
+  alert(message);
+}
