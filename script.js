@@ -46,7 +46,7 @@ function createCell(index) {
 
   // PRIMEIRA COLUNA = IMAGEM
 
-  if (index % 5 === 0) {
+  if (index % 6 === 0) {
 
     cell.classList.add("image-cell");
 
@@ -205,7 +205,7 @@ function addRow() {
   const currentCells = grid.children.length;
 
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
 
     const index = currentCells + i;
 
