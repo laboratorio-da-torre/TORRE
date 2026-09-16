@@ -8,13 +8,15 @@ body {
   padding: 0;
 
   background: #ffffff;
-  color: #00f0ff;
+  color: #0000ff;
 
   font-family: Arial, Helvetica, sans-serif;
 }
 
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 
 #header {
   width: 80vw;
@@ -24,6 +26,11 @@ body {
   justify-content: space-between;
   align-items: flex-start;
 }
+
+
+/* =========================
+   MENU
+========================= */
 
 #menu-wrapper {
   position: relative;
@@ -35,7 +42,7 @@ body {
   margin: 0;
 
   background: transparent;
-  color: #00f0ff;
+  color: #0000ff;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -48,20 +55,6 @@ body {
   opacity: 0.5;
 }
 
-#lab-title {
-  color: #00f0ff;
-  text-decoration: none;
-
-  font-size: 18px;
-  line-height: 1;
-}
-
-#lab-title:hover {
-  opacity: 0.5;
-}
-
-
-/* MENU */
 
 #category-menu {
   position: absolute;
@@ -70,15 +63,14 @@ body {
   left: -8px;
 
   display: none;
-
   flex-direction: column;
+
   gap: 7px;
 
   padding: 10px 12px;
 
   background: #ffffff;
-
-  border: 2px solid #00f0ff;
+  border: 2px solid #0000ff;
 
   z-index: 1000;
 }
@@ -87,12 +79,13 @@ body {
   display: flex;
 }
 
+
 .category-button {
   border: 0;
   padding: 0;
 
   background: transparent;
-  color: #00f0ff;
+  color: #0000ff;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -109,29 +102,54 @@ body {
 }
 
 
-/* ARCHIVE */
+/* =========================
+   LABORATÓRIO
+========================= */
+
+#lab-title {
+  color: #0000ff;
+
+  text-decoration: none;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+#lab-title:hover {
+  opacity: 0.5;
+}
+
+
+/* =========================
+   ARCHIVE
+========================= */
 
 #archive {
   width: 80vw;
   margin: 0 auto;
 }
 
+
 #category-title {
   margin: 0 0 20px 0;
 
-  color: #00f0ff;
+  color: #0000ff;
 
   font-size: 18px;
   line-height: 1;
+
   font-weight: normal;
 }
 
 
-/* GRID */
+/* =========================
+   GRID
+========================= */
 
 #grid {
   width: 100%;
 }
+
 
 .archive-row {
   position: relative;
@@ -139,23 +157,26 @@ body {
   width: 100%;
 
   display: grid;
+
   grid-template-columns:
     repeat(var(--columns), minmax(0, 1fr));
 
   align-items: stretch;
 }
 
+
 .cell {
   min-width: 0;
   min-height: 1.5cm;
 
-  border-right: 2px solid #00f0ff;
-  border-bottom: 2px solid #00f0ff;
+  border-right: 2px solid #0000ff;
+  border-bottom: 2px solid #0000ff;
+
   border-left: 0;
   border-top: 0;
 
   background: #ffffff;
-  color: #00f0ff;
+  color: #0000ff;
 
   padding: 6px;
 
@@ -165,24 +186,32 @@ body {
   outline: none;
 
   overflow: hidden;
+
   word-break: break-word;
 }
 
+
+/* primeira coluna */
+
 .cell:first-child {
-  border-left: 2px solid #00f0ff;
+  border-left: 2px solid #0000ff;
 }
+
+
+/* primeira linha */
 
 .archive-row:first-child .cell {
-  border-top: 2px solid #00f0ff;
+  border-top: 2px solid #0000ff;
 }
 
 
-/* TEXTO EDITÁVEL */
+/* =========================
+   TEXT CELLS
+========================= */
 
 .cell[contenteditable="true"] {
-  color: #00f0ff;
-
-  caret-color: #00f0ff;
+  color: #0000ff;
+  caret-color: #0000ff;
 }
 
 .cell[contenteditable="true"]:focus {
@@ -191,12 +220,15 @@ body {
 }
 
 
-/* IMAGENS */
+/* =========================
+   IMAGE CELL
+========================= */
 
 .image-cell {
   padding: 0;
 
   display: flex;
+
   align-items: flex-start;
   justify-content: center;
 
@@ -206,6 +238,7 @@ body {
 
   overflow: hidden;
 }
+
 
 .image-cell img {
   display: block;
@@ -217,16 +250,18 @@ body {
 
   object-fit: contain;
 
-  transition:
-    transform 0.2s ease;
+  transition: transform 0.2s ease;
 }
+
 
 .image-cell:hover img {
   transform: scale(1.03);
 }
 
 
-/* DELETE */
+/* =========================
+   DELETE ROW
+========================= */
 
 .delete-row {
   position: absolute;
@@ -237,14 +272,16 @@ body {
   transform: translateY(-50%);
 
   border: 0;
+
   background: transparent;
 
   padding: 0;
   margin: 0;
 
-  color: #00f0ff;
+  color: #0000ff;
 
   font-family: Arial, Helvetica, sans-serif;
+
   font-size: 18px;
   line-height: 1;
 
@@ -256,7 +293,9 @@ body {
 }
 
 
-/* CONTROLS */
+/* =========================
+   CONTROLS
+========================= */
 
 #controls {
   display: flex;
@@ -269,32 +308,39 @@ body {
   margin-top: 10px;
 }
 
+
 #controls button {
   border: 0;
 
   background: transparent;
-  color: #00f0ff;
+  color: #0000ff;
 
   font-family: Arial, Helvetica, sans-serif;
 
   cursor: pointer;
+
   padding: 0;
 }
+
 
 #add-row {
   font-size: 24px;
 }
 
+
 #add-column {
   font-size: 14px;
 }
+
 
 #controls button:hover {
   opacity: 0.5;
 }
 
 
-/* IMAGE VIEWER */
+/* =========================
+   IMAGE VIEWER
+========================= */
 
 #image-viewer {
   position: fixed;
@@ -304,7 +350,7 @@ body {
   width: 100vw;
   height: 100vh;
 
-  background: #00f0ff;
+  background: #0000ff;
 
   display: none;
 
@@ -318,9 +364,11 @@ body {
   overflow: hidden;
 }
 
+
 #image-viewer.open {
   display: flex;
 }
+
 
 #viewer-image {
   max-width: 95vw;
