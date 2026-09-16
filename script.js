@@ -1,13 +1,6 @@
-const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
-
-const BUCKET =
-  "images";
-
-
+const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+const BUCKET = "images";
 /* =========================================================
    GOOGLE SHEETS
 ========================================================= */
@@ -21,7 +14,7 @@ const GOOGLE_SHEETS_URL =
 ========================================================= */
 
 const grid =
-  document.getElementById("grid");
+  document.getElementById("archive");
 
 const addRowButton =
   document.getElementById("add-row");
@@ -42,10 +35,10 @@ const viewerImage =
   document.getElementById("viewer-image");
 
 const torreTitle =
-  document.getElementById("torre-title");
+  document.getElementById("menu-button");
 
 const categoryMenu =
-  document.getElementById("category-menu");
+  document.getElementById("menu");
 
 const categoryTitle =
   document.getElementById("category-title");
@@ -54,10 +47,10 @@ const imageFileInput =
   document.getElementById("image-file-input");
 
 const logPanel =
-  document.getElementById("log-panel");
+  document.getElementById("logs-section");
 
 const logList =
-  document.getElementById("log-list");
+  document.getElementById("logs");
 
 const logForm =
   document.getElementById("log-form");
@@ -353,6 +346,7 @@ async function ensureRows() {
     i < missing;
     i++
   ) {
+
     await createRow();
   }
 
@@ -477,6 +471,33 @@ async function loadCells() {
 
 
 /* =========================================================
+   APPLY COLUMN WIDTHS
+========================================================= */
+
+function applyColumnWidths() {
+
+  const template =
+    columns
+      .map(
+        column =>
+          `${column.width_px || 180}px`
+      )
+      .join(" ");
+
+
+  document
+    .querySelectorAll(".archive-row")
+    .forEach(
+      rowElement => {
+
+        rowElement.style.gridTemplateColumns =
+          template;
+      }
+    );
+}
+
+
+/* =========================================================
    RENDER
 ========================================================= */
 
@@ -516,6 +537,9 @@ async function render() {
       );
     }
   );
+
+
+  applyColumnWidths();
 }
 
 
@@ -733,6 +757,10 @@ function createRowElement(
 
       /*
        * Resize handle
+       *
+       * O handle fica apenas na
+       * primeira linha para não
+       * criar vários separadores.
        */
 
       if (
@@ -743,8 +771,7 @@ function createRowElement(
 
         createResizeHandle(
           cell,
-          column,
-          rowElement
+          column
         );
       }
 
@@ -758,6 +785,9 @@ function createRowElement(
 
   /*
    * APAGAR LINHA
+   *
+   * Fica fora da grid através
+   * de position:absolute no CSS.
    */
 
   const deleteButton =
@@ -803,6 +833,7 @@ function createRowElement(
     deleteButton
   );
 
+
   grid.appendChild(
     rowElement
   );
@@ -815,8 +846,7 @@ function createRowElement(
 
 function createResizeHandle(
   cell,
-  column,
-  rowElement
+  column
 ) {
 
   const handle =
@@ -859,6 +889,11 @@ function createResizeHandle(
           .width;
 
 
+      handle.classList.add(
+        "dragging"
+      );
+
+
       handle.setPointerCapture(
         event.pointerId
       );
@@ -887,17 +922,16 @@ function createResizeHandle(
           newWidth;
 
 
-        rowElement.style.gridTemplateColumns =
-          columns
-            .map(
-              item =>
-                `${item.width_px || 180}px`
-            )
-            .join(" ");
+        applyColumnWidths();
       }
 
 
       async function end() {
+
+        handle.classList.remove(
+          "dragging"
+        );
+
 
         handle.removeEventListener(
           "pointermove",
@@ -914,6 +948,7 @@ function createResizeHandle(
 
           await supabaseRequest(
             `torre_columns?id=eq.${column.id}`,
+
             {
               method:
                 "PATCH",
@@ -1180,6 +1215,17 @@ function createImage(
   cell
 ) {
 
+  /*
+   * Guardar o separador antes
+   * de limpar a célula.
+   */
+
+  const resizeHandle =
+    cell.querySelector(
+      ".column-resize-handle"
+    );
+
+
   const image =
     document.createElement(
       "img"
@@ -1211,6 +1257,19 @@ function createImage(
   cell.appendChild(
     image
   );
+
+
+  /*
+   * Voltar a colocar o
+   * separador da coluna.
+   */
+
+  if (resizeHandle) {
+
+    cell.appendChild(
+      resizeHandle
+    );
+  }
 }
 
 
@@ -1826,7 +1885,7 @@ document.addEventListener(
 
     if (
       !event.target.closest(
-        "#menu-wrapper"
+        "#header"
       )
     ) {
 
@@ -2272,23 +2331,26 @@ logForm.addEventListener(
    TOGGLE LOG
 ========================================================= */
 
-toggleLog.addEventListener(
-  "click",
-  function() {
+if (toggleLog) {
 
-    logPanel.classList.toggle(
-      "collapsed"
-    );
+  toggleLog.addEventListener(
+    "click",
+    function() {
 
-
-    toggleLog.textContent =
-      logPanel.classList.contains(
+      logPanel.classList.toggle(
         "collapsed"
-      )
-        ? "+"
-        : "−";
-  }
-);
+      );
+
+
+      toggleLog.textContent =
+        logPanel.classList.contains(
+          "collapsed"
+        )
+          ? "+"
+          : "−";
+    }
+  );
+}
 
 
 /* =========================================================
