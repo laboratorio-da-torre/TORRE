@@ -9,201 +9,99 @@
 
 <body>
 
-  <header id="header">
+<header id="header">
+  <div class="header-left">
+    <button id="menu-button">log/torre</button>
 
-    <div id="menu-wrapper">
+    <nav id="menu">
+      <button class="category-button" data-category="livros">LIVROS</button>
+      <button class="category-button" data-category="ferramentas">FERRAMENTAS</button>
+      <button class="category-button" data-category="laboratorio">LABORATÓRIO</button>
+      <button class="category-button" data-category="arquivo">ARQUIVO</button>
+      <button class="category-button" data-category="materiais">MATERIAIS</button>
+      <button class="category-button" data-category="contactos">CONTACTOS</button>
+    </nav>
+  </div>
 
-      <button id="torre-title" type="button">
-        log/torre
-      </button>
+  <a
+    id="laboratorio-link"
+    href="https://laia.pt/TORRE"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    LABORATÓRIO DA TORRE
+  </a>
+</header>
 
-      <nav id="category-menu"></nav>
 
+<main>
+
+  <div id="category-title"></div>
+
+  <section id="archive-section">
+
+    <div id="archive-wrapper">
+      <div id="archive"></div>
     </div>
-
-    <a
-      id="lab-title"
-      href="https://laia.pt/TORRE"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      LABORATÓRIO DA TORRE
-    </a>
-
-  </header>
-
-
-  <main id="archive">
-
-    <h1 id="category-title"></h1>
-
-    <div id="grid-wrapper">
-
-      <div id="grid"></div>
-
-      <div id="column-controls">
-
-        <button
-          id="add-column"
-          type="button"
-        >
-          + column
-        </button>
-
-        <button
-          id="remove-column"
-          type="button"
-        >
-          − column
-        </button>
-
-      </div>
-
-    </div>
-
 
     <div id="row-controls">
-
-      <button
-        id="add-row"
-        type="button"
-      >
-        + row
-      </button>
-
-      <button
-        id="remove-row"
-        type="button"
-      >
-        − row
-      </button>
-
+      <button id="add-row">+ row</button>
+      <button id="remove-row">− row</button>
     </div>
 
-  </main>
-
-
-  <section id="log-panel">
-
-    <div id="log-header">
-
-      <span>log</span>
-
-      <button
-        id="toggle-log"
-        type="button"
-      >
-        −
-      </button>
-
-    </div>
-
-
-    <div id="log-content">
-
-      <div id="log-list"></div>
-
-
-      <form id="log-form">
-
-        <div class="log-field">
-
-          <label for="log-date">
-            data
-          </label>
-
-          <input
-            id="log-date"
-            type="date"
-            required
-          >
-
-        </div>
-
-
-        <div class="log-field">
-
-          <label for="log-number">
-            nº
-          </label>
-
-          <input
-            id="log-number"
-            type="number"
-            min="1"
-            required
-          >
-
-        </div>
-
-
-        <div class="log-field log-note">
-
-          <label for="log-note">
-            nota
-          </label>
-
-          <textarea
-            id="log-note"
-            rows="2"
-            required
-            placeholder="adicionar nota..."
-          ></textarea>
-
-        </div>
-
-
-        <button
-          id="save-log"
-          type="submit"
-        >
-          +
-        </button>
-
-      </form>
-
+    <div id="column-controls">
+      <button id="add-column">+ column</button>
+      <button id="remove-column">− column</button>
     </div>
 
   </section>
 
 
-  <div
-    id="image-viewer"
-    aria-hidden="true"
+  <section id="logs-section">
+
+    <div id="logs-title">LOG</div>
+
+    <div id="log-form">
+      <input id="log-date" type="date">
+      <input id="log-number" type="number" placeholder="nº">
+      <input id="log-note" type="text" placeholder="nota">
+      <button id="save-log">+</button>
+    </div>
+
+    <div id="logs"></div>
+
+  </section>
+
+</main>
+
+
+<footer id="footer">
+  <a
+    id="sheets-link"
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
   >
-
-    <img
-      id="viewer-image"
-      src=""
-      alt=""
-    >
-
-  </div>
+    google sheets ↗
+  </a>
+</footer>
 
 
-  <input
-    id="image-file-input"
-    type="file"
-    accept="image/*"
-    hidden
-  >
+<div id="image-viewer">
+  <img id="viewer-image" src="" alt="">
+</div>
 
 
-  <footer id="footer">
-
-    <a
-      id="sheets-link"
-      href="#"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      google sheets ↗
-    </a>
-
-  </footer>
+<input
+  id="file-input"
+  type="file"
+  accept="image/*"
+  hidden
+>
 
 
-  <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
