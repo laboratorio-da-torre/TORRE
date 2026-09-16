@@ -2,8 +2,8 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "COLOCA_AQUI_O_PROJECT_URL";
-const SUPABASE_KEY = "COLOCA_AQUI_O_PUBLISHABLE_KEY";
+const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
 const BUCKET = "images";
 
 
