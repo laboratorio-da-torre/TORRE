@@ -2,9 +2,15 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
-const BUCKET = "images";
+const SUPABASE_URL =
+  "COLOCA_AQUI_O_PROJECT_URL";
+
+const SUPABASE_KEY =
+  "COLOCA_AQUI_O_PUBLISHABLE_KEY";
+
+const BUCKET =
+  "images";
+
 
 /* =========================================================
    GOOGLE SHEETS
@@ -81,7 +87,7 @@ let currentCategory = null;
 
 
 /* =========================================================
-   SUPABASE REQUEST
+   SUPABASE
 ========================================================= */
 
 async function supabaseRequest(
@@ -131,7 +137,7 @@ async function supabaseRequest(
 
 
 /* =========================================================
-   CATEGORIAS
+   CATEGORIES
 ========================================================= */
 
 async function loadCategories() {
@@ -140,6 +146,7 @@ async function loadCategories() {
     await supabaseRequest(
       "torre_categories?select=*&order=position.asc"
     );
+
 
   categories =
     await response.json();
@@ -163,16 +170,17 @@ function renderCategoryMenu() {
     category => {
 
       const button =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
+
 
       button.className =
         "category-button";
 
+
       button.textContent =
         category.name;
-
-      button.dataset.category =
-        category.slug;
 
 
       button.addEventListener(
@@ -201,7 +209,7 @@ function renderCategoryMenu() {
 
 
 /* =========================================================
-   CATEGORIA
+   SELECT CATEGORY
 ========================================================= */
 
 async function selectCategory(
@@ -211,8 +219,10 @@ async function selectCategory(
   currentCategory =
     category;
 
+
   categoryTitle.textContent =
     category.name;
+
 
   columns = [];
   rows = [];
@@ -233,7 +243,7 @@ async function selectCategory(
 
 
 /* =========================================================
-   COLUNAS
+   LOAD COLUMNS
 ========================================================= */
 
 async function loadColumns() {
@@ -271,6 +281,7 @@ async function loadColumns() {
 
             body:
               JSON.stringify({
+
                 category_id:
                   currentCategory.id,
 
@@ -287,6 +298,7 @@ async function loadColumns() {
       const inserted =
         await response.json();
 
+
       columns.push(
         inserted[0]
       );
@@ -294,50 +306,52 @@ async function loadColumns() {
   }
 
 
-  columns =
-    columns.map(
-      column => ({
-        ...column,
+  /*
+   * Larguras existentes são convertidas
+   * para proporções.
+   */
 
-        width_px:
+  let total =
+    columns.reduce(
+      (sum, column) =>
+        sum +
+        (
           Number(
             column.width_px
           ) || 180
-      })
+        ),
+      0
     );
 
 
-  normalizeColumnWidths();
-}
-
-
-/* =========================================================
-   NORMALIZAR COLUNAS
-========================================================= */
-
-function normalizeColumnWidths() {
-
-  if (!columns.length) {
-    return;
+  if (!total) {
+    total = 1;
   }
 
 
-  const equalWidth =
-    100 / columns.length;
+  columns =
+    columns.map(
+      column => ({
 
+        ...column,
 
-  columns.forEach(
-    column => {
-
-      column.width_percent =
-        equalWidth;
-    }
-  );
+        width_percent:
+          (
+            (
+              Number(
+                column.width_px
+              ) || 180
+            ) /
+            total
+          ) *
+          100
+      })
+    );
 }
 
 
 /* =========================================================
-   CSS GRID TEMPLATE
+   GRID TEMPLATE
 ========================================================= */
 
 function getGridTemplate() {
@@ -345,14 +359,14 @@ function getGridTemplate() {
   return columns
     .map(
       column =>
-        `${column.width_percent || 100 / columns.length}%`
+        `${column.width_percent}%`
     )
     .join(" ");
 }
 
 
 /* =========================================================
-   APLICAR GRID
+   APPLY GRID
 ========================================================= */
 
 function applyGridTemplate() {
@@ -378,7 +392,7 @@ function applyGridTemplate() {
 
 
 /* =========================================================
-   LINHAS
+   LOAD ROWS
 ========================================================= */
 
 async function loadRows() {
@@ -396,15 +410,22 @@ async function loadRows() {
 }
 
 
+/* =========================================================
+   ENSURE ROWS
+========================================================= */
+
 async function ensureRows() {
 
-  if (rows.length >= 20) {
+  if (
+    rows.length >= 20
+  ) {
     return;
   }
 
 
   const missing =
-    20 - rows.length;
+    20 -
+    rows.length;
 
 
   for (
@@ -422,12 +443,17 @@ async function ensureRows() {
 
 
 /* =========================================================
-   CRIAR LINHA
+   CREATE ROW
 ========================================================= */
 
 async function createRow() {
 
-  const existingNumbers =
+  /*
+   * O número é sempre o maior existente + 1.
+   * Nunca reutilizamos números apagados.
+   */
+
+  const numbers =
     rows
       .map(
         row =>
@@ -441,20 +467,16 @@ async function createRow() {
       );
 
 
-  const highestNumber =
-    existingNumbers.length
+  const highest =
+    numbers.length
       ? Math.max(
-          ...existingNumbers
+          ...numbers
         )
       : 0;
 
 
   const inventoryNumber =
-    highestNumber + 1;
-
-
-  const position =
-    rows.length;
+    highest + 1;
 
 
   const response =
@@ -475,7 +497,7 @@ async function createRow() {
               currentCategory.id,
 
             position:
-              position,
+              rows.length,
 
             inventory_number:
               inventoryNumber
@@ -528,7 +550,7 @@ async function createRow() {
 
 
 /* =========================================================
-   CELLS
+   LOAD CELLS
 ========================================================= */
 
 async function loadCells() {
@@ -553,7 +575,8 @@ async function render() {
     await loadCells();
 
 
-  archive.innerHTML = "";
+  archive.innerHTML =
+    "";
 
 
   const cellMap =
@@ -571,13 +594,18 @@ async function render() {
   );
 
 
+  const template =
+    getGridTemplate();
+
+
   rows.forEach(
     (row, rowIndex) => {
 
       createRowElement(
         row,
         rowIndex,
-        cellMap
+        cellMap,
+        template
       );
     }
   );
@@ -588,17 +616,20 @@ async function render() {
 
 
 /* =========================================================
-   ROW
+   ROW ELEMENT
 ========================================================= */
 
 function createRowElement(
   row,
   rowIndex,
-  cellMap
+  cellMap,
+  template
 ) {
 
   const rowElement =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
 
   rowElement.className =
@@ -607,17 +638,21 @@ function createRowElement(
 
   rowElement.style.setProperty(
     "--grid-columns",
-    getGridTemplate()
+    template
   );
 
 
   /* NUMBER */
 
   const number =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   number.className =
     "row-number";
+
 
   number.textContent =
     String(
@@ -663,10 +698,6 @@ function createRowElement(
         cell.classList.add(
           "image-cell"
         );
-
-
-        cell.contentEditable =
-          "false";
 
 
         if (
@@ -737,10 +768,15 @@ function createRowElement(
 
       } else {
 
-        /* TEXTO */
+        /*
+         * As células de texto continuam
+         * editáveis, mas a grelha vertical
+         * é única para todas as rows.
+         */
 
         cell.contentEditable =
           "true";
+
 
         cell.textContent =
           data?.value || "";
@@ -787,12 +823,12 @@ function createRowElement(
 
 
       /*
-       * UM ÚNICO SISTEMA DE
-       * DIVISÕES VERTICAIS.
+       * HANDLE:
+       * só existe uma vez por divisão,
+       * na primeira linha.
        *
-       * Os handles só são criados
-       * na primeira linha, mas a
-       * alteração aplica-se a todas.
+       * A alteração aplica-se à grelha
+       * inteira.
        */
 
       if (
@@ -826,14 +862,13 @@ function createRowElement(
   deleteButton.className =
     "delete-row";
 
+
+  deleteButton.type =
+    "button";
+
+
   deleteButton.textContent =
     "×";
-
-
-  deleteButton.setAttribute(
-    "aria-label",
-    "Apagar linha"
-  );
 
 
   deleteButton.addEventListener(
@@ -845,13 +880,11 @@ function createRowElement(
       event.stopPropagation();
 
 
-      const confirmed =
-        confirm(
+      if (
+        !confirm(
           "Apagar esta linha?"
-        );
-
-
-      if (!confirmed) {
+        )
+      ) {
         return;
       }
 
@@ -888,7 +921,7 @@ function createRowElement(
 
 
 /* =========================================================
-   RESIZE COLUMN
+   RESIZE
 ========================================================= */
 
 function createResizeHandle(
@@ -925,7 +958,7 @@ function createResizeHandle(
       event.stopPropagation();
 
 
-      const containerWidth =
+      const width =
         archive.getBoundingClientRect()
           .width;
 
@@ -951,11 +984,6 @@ function createResizeHandle(
       );
 
 
-      handle.setPointerCapture(
-        event.pointerId
-      );
-
-
       function move(
         moveEvent
       ) {
@@ -968,69 +996,70 @@ function createResizeHandle(
         const deltaPercent =
           (
             deltaPx /
-            containerWidth
-          ) * 100;
+            width
+          ) *
+          100;
 
 
-        let newLeft =
+        let left =
           startLeft +
           deltaPercent;
 
 
-        let newRight =
+        let right =
           startRight -
           deltaPercent;
 
 
-        const MIN =
-          5;
+        const minimum =
+          8;
 
 
         if (
-          newLeft < MIN
+          left < minimum
         ) {
 
-          newLeft =
-            MIN;
+          left =
+            minimum;
 
-          newRight =
+          right =
             startLeft +
             startRight -
-            MIN;
+            minimum;
         }
 
 
         if (
-          newRight < MIN
+          right < minimum
         ) {
 
-          newRight =
-            MIN;
+          right =
+            minimum;
 
-          newLeft =
+          left =
             startLeft +
             startRight -
-            MIN;
+            minimum;
         }
 
 
         columns[
           columnIndex
         ].width_percent =
-          newLeft;
+          left;
 
 
         columns[
           columnIndex + 1
         ].width_percent =
-          newRight;
+          right;
 
 
         applyGridTemplate();
       }
 
 
-      async function end() {
+      function end() {
 
         handle.classList.remove(
           "dragging"
@@ -1049,16 +1078,7 @@ function createResizeHandle(
         );
 
 
-        try {
-
-          await saveColumnWidths();
-
-        } catch (error) {
-
-          console.error(
-            error
-          );
-        }
+        saveColumnWidths();
       }
 
 
@@ -1083,16 +1103,7 @@ function createResizeHandle(
 
 async function saveColumnWidths() {
 
-  /*
-   * A tabela existente tem width_px.
-   * Guardamos a largura relativa convertida
-   * para uma referência de 700px.
-   *
-   * Na próxima abertura redistribuímos
-   * proporcionalmente.
-   */
-
-  const referenceWidth =
+  const reference =
     700;
 
 
@@ -1101,35 +1112,42 @@ async function saveColumnWidths() {
   ) {
 
     const width =
-      Math.max(
-        1,
-        Math.round(
-          referenceWidth *
-          (
-            column.width_percent /
-            100
-          )
+      Math.round(
+        reference *
+        (
+          column.width_percent /
+          100
         )
       );
 
 
-    await supabaseRequest(
-      `torre_columns?id=eq.${column.id}`,
-      {
-        method: "PATCH",
+    try {
 
-        headers: {
-          "Prefer":
-            "return=minimal"
-        },
+      await supabaseRequest(
+        `torre_columns?id=eq.${column.id}`,
+        {
+          method: "PATCH",
 
-        body:
-          JSON.stringify({
-            width_px:
-              width
-          })
-      }
-    );
+          headers: {
+            "Prefer":
+              "return=minimal"
+          },
+
+          body:
+            JSON.stringify({
+              width_px:
+                width
+            })
+        }
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao guardar largura:",
+        error
+      );
+    }
   }
 }
 
@@ -1253,7 +1271,6 @@ imageFileInput.addEventListener(
         cell
       );
 
-
     } catch (error) {
 
       console.error(
@@ -1338,7 +1355,6 @@ async function handleImagePaste(
         cell
       );
 
-
     } catch (error) {
 
       console.error(
@@ -1401,7 +1417,7 @@ function createImage(
 
 
 /* =========================================================
-   OPTIMIZE IMAGE
+   IMAGE OPTIMIZATION
 ========================================================= */
 
 function optimizeImage(
@@ -1545,7 +1561,7 @@ function optimizeImage(
 
 
 /* =========================================================
-   UPLOAD IMAGE
+   UPLOAD
 ========================================================= */
 
 async function uploadImage(
@@ -1662,8 +1678,8 @@ async function deleteRow(
 
 
   /*
-   * Mantemos os números de inventário.
-   * Não renumeramos as linhas.
+   * Só actualizamos a posição.
+   * inventory_number NÃO muda.
    */
 
   for (
@@ -1684,7 +1700,8 @@ async function deleteRow(
 
         body:
           JSON.stringify({
-            position: i
+            position:
+              i
           })
       }
     );
@@ -1747,19 +1764,17 @@ removeRowButton.addEventListener(
     }
 
 
-    const lastRow =
+    const row =
       rows[
         rows.length - 1
       ];
 
 
-    const confirmed =
-      confirm(
+    if (
+      !confirm(
         "Apagar a última linha?"
-      );
-
-
-    if (!confirmed) {
+      )
+    ) {
       return;
     }
 
@@ -1767,7 +1782,7 @@ removeRowButton.addEventListener(
     try {
 
       await deleteRow(
-        lastRow.id
+        row.id
       );
 
     } catch (error) {
@@ -1790,10 +1805,6 @@ removeRowButton.addEventListener(
 
 async function addColumn() {
 
-  const oldCount =
-    columns.length;
-
-
   const response =
     await supabaseRequest(
       "torre_columns",
@@ -1812,7 +1823,7 @@ async function addColumn() {
               currentCategory.id,
 
             position:
-              oldCount,
+              columns.length,
 
             width_px:
               180
@@ -1835,11 +1846,22 @@ async function addColumn() {
 
 
   /*
-   * NOVA COLUNA:
-   * redistribuir tudo igualmente.
+   * TODAS as colunas passam a
+   * ter exactamente a mesma largura.
    */
 
-  normalizeColumnWidths();
+  const equal =
+    100 /
+    columns.length;
+
+
+  columns.forEach(
+    column => {
+
+      column.width_percent =
+        equal;
+    }
+  );
 
 
   for (
@@ -1898,13 +1920,11 @@ async function removeColumn() {
     ];
 
 
-  const confirmed =
-    confirm(
+  if (
+    !confirm(
       "Apagar a última coluna?"
-    );
-
-
-  if (!confirmed) {
+    )
+  ) {
     return;
   }
 
@@ -1922,6 +1942,20 @@ async function removeColumn() {
       0,
       -1
     );
+
+
+  const equal =
+    100 /
+    columns.length;
+
+
+  columns.forEach(
+    column => {
+
+      column.width_percent =
+        equal;
+    }
+  );
 
 
   for (
@@ -1950,13 +1984,7 @@ async function removeColumn() {
   }
 
 
-  normalizeColumnWidths();
-
   await saveColumnWidths();
-
-  await loadColumns();
-
-  normalizeColumnWidths();
 
   await render();
 }
@@ -2077,7 +2105,7 @@ function openImage(
 
 
 /* =========================================================
-   LOG DATE
+   DATE
 ========================================================= */
 
 function setTodayAsDefaultDate() {
@@ -2134,12 +2162,12 @@ async function loadLogs() {
     );
 
 
-  const logData =
+  const data =
     await response.json();
 
 
   renderLogs(
-    logData
+    data
   );
 }
 
@@ -2149,7 +2177,7 @@ async function loadLogs() {
 ========================================================= */
 
 function renderLogs(
-  logData
+  data
 ) {
 
   logs.innerHTML =
@@ -2157,7 +2185,7 @@ function renderLogs(
 
 
   if (
-    !logData.length
+    !data.length
   ) {
 
     const empty =
@@ -2183,7 +2211,7 @@ function renderLogs(
   }
 
 
-  logData.forEach(
+  data.forEach(
     log => {
 
       const entry =
@@ -2255,25 +2283,23 @@ function renderLogs(
         "delete-log";
 
 
-      deleteButton.textContent =
-        "×";
-
-
       deleteButton.type =
         "button";
+
+
+      deleteButton.textContent =
+        "×";
 
 
       deleteButton.addEventListener(
         "click",
         async function() {
 
-          const confirmed =
-            confirm(
+          if (
+            !confirm(
               "Apagar esta nota?"
-            );
-
-
-          if (!confirmed) {
+            )
+          ) {
             return;
           }
 
@@ -2347,7 +2373,6 @@ function formatDate(
   if (
     parts.length !== 3
   ) {
-
     return dateString;
   }
 
@@ -2422,50 +2447,39 @@ logForm.addEventListener(
 
     try {
 
-      const response =
-        await supabaseRequest(
-          "torre_logs",
-          {
-            method: "POST",
+      await supabaseRequest(
+        "torre_logs",
+        {
+          method: "POST",
 
-            headers: {
-              "Prefer":
-                "return=representation"
-            },
+          headers: {
+            "Prefer":
+              "return=representation"
+          },
 
-            body:
-              JSON.stringify({
+          body:
+            JSON.stringify({
 
-                category_id:
-                  currentCategory.id,
+              category_id:
+                currentCategory.id,
 
-                inventory_number:
-                  number,
+              inventory_number:
+                number,
 
-                log_date:
-                  date,
+              log_date:
+                date,
 
-                note:
-                  note
-              })
-          }
-        );
+              note:
+                note
+            })
+        }
+      );
 
-
-      if (
-        !response.ok
-      ) {
-
-        throw new Error(
-          "Não foi possível guardar o log."
-        );
-      }
-
-
-      logNote.value =
-        "";
 
       logNumber.value =
+        "";
+
+      logNote.value =
         "";
 
 
@@ -2535,9 +2549,6 @@ async function init() {
     `;
   }
 }
-
-
-init();
 
 
 init();
