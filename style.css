@@ -552,17 +552,80 @@ main {
   cursor: pointer;
 }
 
+/* =========================
+   IMAGE VIEWER
+========================= */
+
+#image-viewer {
+  position: fixed;
+  inset: 0;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+
+  background: #ffffff;
+
+  z-index: 500;
+
+  cursor: default;
+}
+
 #image-viewer.open {
   display: flex;
 }
 
+#image-viewer-frame {
+  position: relative;
+
+  max-width: 78vw;
+  max-height: 78vh;
+
+  padding: 12px;
+
+  border: 1px solid #0000ff;
+
+  background: #ffffff;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
 #viewer-image {
-  max-width: 90vw;
-  max-height: 90vh;
+  display: block;
+
+  max-width: 72vw;
+  max-height: 72vh;
+
+  width: auto;
+  height: auto;
 
   object-fit: contain;
+}
 
-  transform: scale(1.4);
+#image-viewer-close {
+  position: absolute;
+
+  top: 18px;
+  right: 24px;
+
+  color: #0000ff;
+
+  font-size: 28px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  z-index: 510;
+}
+
+#image-viewer-close:hover {
+  text-decoration: underline;
 }
 
 
