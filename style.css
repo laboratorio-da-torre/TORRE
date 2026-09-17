@@ -45,7 +45,7 @@ button {
   align-items: flex-start;
 
   position: relative;
-  z-index: 20;
+  z-index: 100;
 }
 
 #menu-button {
@@ -87,7 +87,7 @@ button {
   flex-direction: column;
   align-items: flex-start;
 
-  z-index: 100;
+  z-index: 200;
 }
 
 #menu.open {
@@ -112,12 +112,13 @@ button {
 
 main {
   width: 100%;
-  padding: 25px 24px 100px;
+  padding: 30px 24px 100px;
 }
 
 #category-title {
-  width: 70vw;
-  margin: 0 auto 14px;
+  width: 70%;
+  margin: 0 auto 16px;
+
   font-size: 14px;
 }
 
@@ -127,21 +128,21 @@ main {
 ========================= */
 
 #archive-section {
-  width: 70vw;
+  width: 70%;
   margin: 0 auto;
 }
 
 #archive-wrapper {
   width: 100%;
 
-  overflow: visible;
+  padding: 0;
 
-  padding-left: 48px;
-  padding-right: 32px;
+  overflow: visible;
 }
 
 #archive {
   width: 100%;
+  max-width: 100%;
 }
 
 
@@ -155,22 +156,28 @@ main {
   display: grid;
 
   width: 100%;
+  max-width: 100%;
   min-width: 0;
 
-  --grid-columns: repeat(6, minmax(0, 1fr));
-
   grid-template-columns: var(--grid-columns);
+
+  /*
+   * Todas as linhas recebem
+   * exactamente a mesma definição.
+   */
 }
 
 
 /* =========================
-   CELL
+   CELLS
 ========================= */
 
 .cell {
   position: relative;
 
   min-width: 0;
+  width: 100%;
+
   min-height: 1.5cm;
 
   padding: 7px 8px 6px;
@@ -199,12 +206,11 @@ main {
 .row-number {
   position: absolute;
 
-  right: calc(100% + 8px);
+  right: calc(100% + 14px);
   top: 0;
 
-  width: 40px;
+  width: 36px;
   height: 100%;
-  min-height: 1.5cm;
 
   display: flex;
 
@@ -228,7 +234,10 @@ main {
 
 .image-cell {
   padding: 0;
+
   cursor: pointer;
+
+  overflow: hidden;
 }
 
 .image-cell img {
@@ -251,6 +260,13 @@ main {
 .image-placeholder {
   width: 100%;
   min-height: 1.5cm;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-start;
+
+  padding: 7px 8px;
 }
 
 
@@ -290,10 +306,10 @@ main {
 .delete-row {
   position: absolute;
 
-  left: calc(100% + 7px);
+  left: calc(100% + 9px);
   top: 0;
 
-  width: 22px;
+  width: 20px;
   height: 100%;
 
   display: flex;
@@ -308,7 +324,7 @@ main {
 
   cursor: pointer;
 
-  z-index: 80;
+  z-index: 100;
 }
 
 .delete-row:hover {
@@ -320,12 +336,20 @@ main {
    CONTROLS
 ========================= */
 
-#row-controls,
+#row-controls {
+  margin-top: 10px;
+
+  display: flex;
+  gap: 14px;
+}
+
 #column-controls {
   margin-top: 10px;
 
   display: flex;
   gap: 14px;
+
+  justify-content: flex-end;
 }
 
 #row-controls button,
@@ -336,11 +360,6 @@ main {
 #row-controls button:hover,
 #column-controls button:hover {
   text-decoration: underline;
-}
-
-#column-controls {
-  justify-content: flex-end;
-  width: 100%;
 }
 
 
@@ -354,7 +373,11 @@ main {
   left: 24px;
   bottom: 18px;
 
-  width: 430px;
+  width: 390px;
+
+  max-height: 180px;
+
+  overflow-y: auto;
 
   background: #ffffff;
 
@@ -362,21 +385,28 @@ main {
 
   padding: 8px 10px;
 
-  z-index: 30;
+  z-index: 150;
 }
 
 #logs-title {
   margin-bottom: 6px;
+
   font-size: 14px;
 }
 
 
-/* FORM */
+/* =========================
+   LOG FORM
+========================= */
 
 #log-form {
   display: grid;
 
-  grid-template-columns: 92px 45px minmax(0, 1fr) 20px;
+  grid-template-columns:
+    88px
+    42px
+    minmax(0, 1fr)
+    18px;
 
   gap: 5px;
 
@@ -387,6 +417,8 @@ main {
 
 #log-form input,
 #log-form textarea {
+  width: 100%;
+
   border: 0;
   border-bottom: 1px solid #0000ff;
 
@@ -402,17 +434,16 @@ main {
 }
 
 #log-note {
-  min-height: 28px;
-  height: 28px;
+  min-height: 24px;
+  height: 24px;
 
   resize: none;
 }
 
 #log-form button {
-  text-align: center;
-  align-self: end;
+  height: 24px;
 
-  height: 28px;
+  text-align: center;
 }
 
 #log-form button:hover {
@@ -420,12 +451,18 @@ main {
 }
 
 
-/* LOG ENTRIES */
+/* =========================
+   LOG ENTRIES
+========================= */
 
 .log-entry {
   display: grid;
 
-  grid-template-columns: 72px 34px minmax(0, 1fr) 18px;
+  grid-template-columns:
+    70px
+    32px
+    minmax(0, 1fr)
+    16px;
 
   gap: 5px;
 
@@ -434,27 +471,18 @@ main {
   margin-bottom: 3px;
 }
 
-.log-meta {
-  display: contents;
-}
-
-.log-date-display {
-  width: auto;
-}
-
-.log-number-display {
-  width: auto;
+.log-date-display,
+.log-number-display,
+.log-note-display {
+  min-width: 0;
 }
 
 .log-note-display {
-  min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .delete-log {
-  width: 18px;
-
-  flex-shrink: 0;
+  width: 16px;
 
   cursor: pointer;
 
@@ -481,7 +509,7 @@ main {
 
   background: #ffffff;
 
-  z-index: 200;
+  z-index: 500;
 }
 
 #image-viewer.open {
@@ -544,16 +572,16 @@ main {
   }
 
   #category-title {
-    width: calc(100vw - 28px);
+    width: 100%;
   }
 
   #archive-section {
-    width: calc(100vw - 28px);
+    width: 100%;
   }
 
   #archive-wrapper {
-    padding-left: 46px;
-    padding-right: 28px;
+    padding-left: 42px;
+    padding-right: 25px;
   }
 
   #logs-section {
@@ -561,9 +589,15 @@ main {
     bottom: 14px;
 
     width: calc(100vw - 28px);
+
+    max-height: 160px;
   }
 
   #log-form {
-    grid-template-columns: 82px 45px minmax(0, 1fr) 20px;
+    grid-template-columns:
+      80px
+      42px
+      minmax(0, 1fr)
+      18px;
   }
 }
