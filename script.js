@@ -920,21 +920,13 @@ function createRowElement(
         );
 
 
-        cell.addEventListener(
-          "keydown",
-          function(event) {
-
-            if (
-              event.key ===
-              "Enter"
-            ) {
-
-              event.preventDefault();
-
-              cell.blur();
-            }
-          }
-        );
+        /*
+         * Enter já não fecha a edição.
+         * A célula cresce automaticamente
+         * (para baixo) quando o texto
+         * precisa de mais espaço, o que
+         * empurra a altura de toda a linha.
+         */
       }
 
 
@@ -2627,7 +2619,8 @@ logForm.addEventListener(
       );
 
       alert(
-        "Erro ao guardar a nota."
+        "Erro ao guardar a nota: " +
+        error.message
       );
     }
   }
