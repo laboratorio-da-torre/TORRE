@@ -3,7 +3,7 @@
 ========================================================= */
 
 const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.coL";
+  "https://rvfdobjhfwjdvufwrirp.supabase.co";
 
 const SUPABASE_KEY =
   "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
