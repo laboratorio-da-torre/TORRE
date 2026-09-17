@@ -14,7 +14,8 @@ const BUCKET =
 const GOOGLE_SHEETS_URL =
   "https://docs.google.com/spreadsheets/d/1FO_BRYjuPgpVs3tVaeioE1YjDGEBtgrS5776_Q9-12I/edit?gid=1510436497#gid=1510436497";
 
-
+const saveLogButton =
+  document.getElementById("save-log");
 /* =========================================================
    DOM
 ========================================================= */
@@ -545,97 +546,64 @@ async function ensureRows() {
 
 async function repairInventoryNumbers() {
 
+  if (!rows.length) {
+    return;
+  }
+
+  const orderedRows = [...rows].sort(
+    (a, b) =>
+      Number(a.position || 0) -
+      Number(b.position || 0)
+  );
+
   /*
-   * O número visual corresponde à posição
-   * da linha no arquivo.
-   *
-   * Assim:
-   * primeira linha = 001
-   * segunda linha  = 002
-   * terceira linha = 003
-   *
-   * Isto também corrige números duplicados
-   * ou números antigos que ficaram errados.
+   * A primeira row é a linha de cabeçalho.
+   * Não tem número.
    */
+  const firstRow = orderedRows[0];
 
-  const orderedRows =
-    [...rows].sort(
-      (a, b) =>
-        Number(a.position || 0) -
-        Number(b.position || 0)
-    );
-
-
-  for (
-    let index = 0;
-    index < orderedRows.length;
-    index++
-  ) {
-
-    const row =
-      orderedRows[index];
-
-
-    const expectedNumber =
-      index + 1;
-
-
-    const currentNumber =
-      Number(
-        row.inventory_number
-      );
-
-
-    if (
-      currentNumber ===
-      expectedNumber
-    ) {
-      continue;
-    }
-
-
+  if (firstRow && firstRow.inventory_number !== null) {
     await supabaseRequest(
-      "torre_rows?id=eq." +
-      row.id,
+      "torre_rows?id=eq." + firstRow.id,
       {
-        method:
-          "PATCH",
-
-        body:
-          JSON.stringify({
-            inventory_number:
-              expectedNumber
-          })
+        method: "PATCH",
+        body: JSON.stringify({
+          inventory_number: null
+        })
       }
     );
 
-
-    row.inventory_number =
-      expectedNumber;
+    firstRow.inventory_number = null;
   }
 
-
   /*
-   * Mantém também o estado principal
-   * actualizado.
+   * Não renumeramos números que já existem.
+   * Assim, apagar uma row não altera os números
+   * das restantes.
+   *
+   * Apenas damos número a rows que ainda não têm.
    */
 
-  rows =
-    orderedRows;
-}
-    }
+  const used = new Set(
+    orderedRows
+      .map(row => Number(row.inventory_number))
+      .filter(
+        number =>
+          Number.isFinite(number) &&
+          number > 0
+      )
   );
 
+  let next = used.size
+    ? Math.max(...used) + 1
+    : 1;
 
-  for (
-    const row of rows
-  ) {
+  for (let index = 1; index < orderedRows.length; index++) {
+
+    const row = orderedRows[index];
 
     const current =
-      Number(
-        row.inventory_number
-      );
-
+      Number(row.inventory_number);
 
     if (
       Number.isFinite(current) &&
@@ -644,41 +612,29 @@ async function repairInventoryNumbers() {
       continue;
     }
 
-
-    let next =
-      1;
-
-
-    while (
-      used.has(next)
-    ) {
+    while (used.has(next)) {
       next++;
     }
 
-
     await supabaseRequest(
-      "torre_rows?id=eq." +
-      row.id,
+      "torre_rows?id=eq." + row.id,
       {
         method: "PATCH",
-
-        body:
-          JSON.stringify({
-            inventory_number:
-              next
-          })
+        body: JSON.stringify({
+          inventory_number: next
+        })
       }
     );
 
-
-    row.inventory_number =
-      next;
-
+    row.inventory_number = next;
 
     used.add(next);
-  }
-}
 
+    next++;
+  }
+
+  rows = orderedRows;
+}
 
 /* =========================================================
    CRIAR LINHA
@@ -982,47 +938,33 @@ function renderArchiveHeader() {
         }
       );
 
+if (rows.indexOf(row) > 0) {
 
-      cell.appendChild(
-        title
-      );
+  const numberCell =
+    document.createElement("div");
 
+  numberCell.className =
+    "cell inventory-number-cell";
 
-      /*
-       * Resize
-       */
+  const number =
+    Number(row.inventory_number);
 
-      const handle =
-        document.createElement(
-          "div"
-        );
+  if (Number.isFinite(number)) {
 
+    numberCell.textContent =
+      String(
+        Math.floor(number)
+      ).padStart(3, "0");
 
-      handle.className =
-        "column-resize-handle";
+  } else {
 
+    numberCell.textContent = "";
+  }
 
-      handle.addEventListener(
-        "pointerdown",
-        event => {
-
-          startColumnResize(
-            event,
-            index,
-            handle
-          );
-        }
-      );
-
-
-      cell.appendChild(
-        handle
-      );
-
-
-      header.appendChild(
-        cell
-      );
+  rowElement.appendChild(
+    numberCell
+  );
+}
     }
   );
 
@@ -2201,30 +2143,20 @@ document.addEventListener(
 /* =========================================================
    IMAGE VIEWER
 ========================================================= */
+function openImageViewer(url) {
 
-function openImageViewer(
-  url
-) {
+  viewerImage.src = url;
 
-  viewerImage.src =
-    url;
-
-  imageViewer.classList.add(
-    "open"
-  );
+  viewer.classList.add("open");
 }
 
 
 function closeImageViewer() {
 
-  imageViewer.classList.remove(
-    "open"
-  );
+  viewer.classList.remove("open");
 
-  viewerImage.src =
-    "";
+  viewerImage.src = "";
 }
-
 
 imageViewerClose.addEventListener(
   "click",
@@ -2244,21 +2176,6 @@ imageViewer.addEventListener(
     if (
       event.target ===
       imageViewer
-    ) {
-
-      closeImageViewer();
-    }
-  }
-);
-
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key ===
-      "Escape"
     ) {
 
       closeImageViewer();
@@ -2472,6 +2389,7 @@ saveLogButton.addEventListener(
     const number =
       Number(
         logNumber.value
+         
       );
 
 
