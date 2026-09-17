@@ -117,15 +117,9 @@ main {
 
 #category-title {
   width: 70%;
-  margin: 0 auto 22px;
+  margin: 0 auto 16px;
 
   font-size: 14px;
-  font-weight: 700;
-
-  line-height: 1;
-
-  position: relative;
-  top: -4px;
 }
 
 
@@ -140,72 +134,15 @@ main {
 
 #archive-wrapper {
   width: 100%;
+
   padding: 0;
+
   overflow: visible;
 }
 
 #archive {
   width: 100%;
   max-width: 100%;
-}
-
-
-/* =========================
-   HEADER DA GRID
-========================= */
-
-.archive-header {
-  display: grid;
-
-  width: 100%;
-  max-width: 100%;
-
-  grid-template-columns: var(--grid-columns);
-
-  position: relative;
-
-  font-weight: 700;
-}
-
-.archive-header-cell {
-  position: relative;
-
-  min-width: 0;
-  width: 100%;
-
-  min-height: 1.5cm;
-
-  padding: 7px 8px 6px;
-
-  border-right: 1px solid #0000ff;
-  border-bottom: 2px solid #0000ff;
-
-  overflow: visible;
-
-  overflow-wrap: anywhere;
-
-  display: flex;
-  align-items: center;
-}
-
-.archive-header-cell:first-child {
-  border-left: 2px solid #0000ff;
-}
-
-.archive-header-number {
-  justify-content: center;
-}
-
-.archive-header-title {
-  cursor: text;
-}
-
-.archive-header-title[contenteditable="true"] {
-  outline: none;
-}
-
-.archive-header-title:focus {
-  text-decoration: underline;
 }
 
 
@@ -223,6 +160,11 @@ main {
   min-width: 0;
 
   grid-template-columns: var(--grid-columns);
+
+  /*
+   * Todas as linhas recebem
+   * exactamente a mesma definição.
+   */
 }
 
 
@@ -248,27 +190,41 @@ main {
   overflow-wrap: anywhere;
 }
 
+.archive-row:first-child .cell {
+  border-top: 2px solid #0000ff;
+}
+
+.cell:first-child {
+  border-left: 2px solid #0000ff;
+}
+
 
 /* =========================
    INVENTORY NUMBER
 ========================= */
 
-.inventory-number-cell {
+.row-number {
+  position: absolute;
+
+  right: calc(100% + 14px);
+  top: 0;
+
+  width: 36px;
+  height: 100%;
+
   display: flex;
 
   align-items: center;
   justify-content: center;
 
+  color: #0000ff;
+
   font-size: 14px;
   font-weight: 700;
 
+  line-height: 1;
+
   white-space: nowrap;
-
-  border-left: 2px solid #0000ff;
-}
-
-.inventory-number-cell.empty {
-  font-weight: 400;
 }
 
 
@@ -554,84 +510,19 @@ main {
   background: #ffffff;
 
   z-index: 500;
-
-  cursor: pointer;
-}
-
-/* =========================
-   IMAGE VIEWER
-========================= */
-
-#image-viewer {
-  position: fixed;
-  inset: 0;
-
-  display: none;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 40px;
-
-  background: #ffffff;
-
-  z-index: 500;
-
-  cursor: default;
 }
 
 #image-viewer.open {
   display: flex;
 }
 
-#image-viewer-frame {
-  position: relative;
-
-  max-width: 78vw;
-  max-height: 78vh;
-
-  padding: 12px;
-
-  border: 1px solid #0000ff;
-
-  background: #ffffff;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-}
-
 #viewer-image {
-  display: block;
-
-  max-width: 72vw;
-  max-height: 72vh;
-
-  width: auto;
-  height: auto;
+  max-width: 90vw;
+  max-height: 90vh;
 
   object-fit: contain;
-}
 
-#image-viewer-close {
-  position: absolute;
-
-  top: 18px;
-  right: 24px;
-
-  color: #0000ff;
-
-  font-size: 28px;
-  line-height: 1;
-
-  cursor: pointer;
-
-  z-index: 510;
-}
-
-#image-viewer-close:hover {
-  text-decoration: underline;
+  transform: scale(1.4);
 }
 
 
@@ -661,72 +552,6 @@ main {
 
 
 /* =========================
-   POPUP DESENVOLVIMENTO
-========================= */
-
-#development-notice {
-  position: fixed;
-  inset: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background: rgba(255, 255, 255, 0.85);
-
-  z-index: 9999;
-}
-
-#development-notice-box {
-  position: relative;
-
-  width: 420px;
-  max-width: 100%;
-
-  padding: 24px;
-
-  border: 1px solid #0000ff;
-
-  background: #ffffff;
-
-  color: #0000ff;
-}
-
-#development-notice-close {
-  position: absolute;
-
-  top: 5px;
-  right: 8px;
-
-  color: #0000ff;
-
-  font-size: 24px;
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-#development-notice-close:hover {
-  text-decoration: underline;
-}
-
-#development-notice-title {
-  margin-bottom: 12px;
-}
-
-#development-notice-text p {
-  margin: 0 0 10px;
-}
-
-#development-notice-text p:last-child {
-  margin-bottom: 0;
-}
-
-
-/* =========================
    MOBILE
 ========================= */
 
@@ -748,7 +573,6 @@ main {
 
   #category-title {
     width: 100%;
-    margin-bottom: 18px;
   }
 
   #archive-section {
@@ -756,7 +580,7 @@ main {
   }
 
   #archive-wrapper {
-    padding-left: 0;
+    padding-left: 42px;
     padding-right: 25px;
   }
 
@@ -775,13 +599,5 @@ main {
       42px
       minmax(0, 1fr)
       18px;
-  }
-
-  #development-notice {
-    padding: 14px;
-  }
-
-  #development-notice-box {
-    padding: 20px;
   }
 }
