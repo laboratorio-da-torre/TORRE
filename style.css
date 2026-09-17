@@ -2,242 +2,358 @@
   box-sizing: border-box;
 }
 
+:root {
+  --blue: #0000ff;
+  --white: #ffffff;
+  --border: 1px solid var(--blue);
+  --header-border: 2px solid var(--blue);
+  --grid-columns: 70px repeat(6, 1fr);
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
-}
-
-body {
-  background: #ffffff;
-  color: #0000ff;
+  background: var(--white);
+  color: var(--blue);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
-  line-height: 1.25;
-}
-
-button,
-input,
-textarea {
-  font: inherit;
-  color: #0000ff;
-}
-
-button {
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
 }
 
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+   ========================================================= */
 
-#header {
-  width: 100%;
-  padding: 18px 24px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
+#site-header {
   position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 10px 18px;
+  border-bottom: var(--border);
+  background: var(--white);
   z-index: 100;
 }
 
-#menu-button {
-  color: #0000ff;
+#menu-toggle {
+  border: 0;
+  padding: 0;
+  margin: 0 24px 0 0;
+
+  background: transparent;
+  color: var(--blue);
+
+  font-family: inherit;
   font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
 }
 
-#menu-button:hover {
-  text-decoration: underline;
-}
-
-#laboratorio-link {
-  color: #0000ff;
-  text-decoration: none;
-  font-size: 16px;
-}
-
-#laboratorio-link:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================
-   MENU
-========================= */
-
-#menu {
-  display: none;
-
-  position: absolute;
-  top: 48px;
-  left: 24px;
-
-  background: #ffffff;
-  border: 1px solid #0000ff;
-
-  padding: 8px 12px;
-
-  flex-direction: column;
-  align-items: flex-start;
-
-  z-index: 200;
-}
-
-#menu.open {
+#category-menu {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .category-button {
-  display: block;
-  text-align: left;
-  padding: 3px 0;
-  white-space: nowrap;
+  border: 1px solid var(--blue);
+  background: var(--white);
+  color: var(--blue);
+
+  padding: 5px 9px;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  cursor: pointer;
 }
 
-.category-button:hover {
-  text-decoration: underline;
+.category-button:hover,
+.category-button.active {
+  background: var(--blue);
+  color: var(--white);
 }
 
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+   ========================================================= */
 
 main {
   width: 100%;
-  padding: 30px 24px 100px;
+  padding: 25px 18px 100px;
 }
 
 #category-title {
-  width: 70%;
-  margin: 0 auto 16px;
+  margin: 0 0 22px;
+  color: var(--blue);
 
-  font-size: 14px;
+  font-size: 28px;
+  line-height: 1;
+
+  font-weight: 700;
 }
 
 
-/* =========================
+/* =========================================================
    ARCHIVE
-========================= */
+   ========================================================= */
 
 #archive-section {
-  width: 70%;
-  margin: 0 auto;
+  width: 100%;
 }
 
 #archive-wrapper {
   width: 100%;
-
-  padding: 0;
-
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: visible;
 }
+
+
+/*
+  O archive tem agora:
+
+  1 coluna para o número
+  +
+  todas as colunas do inventário
+*/
 
 #archive {
+  min-width: 900px;
   width: 100%;
-  max-width: 100%;
 }
 
 
-/* =========================
-   ROW
-========================= */
+/* =========================================================
+   CABEÇALHO ESPECIAL DA GRELHA
+   ========================================================= */
 
-.archive-row {
-  position: relative;
-
+.archive-header-row {
   display: grid;
-
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
 
   grid-template-columns: var(--grid-columns);
 
-  /*
-   * Todas as linhas recebem
-   * exactamente a mesma definição.
-   */
+  width: 100%;
+
+  margin: 0;
+
+  position: relative;
+
+  border-top: var(--header-border);
+  border-left: var(--header-border);
+  border-right: var(--header-border);
+  border-bottom: var(--header-border);
+
+  background: var(--white);
+
+  z-index: 10;
 }
 
 
-/* =========================
-   CELLS
-========================= */
+/*
+  A linha de cabeçalho é visualmente diferente
+  das linhas normais.
+*/
 
-.cell {
+.archive-header-cell {
+  min-width: 0;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+
   position: relative;
 
-  min-width: 0;
-  width: 100%;
+  padding: 7px 28px 7px 9px;
 
-  min-height: 1.5cm;
+  border-right: var(--header-border);
 
-  padding: 7px 8px 6px;
+  color: var(--blue);
 
-  border-right: 1px solid #0000ff;
-  border-bottom: 1px solid #0000ff;
+  font-size: 13px;
+  line-height: 1.15;
+  font-weight: 700;
 
-  overflow: visible;
+  background: var(--white);
+}
 
+
+/*
+  Última célula não precisa da borda direita
+  porque a própria row já tem a borda.
+*/
+
+.archive-header-cell:last-child {
+  border-right: 0;
+}
+
+
+/*
+  Primeira célula = número.
+*/
+
+.archive-header-number {
+  justify-content: center;
+
+  padding: 5px;
+
+  text-align: center;
+
+  background: var(--white);
+}
+
+
+/*
+  Títulos editáveis.
+*/
+
+.archive-header-title {
+  cursor: text;
+
+  outline: none;
+
+  white-space: normal;
   overflow-wrap: anywhere;
 }
 
-.archive-row:first-child .cell {
-  border-top: 2px solid #0000ff;
+.archive-header-title:focus {
+  background: #f4f4ff;
 }
 
-.cell:first-child {
-  border-left: 2px solid #0000ff;
+.archive-header-title[data-saving="true"] {
+  opacity: 0.55;
+}
+
+.archive-header-title[data-saved="true"] {
+  background: #f4f4ff;
 }
 
 
-/* =========================
-   INVENTORY NUMBER
-========================= */
+/*
+  Pequena indicação visual de que o título
+  pode ser editado.
+*/
 
-.row-number {
+.archive-header-title::after {
+  content: "✎";
+
   position: absolute;
 
-  right: calc(100% + 14px);
-  top: 0;
+  top: 5px;
+  right: 7px;
 
-  width: 36px;
-  height: 100%;
+  font-size: 10px;
+
+  opacity: 0.45;
+}
+
+
+/* =========================================================
+   LINHAS DE INVENTÁRIO
+   ========================================================= */
+
+.archive-row {
+  display: grid;
+
+  grid-template-columns: var(--grid-columns);
+
+  width: 100%;
+
+  position: relative;
+
+  border-left: var(--border);
+  border-right: var(--border);
+  border-bottom: var(--border);
+
+  background: var(--white);
+}
+
+
+/*
+  PRIMEIRA COLUNA:
+  número de inventário.
+
+  Agora está efectivamente dentro da grelha.
+*/
+
+.inventory-number-cell {
+  min-width: 0;
+  min-height: 1.5cm;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  color: #0000ff;
+  padding: 5px;
+
+  border-right: var(--border);
+
+  color: var(--blue);
 
   font-size: 14px;
   font-weight: 700;
 
-  line-height: 1;
+  text-align: center;
 
-  white-space: nowrap;
+  background: var(--white);
 }
 
 
-/* =========================
-   IMAGE
-========================= */
+/* =========================================================
+   CÉLULAS NORMAIS
+   ========================================================= */
+
+.cell {
+  min-width: 0;
+  min-height: 1.5cm;
+
+  position: relative;
+
+  padding: 8px;
+
+  border-right: var(--border);
+
+  color: var(--blue);
+
+  font-size: 14px;
+
+  background: var(--white);
+}
+
+.cell:last-child {
+  border-right: 0;
+}
+
+
+.text-cell {
+  outline: none;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  cursor: text;
+}
+
+.text-cell:focus {
+  background: #f8f8ff;
+}
+
+
+/* =========================================================
+   IMAGENS
+   ========================================================= */
 
 .image-cell {
   padding: 0;
 
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   overflow: hidden;
+
+  cursor: pointer;
 }
 
 .image-cell img {
@@ -246,15 +362,9 @@ main {
   width: 100%;
   height: auto;
 
-  max-width: 100%;
+  max-height: 300px;
 
   object-fit: contain;
-
-  transition: transform 0.15s ease;
-}
-
-.image-cell:hover img {
-  transform: scale(1.03);
 }
 
 .image-placeholder {
@@ -262,342 +372,459 @@ main {
   min-height: 1.5cm;
 
   display: flex;
-
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 
-  padding: 7px 8px;
+  padding: 8px;
+
+  color: var(--blue);
+
+  font-size: 12px;
+
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.image-placeholder:hover {
+  background: #f8f8ff;
 }
 
 
-/* =========================
-   RESIZE HANDLE
-========================= */
+/* =========================================================
+   RESIZE
+   ========================================================= */
 
-.column-resize-handle {
+.resize-handle {
   position: absolute;
 
   top: 0;
-  right: -5px;
+  right: -4px;
 
-  width: 10px;
+  width: 8px;
   height: 100%;
 
   cursor: col-resize;
 
-  z-index: 50;
-
-  touch-action: none;
+  z-index: 20;
 }
 
-.column-resize-handle:hover {
-  background: rgba(0, 0, 255, 0.08);
-}
-
-.column-resize-handle.dragging {
-  background: rgba(0, 0, 255, 0.15);
+.resize-handle:hover {
+  background: var(--blue);
+  opacity: 0.15;
 }
 
 
-/* =========================
-   DELETE ROW
-========================= */
+/* =========================================================
+   BOTÃO DE APAGAR LINHA
+   ========================================================= */
 
-.delete-row {
+.delete-row-button {
   position: absolute;
 
-  left: calc(100% + 9px);
-  top: 0;
+  right: -29px;
+  top: 50%;
 
-  width: 20px;
-  height: 100%;
+  transform: translateY(-50%);
 
-  display: flex;
+  width: 22px;
+  height: 22px;
 
-  align-items: center;
-  justify-content: center;
+  padding: 0;
 
-  color: #0000ff;
+  border: 1px solid var(--blue);
 
-  font-size: 15px;
+  background: var(--white);
+  color: var(--blue);
+
+  font-family: inherit;
+  font-size: 14px;
   line-height: 1;
 
   cursor: pointer;
-
-  z-index: 100;
 }
 
-.delete-row:hover {
-  text-decoration: underline;
+.delete-row-button:hover {
+  background: var(--blue);
+  color: var(--white);
 }
 
 
-/* =========================
-   CONTROLS
-========================= */
+/* =========================================================
+   CONTROLOS
+   ========================================================= */
 
-#row-controls {
-  margin-top: 10px;
-
+#archive-controls {
   display: flex;
-  gap: 14px;
+  gap: 8px;
+
+  margin-top: 16px;
 }
 
-#column-controls {
-  margin-top: 10px;
+#archive-controls button {
+  border: 1px solid var(--blue);
 
-  display: flex;
-  gap: 14px;
+  background: var(--white);
+  color: var(--blue);
 
-  justify-content: flex-end;
-}
+  padding: 6px 10px;
 
-#row-controls button,
-#column-controls button {
-  color: #0000ff;
-}
-
-#row-controls button:hover,
-#column-controls button:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================
-   LOG
-========================= */
-
-#logs-section {
-  position: fixed;
-
-  left: 24px;
-  bottom: 18px;
-
-  width: 390px;
-
-  max-height: 180px;
-
-  overflow-y: auto;
-
-  background: #ffffff;
-
-  border: 1px solid #0000ff;
-
-  padding: 8px 10px;
-
-  z-index: 150;
-}
-
-#logs-title {
-  margin-bottom: 6px;
-
-  font-size: 14px;
-}
-
-
-/* =========================
-   LOG FORM
-========================= */
-
-#log-form {
-  display: grid;
-
-  grid-template-columns:
-    88px
-    42px
-    minmax(0, 1fr)
-    18px;
-
-  gap: 5px;
-
-  margin-bottom: 7px;
-
-  align-items: end;
-}
-
-#log-form input,
-#log-form textarea {
-  width: 100%;
-
-  border: 0;
-  border-bottom: 1px solid #0000ff;
-
-  border-radius: 0;
-
-  outline: none;
-
-  background: transparent;
-
-  padding: 2px 0;
-
-  min-width: 0;
-}
-
-#log-note {
-  min-height: 24px;
-  height: 24px;
-
-  resize: none;
-}
-
-#log-form button {
-  height: 24px;
-
-  text-align: center;
-}
-
-#log-form button:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================
-   LOG ENTRIES
-========================= */
-
-.log-entry {
-  display: grid;
-
-  grid-template-columns:
-    70px
-    32px
-    minmax(0, 1fr)
-    16px;
-
-  gap: 5px;
-
-  align-items: start;
-
-  margin-bottom: 3px;
-}
-
-.log-date-display,
-.log-number-display,
-.log-note-display {
-  min-width: 0;
-}
-
-.log-note-display {
-  overflow-wrap: anywhere;
-}
-
-.delete-log {
-  width: 16px;
+  font-family: inherit;
+  font-size: 13px;
 
   cursor: pointer;
-
-  text-align: center;
 }
 
-.delete-log:hover {
-  text-decoration: underline;
+#archive-controls button:hover {
+  background: var(--blue);
+  color: var(--white);
 }
 
 
-/* =========================
-   IMAGE VIEWER
-========================= */
+/* =========================================================
+   LOG
+   ========================================================= */
 
-#image-viewer {
+#log-section {
   position: fixed;
-  inset: 0;
 
-  display: none;
+  left: 14px;
+  bottom: 14px;
 
-  align-items: center;
-  justify-content: center;
+  width: 390px;
+  max-width: calc(100vw - 28px);
 
-  background: #ffffff;
+  border: 2px solid var(--blue);
+
+  background: var(--white);
 
   z-index: 500;
 }
 
-#image-viewer.open {
+#log-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 34px;
+
+  padding: 5px 9px;
+
+  border-bottom: 1px solid var(--blue);
+
+  font-size: 13px;
+  font-weight: 700;
 }
 
-#viewer-image {
-  max-width: 90vw;
-  max-height: 90vh;
+#log-toggle {
+  border: 0;
 
-  object-fit: contain;
+  padding: 0;
 
-  transform: scale(1.4);
+  background: transparent;
+  color: var(--blue);
+
+  font-size: 18px;
+
+  cursor: pointer;
+}
+
+#log-content {
+  max-height: 300px;
+
+  overflow-y: auto;
+
+  padding: 8px;
+}
+
+.log-entry {
+  display: grid;
+
+  grid-template-columns: 75px 50px 1fr 20px;
+
+  gap: 7px;
+
+  padding: 5px 0;
+
+  border-bottom: 1px solid #ccccff;
+
+  font-size: 12px;
+}
+
+.log-date {
+  white-space: nowrap;
+}
+
+.log-number {
+  font-weight: 700;
+}
+
+.log-note {
+  overflow-wrap: anywhere;
+}
+
+.log-delete {
+  border: 0;
+
+  padding: 0;
+
+  background: transparent;
+  color: var(--blue);
+
+  cursor: pointer;
+}
+
+#log-form {
+  margin-top: 8px;
+}
+
+.log-form-row {
+  display: grid;
+
+  grid-template-columns: 65px 1fr auto;
+
+  gap: 5px;
+}
+
+.log-form-row input {
+  min-width: 0;
+
+  border: 1px solid var(--blue);
+
+  padding: 5px;
+
+  background: var(--white);
+  color: var(--blue);
+
+  font-family: inherit;
+  font-size: 12px;
+
+  outline: none;
+}
+
+.log-form-row input:focus {
+  background: #f8f8ff;
+}
+
+.log-form-row button {
+  border: 1px solid var(--blue);
+
+  background: var(--white);
+  color: var(--blue);
+
+  padding: 5px 8px;
+
+  font-family: inherit;
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.log-form-row button:hover {
+  background: var(--blue);
+  color: var(--white);
 }
 
 
-/* =========================
-   FOOTER
-========================= */
+/* =========================================================
+   POPUP DESENVOLVIMENTO
+   ========================================================= */
 
-#footer {
-  width: 100%;
+#development-notice {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   padding: 20px;
 
-  display: flex;
+  background: rgba(255, 255, 255, 0.82);
 
-  justify-content: center;
+  z-index: 1000;
+}
+
+#development-notice.hidden {
+  display: none;
+}
+
+#development-notice-box {
+  position: relative;
+
+  width: 430px;
+  max-width: 100%;
+
+  border: 2px solid var(--blue);
+
+  padding: 25px 24px 22px;
+
+  background: var(--white);
+
+  color: var(--blue);
+
+  box-shadow: 8px 8px 0 rgba(0, 0, 255, 0.08);
+}
+
+#development-notice-title {
+  margin-bottom: 20px;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+#development-notice-text {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#development-notice-text p {
+  margin: 0 0 12px;
+}
+
+#development-notice-text p:last-child {
+  margin-bottom: 0;
+}
+
+#development-notice-close {
+  position: absolute;
+
+  top: 7px;
+  right: 9px;
+
+  width: 25px;
+  height: 25px;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--blue);
+
+  font-size: 23px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   IMAGE VIEWER
+   ========================================================= */
+
+#image-viewer {
+  position: fixed;
+
+  inset: 0;
+
+  display: none;
   align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  z-index: 900;
 }
 
-#footer a {
-  color: #0000ff;
-  text-decoration: none;
+#image-viewer.visible {
+  display: flex;
 }
 
-#footer a:hover {
-  text-decoration: underline;
+#image-viewer-image {
+  max-width: 95vw;
+  max-height: 90vh;
+
+  object-fit: contain;
+}
+
+#image-viewer-close {
+  position: absolute;
+
+  top: 15px;
+  right: 20px;
+
+  border: 0;
+
+  background: transparent;
+  color: var(--blue);
+
+  font-size: 34px;
+
+  cursor: pointer;
 }
 
 
-/* =========================
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer {
+  padding: 25px 18px;
+
+  border-top: var(--border);
+
+  font-size: 12px;
+}
+
+footer a {
+  color: var(--blue);
+}
+
+
+/* =========================================================
    MOBILE
-========================= */
+   ========================================================= */
 
 @media (max-width: 700px) {
 
-  #header {
-    padding: 14px;
+  #site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  #menu-button,
-  #laboratorio-link {
-    font-size: 14px;
+  #menu-toggle {
+    margin-right: 0;
+  }
+
+  #category-menu {
+    width: 100%;
   }
 
   main {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding: 20px 12px 110px;
   }
 
   #category-title {
-    width: 100%;
+    font-size: 24px;
   }
 
-  #archive-section {
-    width: 100%;
+  #archive {
+    min-width: 800px;
   }
 
-  #archive-wrapper {
-    padding-left: 42px;
-    padding-right: 25px;
+  #log-section {
+    left: 8px;
+    bottom: 8px;
+
+    width: calc(100vw - 16px);
   }
 
-  #logs-section {
-    left: 14px;
-    bottom: 14px;
-
-    width: calc(100vw - 28px);
-
-    max-height: 160px;
+  #log-content {
+    max-height: 250px;
   }
 
-  #log-form {
-    grid-template-columns:
-      80px
-      42px
-      minmax(0, 1fr)
-      18px;
+  .log-entry {
+    grid-template-columns: 65px 45px 1fr 20px;
+  }
+
+  .delete-row-button {
+    right: -26px;
+  }
+
+  #development-notice-box {
+    padding: 22px 18px 18px;
   }
 }
