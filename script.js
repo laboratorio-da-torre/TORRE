@@ -3,10 +3,10 @@
 ========================================================= */
 
 const SUPABASE_URL =
-  "https://rvfdobjhfwjdvufwrirp.supabase.co";
+  "COLOCA_AQUI_O_PROJECT_URL";
 
 const SUPABASE_KEY =
-  "sb_publishable_aXh2Uj79AHJpjRXLVZeKA_UCRE96LL";
+  "COLOCA_AQUI_O_PUBLISHABLE_KEY";
 
 const BUCKET =
   "images";
@@ -60,6 +60,9 @@ const viewerImage =
 const logs =
   document.getElementById("logs");
 
+const logForm =
+  document.getElementById("log-form");
+
 const logDate =
   document.getElementById("log-date");
 
@@ -68,9 +71,6 @@ const logNumber =
 
 const logNote =
   document.getElementById("log-note");
-
-const saveLogButton =
-  document.getElementById("save-log");
 
 const sheetsLink =
   document.getElementById("sheets-link");
@@ -306,6 +306,11 @@ async function loadColumns() {
   }
 
 
+  /*
+   * Larguras existentes são convertidas
+   * para proporções.
+   */
+
   let total =
     columns.reduce(
       (sum, column) =>
@@ -351,21 +356,12 @@ async function loadColumns() {
 
 function getGridTemplate() {
 
-  /*
-   * A primeira coluna é sempre a coluna
-   * fixa do número de inventário.
-   *
-   * As restantes colunas correspondem
-   * às colunas existentes no Supabase.
-   */
-
-  return [
-    "58px",
-    ...columns.map(
+  return columns
+    .map(
       column =>
         `${column.width_percent}%`
     )
-  ].join(" ");
+    .join(" ");
 }
 
 
@@ -451,6 +447,11 @@ async function ensureRows() {
 ========================================================= */
 
 async function createRow() {
+
+  /*
+   * O número é sempre o maior existente + 1.
+   * Nunca reutilizamos números apagados.
+   */
 
   const numbers =
     rows
@@ -597,19 +598,6 @@ async function render() {
     getGridTemplate();
 
 
-  /*
-   * CABEÇALHO
-   */
-
-  createHeaderRow(
-    template
-  );
-
-
-  /*
-   * LINHAS DE INVENTÁRIO
-   */
-
   rows.forEach(
     (row, rowIndex) => {
 
@@ -624,122 +612,6 @@ async function render() {
 
 
   applyGridTemplate();
-}
-
-
-/* =========================================================
-   HEADER ROW
-========================================================= */
-
-function createHeaderRow(
-  template
-) {
-
-  const header =
-    document.createElement(
-      "div"
-    );
-
-
-  header.className =
-    "archive-row archive-header";
-
-
-  header.style.setProperty(
-    "--grid-columns",
-    template
-  );
-
-
-  /*
-   * NÚMERO
-   */
-
-  const numberHeader =
-    document.createElement(
-      "div"
-    );
-
-
-  numberHeader.className =
-    "cell number-column header-cell";
-
-
-  numberHeader.textContent =
-    "nº";
-
-
-  header.appendChild(
-    numberHeader
-  );
-
-
-  /*
-   * COLUNAS
-   */
-
-  columns.forEach(
-    (column, index) => {
-
-      const cell =
-        document.createElement(
-          "div"
-        );
-
-
-      cell.className =
-        "cell header-cell";
-
-
-      cell.textContent =
-        `coluna ${index + 1}`;
-
-
-      /*
-       * Handle de resize
-       */
-
-      if (
-        index <
-        columns.length - 1
-      ) {
-
-        createResizeHandle(
-          cell,
-          index
-        );
-      }
-
-
-      header.appendChild(
-        cell
-      );
-    }
-  );
-
-
-  /*
-   * Espaço para o botão de apagar
-   */
-
-  const spacer =
-    document.createElement(
-      "div"
-    );
-
-
-  spacer.className =
-    "header-delete-spacer";
-
-
-  header.appendChild(
-    spacer
-  );
-
-
-  archive.appendChild(
-    header
-  );
 }
 
 
@@ -770,9 +642,7 @@ function createRowElement(
   );
 
 
-  /*
-   * NÚMERO DE INVENTÁRIO
-   */
+  /* NUMBER */
 
   const number =
     document.createElement(
@@ -781,7 +651,7 @@ function createRowElement(
 
 
   number.className =
-    "cell number-column";
+    "row-number";
 
 
   number.textContent =
@@ -798,9 +668,7 @@ function createRowElement(
   );
 
 
-  /*
-   * CELLS
-   */
+  /* CELLS */
 
   columns.forEach(
     (column, columnIndex) => {
@@ -821,9 +689,7 @@ function createRowElement(
         );
 
 
-      /*
-       * IMAGEM
-       */
+      /* IMAGE */
 
       if (
         columnIndex === 0
@@ -903,7 +769,9 @@ function createRowElement(
       } else {
 
         /*
-         * TEXTO
+         * As células de texto continuam
+         * editáveis, mas a grelha vertical
+         * é única para todas as rows.
          */
 
         cell.contentEditable =
@@ -955,11 +823,25 @@ function createRowElement(
 
 
       /*
-       * RESIZE
+       * HANDLE:
+       * só existe uma vez por divisão,
+       * na primeira linha.
        *
-       * O handle fica no cabeçalho,
-       * não se repete em todas as linhas.
+       * A alteração aplica-se à grelha
+       * inteira.
        */
+
+      if (
+        rowIndex === 0 &&
+        columnIndex <
+          columns.length - 1
+      ) {
+
+        createResizeHandle(
+          cell,
+          columnIndex
+        );
+      }
 
 
       rowElement.appendChild(
@@ -969,9 +851,7 @@ function createRowElement(
   );
 
 
-  /*
-   * DELETE
-   */
+  /* DELETE */
 
   const deleteButton =
     document.createElement(
@@ -1186,13 +1066,13 @@ function createResizeHandle(
         );
 
 
-        document.removeEventListener(
+        handle.removeEventListener(
           "pointermove",
           move
         );
 
 
-        document.removeEventListener(
+        handle.removeEventListener(
           "pointerup",
           end
         );
@@ -1202,13 +1082,13 @@ function createResizeHandle(
       }
 
 
-      document.addEventListener(
+      handle.addEventListener(
         "pointermove",
         move
       );
 
 
-      document.addEventListener(
+      handle.addEventListener(
         "pointerup",
         end
       );
@@ -1797,6 +1677,11 @@ async function deleteRow(
     );
 
 
+  /*
+   * Só actualizamos a posição.
+   * inventory_number NÃO muda.
+   */
+
   for (
     let i = 0;
     i < rows.length;
@@ -1959,6 +1844,11 @@ async function addColumn() {
     newColumn
   );
 
+
+  /*
+   * TODAS as colunas passam a
+   * ter exactamente a mesma largura.
+   */
 
   const equal =
     100 /
@@ -2499,159 +2389,112 @@ function formatDate(
    SAVE LOG
 ========================================================= */
 
-async function saveLog() {
+logForm.addEventListener(
+  "submit",
+  async function(event) {
 
-  const date =
-    logDate.value;
-
-
-  const number =
-    Number(
-      logNumber.value
-    );
+    event.preventDefault();
 
 
-  const note =
-    logNote.value.trim();
+    const date =
+      logDate.value;
 
 
-  if (
-    !date ||
-    !number ||
-    !note
-  ) {
-
-    alert(
-      "É obrigatório indicar a data, o número do inventário e a nota."
-    );
-
-    return;
-  }
+    const number =
+      Number(
+        logNumber.value
+      );
 
 
-  const rowExists =
-    rows.some(
-      row =>
-        Number(
-          row.inventory_number
-        ) === number
-    );
+    const note =
+      logNote.value.trim();
 
-
-  if (
-    !rowExists
-  ) {
-
-    alert(
-      "Esse número de inventário não existe nesta categoria."
-    );
-
-    return;
-  }
-
-
-  try {
-
-    saveLogButton.disabled =
-      true;
-
-
-    await supabaseRequest(
-      "torre_logs",
-      {
-        method: "POST",
-
-        headers: {
-          "Prefer":
-            "return=representation"
-        },
-
-        body:
-          JSON.stringify({
-
-            category_id:
-              currentCategory.id,
-
-            inventory_number:
-              number,
-
-            log_date:
-              date,
-
-            note:
-              note
-          })
-      }
-    );
-
-
-    /*
-     * Limpa os campos de número e nota,
-     * mas mantém a data.
-     */
-
-    logNumber.value =
-      "";
-
-    logNote.value =
-      "";
-
-
-    /*
-     * Recarrega imediatamente o LOG.
-     */
-
-    await loadLogs();
-
-  } catch (error) {
-
-    console.error(
-      "LOG ERROR:",
-      error
-    );
-
-    alert(
-      "Erro ao guardar a nota."
-    );
-
-  } finally {
-
-    saveLogButton.disabled =
-      false;
-  }
-}
-
-
-/*
- * O botão é usado directamente.
- *
- * Isto substitui o antigo evento
- * "submit" num elemento <div>.
- */
-
-saveLogButton.addEventListener(
-  "click",
-  saveLog
-);
-
-
-/*
- * Enter no campo da nota também
- * permite adicionar o LOG.
- */
-
-logNote.addEventListener(
-  "keydown",
-  function(event) {
 
     if (
-      event.key === "Enter" &&
-      !event.shiftKey
+      !date ||
+      !number ||
+      !note
     ) {
 
-      event.preventDefault();
+      alert(
+        "É obrigatório indicar a data, o número do inventário e a nota."
+      );
 
-      saveLog();
+      return;
+    }
+
+
+    const rowExists =
+      rows.some(
+        row =>
+          Number(
+            row.inventory_number
+          ) === number
+      );
+
+
+    if (
+      !rowExists
+    ) {
+
+      alert(
+        "Esse número de inventário não existe nesta categoria."
+      );
+
+      return;
+    }
+
+
+    try {
+
+      await supabaseRequest(
+        "torre_logs",
+        {
+          method: "POST",
+
+          headers: {
+            "Prefer":
+              "return=representation"
+          },
+
+          body:
+            JSON.stringify({
+
+              category_id:
+                currentCategory.id,
+
+              inventory_number:
+                number,
+
+              log_date:
+                date,
+
+              note:
+                note
+            })
+        }
+      );
+
+
+      logNumber.value =
+        "";
+
+      logNote.value =
+        "";
+
+
+      await loadLogs();
+
+    } catch (error) {
+
+      console.error(
+        "LOG ERROR:",
+        error
+      );
+
+      alert(
+        "Erro ao guardar a nota."
+      );
     }
   }
 );
