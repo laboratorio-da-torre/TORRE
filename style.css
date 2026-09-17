@@ -163,7 +163,7 @@ main {
 
   /*
    * Todas as linhas recebem
-   * exactamente a mesma definição.
+   * exactamente a mesma definiÃ§Ã£o.
    */
 }
 
@@ -203,15 +203,7 @@ main {
    INVENTORY NUMBER
 ========================= */
 
-.row-number {
-  position: absolute;
-
-  right: calc(100% + 14px);
-  top: 0;
-
-  width: 36px;
-  height: 100%;
-
+.number-cell {
   display: flex;
 
   align-items: center;
@@ -219,12 +211,24 @@ main {
 
   color: #0000ff;
 
-  font-size: 14px;
   font-weight: 700;
 
   line-height: 1;
 
   white-space: nowrap;
+
+  user-select: none;
+
+  cursor: default;
+}
+
+
+/* =========================
+   HEADER ROW
+========================= */
+
+.archive-row.header-row .cell {
+  font-weight: 700;
 }
 
 
@@ -527,6 +531,75 @@ main {
 
 
 /* =========================
+   DEVELOPMENT NOTICE
+========================= */
+
+#development-notice {
+  position: fixed;
+  inset: 0;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  padding: 24px;
+
+  z-index: 600;
+}
+
+#development-notice.open {
+  display: flex;
+}
+
+#development-notice-box {
+  position: relative;
+
+  width: 100%;
+  max-width: 420px;
+
+  background: #ffffff;
+
+  border: 1px solid #0000ff;
+
+  padding: 24px 26px 20px;
+}
+
+#development-notice-close {
+  position: absolute;
+
+  top: 8px;
+  right: 12px;
+
+  color: #0000ff;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+#development-notice-close:hover {
+  text-decoration: underline;
+}
+
+#development-notice-title {
+  font-size: 16px;
+  font-weight: 700;
+
+  margin-bottom: 12px;
+}
+
+#development-notice-text p {
+  margin: 0 0 10px;
+}
+
+#development-notice-text p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* =========================
    FOOTER
 ========================= */
 
@@ -580,7 +653,6 @@ main {
   }
 
   #archive-wrapper {
-    padding-left: 42px;
     padding-right: 25px;
   }
 
@@ -599,5 +671,13 @@ main {
       42px
       minmax(0, 1fr)
       18px;
+  }
+
+  #development-notice {
+    padding: 16px;
+  }
+
+  #development-notice-box {
+    padding: 20px 18px 16px;
   }
 }
