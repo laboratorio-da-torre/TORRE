@@ -117,9 +117,10 @@ main {
 
 #category-title {
   width: 70%;
-  margin: 0 auto 16px;
+  margin: -8px auto 16px;
 
   font-size: 14px;
+  font-weight: 700;
 }
 
 
@@ -163,7 +164,7 @@ main {
 
   /*
    * Todas as linhas recebem
-   * exactamente a mesma definiÃ§Ã£o.
+   * exactamente a mesma definição.
    */
 }
 
@@ -196,6 +197,10 @@ main {
 
 .cell:first-child {
   border-left: 2px solid #0000ff;
+}
+
+.cell:last-child {
+  border-right: 2px solid #0000ff;
 }
 
 
@@ -340,20 +345,22 @@ main {
    CONTROLS
 ========================= */
 
-#row-controls {
+#grid-controls {
   margin-top: 10px;
 
   display: flex;
+  flex-wrap: wrap;
+
+  justify-content: space-between;
+  align-items: center;
+
   gap: 14px;
 }
 
+#row-controls,
 #column-controls {
-  margin-top: 10px;
-
   display: flex;
   gap: 14px;
-
-  justify-content: flex-end;
 }
 
 #row-controls button,
