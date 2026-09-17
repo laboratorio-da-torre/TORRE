@@ -3,10 +3,10 @@
 ========================================================= */
 
 const SUPABASE_URL =
-  "COLOCA_AQUI_A_TUA_URL_SUPABASE";
+  "https://rvfdobjhfwjdvufwrirp.supabase.co";
 
 const SUPABASE_KEY =
-  "COLOCA_AQUI_A_TUA_CHAVE_SUPABASE";
+  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
 
 const BUCKET =
   "images";
