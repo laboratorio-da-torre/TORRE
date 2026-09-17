@@ -75,6 +75,15 @@ const logNote =
 const sheetsLink =
   document.getElementById("sheets-link");
 
+const developmentNotice =
+  document.getElementById("development-notice");
+
+const developmentNoticeBox =
+  document.getElementById("development-notice-box");
+
+const developmentNoticeClose =
+  document.getElementById("development-notice-close");
+
 
 /* =========================================================
    ESTADO
@@ -356,12 +365,18 @@ async function loadColumns() {
 
 function getGridTemplate() {
 
-  return columns
-    .map(
-      column =>
-        `${column.width_percent}%`
-    )
-    .join(" ");
+  const numberColumn =
+    "42px";
+
+  const dataColumns =
+    columns
+      .map(
+        column =>
+          `${column.width_percent}%`
+      )
+      .join(" ");
+
+  return `${numberColumn} ${dataColumns}`;
 }
 
 
@@ -598,6 +613,11 @@ async function render() {
     getGridTemplate();
 
 
+  createHeaderRowElement(
+    template
+  );
+
+
   rows.forEach(
     (row, rowIndex) => {
 
@@ -612,6 +632,102 @@ async function render() {
 
 
   applyGridTemplate();
+}
+
+
+/* =========================================================
+   HEADER ROW
+========================================================= */
+
+function createHeaderRowElement(
+  template
+) {
+
+  const rowElement =
+    document.createElement(
+      "div"
+    );
+
+
+  rowElement.className =
+    "archive-row header-row";
+
+
+  rowElement.style.setProperty(
+    "--grid-columns",
+    template
+  );
+
+
+  /* Nº */
+
+  const numberCell =
+    document.createElement(
+      "div"
+    );
+
+
+  numberCell.className =
+    "cell number-cell";
+
+
+  numberCell.textContent =
+    "Nº";
+
+
+  rowElement.appendChild(
+    numberCell
+  );
+
+
+  /* COLUNAS */
+
+  columns.forEach(
+    (column, columnIndex) => {
+
+      const cell =
+        document.createElement(
+          "div"
+        );
+
+
+      cell.className =
+        "cell";
+
+
+      cell.textContent =
+        columnIndex === 0
+          ? "imagem"
+          : `coluna ${columnIndex}`;
+
+
+      /*
+       * O redimensionamento das colunas
+       * fica associado ao cabeçalho.
+       */
+
+      if (
+        columnIndex <
+          columns.length - 1
+      ) {
+
+        createResizeHandle(
+          cell,
+          columnIndex
+        );
+      }
+
+
+      rowElement.appendChild(
+        cell
+      );
+    }
+  );
+
+
+  archive.appendChild(
+    rowElement
+  );
 }
 
 
@@ -642,19 +758,19 @@ function createRowElement(
   );
 
 
-  /* NUMBER */
+  /* NÚMERO */
 
-  const number =
+  const numberCell =
     document.createElement(
       "div"
     );
 
 
-  number.className =
-    "row-number";
+  numberCell.className =
+    "cell number-cell";
 
 
-  number.textContent =
+  numberCell.textContent =
     String(
       row.inventory_number
     ).padStart(
@@ -664,7 +780,7 @@ function createRowElement(
 
 
   rowElement.appendChild(
-    number
+    numberCell
   );
 
 
@@ -818,28 +934,6 @@ function createRowElement(
               cell.blur();
             }
           }
-        );
-      }
-
-
-      /*
-       * HANDLE:
-       * só existe uma vez por divisão,
-       * na primeira linha.
-       *
-       * A alteração aplica-se à grelha
-       * inteira.
-       */
-
-      if (
-        rowIndex === 0 &&
-        columnIndex <
-          columns.length - 1
-      ) {
-
-        createResizeHandle(
-          cell,
-          columnIndex
         );
       }
 
@@ -2102,6 +2196,46 @@ function openImage(
     "open"
   );
 }
+
+
+/* =========================================================
+   DEVELOPMENT NOTICE
+========================================================= */
+
+developmentNotice.classList.add(
+  "open"
+);
+
+
+developmentNoticeClose.addEventListener(
+  "click",
+  function() {
+
+    developmentNotice.classList.remove(
+      "open"
+    );
+  }
+);
+
+
+developmentNotice.addEventListener(
+  "click",
+  function() {
+
+    developmentNotice.classList.remove(
+      "open"
+    );
+  }
+);
+
+
+developmentNoticeBox.addEventListener(
+  "click",
+  function(event) {
+
+    event.stopPropagation();
+  }
+);
 
 
 /* =========================================================
