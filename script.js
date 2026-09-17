@@ -6,7 +6,6 @@ const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
 const BUCKET = "images";
 
-
 /* =========================================================
    GOOGLE SHEETS
 ========================================================= */
@@ -19,18 +18,29 @@ const GOOGLE_SHEETS_URL =
    ELEMENTOS
 ========================================================= */
 
-const menuButton = document.getElementById("menu-button");
-const menu = document.getElementById("menu");
+const menuButton =
+  document.getElementById("menu-button");
 
-const archive = document.getElementById("archive");
+const menu =
+  document.getElementById("menu");
 
-const addRowButton = document.getElementById("add-row");
-const removeRowButton = document.getElementById("remove-row");
+const archive =
+  document.getElementById("archive");
 
-const addColumnButton = document.getElementById("add-column");
-const removeColumnButton = document.getElementById("remove-column");
+const addRowButton =
+  document.getElementById("add-row");
 
-const categoryTitle = document.getElementById("category-title");
+const removeRowButton =
+  document.getElementById("remove-row");
+
+const addColumnButton =
+  document.getElementById("add-column");
+
+const removeColumnButton =
+  document.getElementById("remove-column");
+
+const categoryTitle =
+  document.getElementById("category-title");
 
 const imageFileInput =
   document.getElementById("image-file-input");
@@ -74,21 +84,32 @@ let currentCategory = null;
    SUPABASE REQUEST
 ========================================================= */
 
-async function supabaseRequest(endpoint, options = {}) {
+async function supabaseRequest(
+  endpoint,
+  options = {}
+) {
 
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/${endpoint}`,
-    {
-      ...options,
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/${endpoint}`,
+      {
+        ...options,
 
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        ...(options.headers || {})
+        headers: {
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`,
+
+          "Content-Type":
+            "application/json",
+
+          ...(options.headers || {})
+        }
       }
-    }
-  );
+    );
+
 
   if (!response.ok) {
 
@@ -103,6 +124,7 @@ async function supabaseRequest(endpoint, options = {}) {
 
     throw new Error(error);
   }
+
 
   return response;
 }
@@ -122,7 +144,9 @@ async function loadCategories() {
   categories =
     await response.json();
 
+
   if (!categories.length) {
+
     throw new Error(
       "Não existem categorias no Supabase."
     );
@@ -134,42 +158,55 @@ function renderCategoryMenu() {
 
   menu.innerHTML = "";
 
-  categories.forEach(category => {
 
-    const button =
-      document.createElement("button");
+  categories.forEach(
+    category => {
 
-    button.className =
-      "category-button";
+      const button =
+        document.createElement("button");
 
-    button.textContent =
-      category.name;
+      button.className =
+        "category-button";
 
-    button.dataset.category =
-      category.slug;
+      button.textContent =
+        category.name;
 
-    button.addEventListener(
-      "click",
-      async function(event) {
+      button.dataset.category =
+        category.slug;
 
-        event.stopPropagation();
 
-        menu.classList.remove("open");
+      button.addEventListener(
+        "click",
+        async function(event) {
 
-        await selectCategory(category);
-      }
-    );
+          event.stopPropagation();
 
-    menu.appendChild(button);
-  });
+          menu.classList.remove(
+            "open"
+          );
+
+          await selectCategory(
+            category
+          );
+        }
+      );
+
+
+      menu.appendChild(
+        button
+      );
+    }
+  );
 }
 
 
 /* =========================================================
-   SELECCIONAR CATEGORIA
+   CATEGORIA
 ========================================================= */
 
-async function selectCategory(category) {
+async function selectCategory(
+  category
+) {
 
   currentCategory =
     category;
@@ -180,7 +217,9 @@ async function selectCategory(category) {
   columns = [];
   rows = [];
 
+
   await loadColumns();
+
   await loadRows();
 
   await ensureRows();
@@ -206,13 +245,18 @@ async function loadColumns() {
       `&order=position.asc`
     );
 
+
   columns =
     await response.json();
 
 
   if (!columns.length) {
 
-    for (let i = 0; i < 6; i++) {
+    for (
+      let i = 0;
+      i < 6;
+      i++
+    ) {
 
       const response =
         await supabaseRequest(
@@ -239,6 +283,7 @@ async function loadColumns() {
           }
         );
 
+
       const inserted =
         await response.json();
 
@@ -250,13 +295,85 @@ async function loadColumns() {
 
 
   columns =
-    columns.map(column => ({
-      ...column,
+    columns.map(
+      column => ({
+        ...column,
 
-      width_px:
-        Number(column.width_px) ||
-        180
-    }));
+        width_px:
+          Number(
+            column.width_px
+          ) || 180
+      })
+    );
+
+
+  normalizeColumnWidths();
+}
+
+
+/* =========================================================
+   NORMALIZAR COLUNAS
+========================================================= */
+
+function normalizeColumnWidths() {
+
+  if (!columns.length) {
+    return;
+  }
+
+
+  const equalWidth =
+    100 / columns.length;
+
+
+  columns.forEach(
+    column => {
+
+      column.width_percent =
+        equalWidth;
+    }
+  );
+}
+
+
+/* =========================================================
+   CSS GRID TEMPLATE
+========================================================= */
+
+function getGridTemplate() {
+
+  return columns
+    .map(
+      column =>
+        `${column.width_percent || 100 / columns.length}%`
+    )
+    .join(" ");
+}
+
+
+/* =========================================================
+   APLICAR GRID
+========================================================= */
+
+function applyGridTemplate() {
+
+  const template =
+    getGridTemplate();
+
+
+  document
+    .querySelectorAll(
+      ".archive-row"
+    )
+    .forEach(
+      row => {
+
+        row.style.setProperty(
+          "--grid-columns",
+          template
+        );
+      }
+    );
 }
 
 
@@ -273,6 +390,7 @@ async function loadRows() {
       `&order=position.asc`
     );
 
+
   rows =
     await response.json();
 }
@@ -284,12 +402,20 @@ async function ensureRows() {
     return;
   }
 
+
   const missing =
     20 - rows.length;
 
-  for (let i = 0; i < missing; i++) {
+
+  for (
+    let i = 0;
+    i < missing;
+    i++
+  ) {
+
     await createRow();
   }
+
 
   await loadRows();
 }
@@ -303,17 +429,23 @@ async function createRow() {
 
   const existingNumbers =
     rows
-      .map(row =>
-        Number(row.inventory_number)
+      .map(
+        row =>
+          Number(
+            row.inventory_number
+          )
       )
-      .filter(number =>
-        Number.isFinite(number)
+      .filter(
+        number =>
+          Number.isFinite(number)
       );
 
 
   const highestNumber =
     existingNumbers.length
-      ? Math.max(...existingNumbers)
+      ? Math.max(
+          ...existingNumbers
+        )
       : 0;
 
 
@@ -338,6 +470,7 @@ async function createRow() {
 
         body:
           JSON.stringify({
+
             category_id:
               currentCategory.id,
 
@@ -354,13 +487,19 @@ async function createRow() {
   const inserted =
     await response.json();
 
+
   const row =
     inserted[0];
 
-  rows.push(row);
+
+  rows.push(
+    row
+  );
 
 
-  for (const column of columns) {
+  for (
+    const column of columns
+  ) {
 
     await supabaseRequest(
       "torre_cells",
@@ -369,6 +508,7 @@ async function createRow() {
 
         body:
           JSON.stringify({
+
             row_id:
               row.id,
 
@@ -398,6 +538,7 @@ async function loadCells() {
       "torre_cells?select=*"
     );
 
+
   return await response.json();
 }
 
@@ -411,19 +552,23 @@ async function render() {
   const cells =
     await loadCells();
 
+
   archive.innerHTML = "";
+
 
   const cellMap =
     new Map();
 
 
-  cells.forEach(cell => {
+  cells.forEach(
+    cell => {
 
-    cellMap.set(
-      `${cell.row_id}-${cell.column_id}`,
-      cell
-    );
-  });
+      cellMap.set(
+        `${cell.row_id}-${cell.column_id}`,
+        cell
+      );
+    }
+  );
 
 
   rows.forEach(
@@ -436,11 +581,14 @@ async function render() {
       );
     }
   );
+
+
+  applyGridTemplate();
 }
 
 
 /* =========================================================
-   ROW ELEMENT
+   ROW
 ========================================================= */
 
 function createRowElement(
@@ -452,19 +600,18 @@ function createRowElement(
   const rowElement =
     document.createElement("div");
 
+
   rowElement.className =
     "archive-row";
 
 
-  rowElement.style.gridTemplateColumns =
-    columns
-      .map(column =>
-        `${column.width_px || 180}px`
-      )
-      .join(" ");
+  rowElement.style.setProperty(
+    "--grid-columns",
+    getGridTemplate()
+  );
 
 
-  /* INVENTORY NUMBER */
+  /* NUMBER */
 
   const number =
     document.createElement("div");
@@ -475,9 +622,15 @@ function createRowElement(
   number.textContent =
     String(
       row.inventory_number
-    ).padStart(3, "0");
+    ).padStart(
+      3,
+      "0"
+    );
 
-  rowElement.appendChild(number);
+
+  rowElement.appendChild(
+    number
+  );
 
 
   /* CELLS */
@@ -486,7 +639,10 @@ function createRowElement(
     (column, columnIndex) => {
 
       const cell =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       cell.className =
         "cell";
@@ -498,21 +654,25 @@ function createRowElement(
         );
 
 
-      /* IMAGE COLUMN */
+      /* IMAGE */
 
-      if (columnIndex === 0) {
+      if (
+        columnIndex === 0
+      ) {
 
         cell.classList.add(
           "image-cell"
         );
 
+
         cell.contentEditable =
           "false";
 
-        cell.tabIndex = 0;
 
-
-        if (data && data.value) {
+        if (
+          data &&
+          data.value
+        ) {
 
           createImage(
             data.value,
@@ -548,7 +708,10 @@ function createRowElement(
           function(event) {
 
             const image =
-              cell.querySelector("img");
+              cell.querySelector(
+                "img"
+              );
+
 
             if (image) {
 
@@ -559,7 +722,9 @@ function createRowElement(
               return;
             }
 
+
             event.preventDefault();
+
 
             openFilePicker(
               row.id,
@@ -572,7 +737,7 @@ function createRowElement(
 
       } else {
 
-        /* TEXT CELL */
+        /* TEXTO */
 
         cell.contentEditable =
           "true";
@@ -595,7 +760,9 @@ function createRowElement(
 
             } catch (error) {
 
-              console.error(error);
+              console.error(
+                error
+              );
             }
           }
         );
@@ -605,7 +772,10 @@ function createRowElement(
           "keydown",
           function(event) {
 
-            if (event.key === "Enter") {
+            if (
+              event.key ===
+              "Enter"
+            ) {
 
               event.preventDefault();
 
@@ -616,7 +786,14 @@ function createRowElement(
       }
 
 
-      /* RESIZE */
+      /*
+       * UM ÚNICO SISTEMA DE
+       * DIVISÕES VERTICAIS.
+       *
+       * Os handles só são criados
+       * na primeira linha, mas a
+       * alteração aplica-se a todas.
+       */
 
       if (
         rowIndex === 0 &&
@@ -626,27 +803,32 @@ function createRowElement(
 
         createResizeHandle(
           cell,
-          column,
-          rowElement
+          columnIndex
         );
       }
 
 
-      rowElement.appendChild(cell);
+      rowElement.appendChild(
+        cell
+      );
     }
   );
 
 
-  /* DELETE ROW */
+  /* DELETE */
 
   const deleteButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
+
 
   deleteButton.className =
     "delete-row";
 
   deleteButton.textContent =
     "×";
+
 
   deleteButton.setAttribute(
     "aria-label",
@@ -658,20 +840,38 @@ function createRowElement(
     "click",
     async function(event) {
 
+      event.preventDefault();
+
       event.stopPropagation();
+
 
       const confirmed =
         confirm(
           "Apagar esta linha?"
         );
 
+
       if (!confirmed) {
         return;
       }
 
-      await deleteRow(
-        row.id
-      );
+
+      try {
+
+        await deleteRow(
+          row.id
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        alert(
+          "Erro ao apagar a linha."
+        );
+      }
     }
   );
 
@@ -680,6 +880,7 @@ function createRowElement(
     deleteButton
   );
 
+
   archive.appendChild(
     rowElement
   );
@@ -687,27 +888,32 @@ function createRowElement(
 
 
 /* =========================================================
-   RESIZE COLUMNS
+   RESIZE COLUMN
 ========================================================= */
 
 function createResizeHandle(
   cell,
-  column,
-  rowElement
+  columnIndex
 ) {
 
   const handle =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   handle.className =
     "column-resize-handle";
 
 
-  cell.appendChild(handle);
+  cell.appendChild(
+    handle
+  );
 
 
   let startX = 0;
-  let startWidth = 0;
+  let startLeft = 0;
+  let startRight = 0;
 
 
   handle.addEventListener(
@@ -715,16 +921,34 @@ function createResizeHandle(
     function(event) {
 
       event.preventDefault();
+
       event.stopPropagation();
+
+
+      const containerWidth =
+        archive.getBoundingClientRect()
+          .width;
 
 
       startX =
         event.clientX;
 
 
-      startWidth =
-        Number(column.width_px) ||
-        cell.getBoundingClientRect().width;
+      startLeft =
+        columns[
+          columnIndex
+        ].width_percent;
+
+
+      startRight =
+        columns[
+          columnIndex + 1
+        ].width_percent;
+
+
+      handle.classList.add(
+        "dragging"
+      );
 
 
       handle.setPointerCapture(
@@ -732,41 +956,92 @@ function createResizeHandle(
       );
 
 
-      function move(moveEvent) {
+      function move(
+        moveEvent
+      ) {
 
-        const delta =
+        const deltaPx =
           moveEvent.clientX -
           startX;
 
 
-        const newWidth =
-          Math.max(
-            80,
-            Math.round(
-              startWidth + delta
-            )
-          );
+        const deltaPercent =
+          (
+            deltaPx /
+            containerWidth
+          ) * 100;
 
 
-        column.width_px =
-          newWidth;
+        let newLeft =
+          startLeft +
+          deltaPercent;
 
 
-        rowElement.style.gridTemplateColumns =
-          columns
-            .map(item =>
-              `${item.width_px || 180}px`
-            )
-            .join(" ");
+        let newRight =
+          startRight -
+          deltaPercent;
+
+
+        const MIN =
+          5;
+
+
+        if (
+          newLeft < MIN
+        ) {
+
+          newLeft =
+            MIN;
+
+          newRight =
+            startLeft +
+            startRight -
+            MIN;
+        }
+
+
+        if (
+          newRight < MIN
+        ) {
+
+          newRight =
+            MIN;
+
+          newLeft =
+            startLeft +
+            startRight -
+            MIN;
+        }
+
+
+        columns[
+          columnIndex
+        ].width_percent =
+          newLeft;
+
+
+        columns[
+          columnIndex + 1
+        ].width_percent =
+          newRight;
+
+
+        applyGridTemplate();
       }
 
 
       async function end() {
 
+        handle.classList.remove(
+          "dragging"
+        );
+
+
         handle.removeEventListener(
           "pointermove",
           move
         );
+
 
         handle.removeEventListener(
           "pointerup",
@@ -776,27 +1051,13 @@ function createResizeHandle(
 
         try {
 
-          await supabaseRequest(
-            `torre_columns?id=eq.${column.id}`,
-            {
-              method: "PATCH",
-
-              headers: {
-                "Prefer":
-                  "return=minimal"
-              },
-
-              body:
-                JSON.stringify({
-                  width_px:
-                    column.width_px
-                })
-            }
-          );
+          await saveColumnWidths();
 
         } catch (error) {
 
-          console.error(error);
+          console.error(
+            error
+          );
         }
       }
 
@@ -806,12 +1067,70 @@ function createResizeHandle(
         move
       );
 
+
       handle.addEventListener(
         "pointerup",
         end
       );
     }
   );
+}
+
+
+/* =========================================================
+   SAVE COLUMN WIDTHS
+========================================================= */
+
+async function saveColumnWidths() {
+
+  /*
+   * A tabela existente tem width_px.
+   * Guardamos a largura relativa convertida
+   * para uma referência de 700px.
+   *
+   * Na próxima abertura redistribuímos
+   * proporcionalmente.
+   */
+
+  const referenceWidth =
+    700;
+
+
+  for (
+    const column of columns
+  ) {
+
+    const width =
+      Math.max(
+        1,
+        Math.round(
+          referenceWidth *
+          (
+            column.width_percent /
+            100
+          )
+        )
+      );
+
+
+    await supabaseRequest(
+      `torre_columns?id=eq.${column.id}`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "Prefer":
+            "return=minimal"
+        },
+
+        body:
+          JSON.stringify({
+            width_px:
+              width
+          })
+      }
+    );
+  }
 }
 
 
@@ -826,10 +1145,14 @@ function createImagePlaceholder(
 ) {
 
   const placeholder =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   placeholder.className =
     "image-placeholder";
+
 
   placeholder.textContent =
     ">img<";
@@ -840,6 +1163,7 @@ function createImagePlaceholder(
     function(event) {
 
       event.stopPropagation();
+
 
       openFilePicker(
         rowId,
@@ -875,6 +1199,7 @@ function openFilePicker(
   imageFileInput._targetCell =
     cell;
 
+
   imageFileInput.click();
 }
 
@@ -885,6 +1210,7 @@ imageFileInput.addEventListener(
 
     const file =
       imageFileInput.files[0];
+
 
     if (!file) {
       return;
@@ -904,7 +1230,10 @@ imageFileInput.addEventListener(
     try {
 
       const optimized =
-        await optimizeImage(file);
+        await optimizeImage(
+          file
+        );
+
 
       const imageUrl =
         await uploadImage(
@@ -927,7 +1256,9 @@ imageFileInput.addEventListener(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       alert(
         "Erro ao carregar a imagem."
@@ -935,7 +1266,8 @@ imageFileInput.addEventListener(
     }
 
 
-    imageFileInput.value = "";
+    imageFileInput.value =
+      "";
   }
 );
 
@@ -955,7 +1287,9 @@ async function handleImagePaste(
     event.clipboardData.items;
 
 
-  for (const item of items) {
+  for (
+    const item of items
+  ) {
 
     if (
       !item.type.startsWith(
@@ -981,7 +1315,9 @@ async function handleImagePaste(
     try {
 
       const optimized =
-        await optimizeImage(file);
+        await optimizeImage(
+          file
+        );
 
 
       const imageUrl =
@@ -1005,7 +1341,9 @@ async function handleImagePaste(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       alert(
         "Erro ao carregar a imagem."
@@ -1028,7 +1366,10 @@ function createImage(
 ) {
 
   const image =
-    document.createElement("img");
+    document.createElement(
+      "img"
+    );
+
 
   image.src =
     src;
@@ -1050,7 +1391,8 @@ function createImage(
   );
 
 
-  cell.innerHTML = "";
+  cell.innerHTML =
+    "";
 
   cell.appendChild(
     image
@@ -1059,10 +1401,12 @@ function createImage(
 
 
 /* =========================================================
-   IMAGE OPTIMIZATION
+   OPTIMIZE IMAGE
 ========================================================= */
 
-function optimizeImage(file) {
+function optimizeImage(
+  file
+) {
 
   return new Promise(
     (resolve, reject) => {
@@ -1108,6 +1452,7 @@ function optimizeImage(file) {
                   Math.round(
                     width * ratio
                   );
+
 
                 height =
                   Math.round(
@@ -1203,7 +1548,9 @@ function optimizeImage(file) {
    UPLOAD IMAGE
 ========================================================= */
 
-async function uploadImage(file) {
+async function uploadImage(
+  file
+) {
 
   const filename =
     `${Date.now()}-` +
@@ -1242,7 +1589,9 @@ async function uploadImage(file) {
     const error =
       await response.text();
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     throw new Error(
       "Upload falhou."
@@ -1268,27 +1617,24 @@ async function saveCell(
   value
 ) {
 
-  const response =
-    await supabaseRequest(
-      `torre_cells?` +
-      `row_id=eq.${rowId}` +
-      `&column_id=eq.${columnId}`,
-      {
-        method: "PATCH",
+  await supabaseRequest(
+    `torre_cells?` +
+    `row_id=eq.${rowId}` +
+    `&column_id=eq.${columnId}`,
+    {
+      method: "PATCH",
 
-        headers: {
-          "Prefer":
-            "return=minimal"
-        },
+      headers: {
+        "Prefer":
+          "return=minimal"
+      },
 
-        body:
-          JSON.stringify({
-            value
-          })
-      }
-    );
-
-  return response;
+      body:
+        JSON.stringify({
+          value
+        })
+    }
+  );
 }
 
 
@@ -1316,9 +1662,8 @@ async function deleteRow(
 
 
   /*
-   * IMPORTANTE:
-   * Não alteramos inventory_number.
-   * Os números existentes ficam estáveis.
+   * Mantemos os números de inventário.
+   * Não renumeramos as linhas.
    */
 
   for (
@@ -1370,7 +1715,9 @@ addRowButton.addEventListener(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       alert(
         "Erro ao criar linha."
@@ -1388,7 +1735,9 @@ removeRowButton.addEventListener(
   "click",
   async function() {
 
-    if (rows.length <= 1) {
+    if (
+      rows.length <= 1
+    ) {
 
       alert(
         "É necessário manter pelo menos uma linha."
@@ -1399,7 +1748,9 @@ removeRowButton.addEventListener(
 
 
     const lastRow =
-      rows[rows.length - 1];
+      rows[
+        rows.length - 1
+      ];
 
 
     const confirmed =
@@ -1413,9 +1764,22 @@ removeRowButton.addEventListener(
     }
 
 
-    await deleteRow(
-      lastRow.id
-    );
+    try {
+
+      await deleteRow(
+        lastRow.id
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao apagar a linha."
+      );
+    }
   }
 );
 
@@ -1426,7 +1790,7 @@ removeRowButton.addEventListener(
 
 async function addColumn() {
 
-  const position =
+  const oldCount =
     columns.length;
 
 
@@ -1443,10 +1807,12 @@ async function addColumn() {
 
         body:
           JSON.stringify({
+
             category_id:
               currentCategory.id,
 
-            position,
+            position:
+              oldCount,
 
             width_px:
               180
@@ -1459,16 +1825,26 @@ async function addColumn() {
     await response.json();
 
 
-  const column =
+  const newColumn =
     inserted[0];
 
 
   columns.push(
-    column
+    newColumn
   );
 
 
-  for (const row of rows) {
+  /*
+   * NOVA COLUNA:
+   * redistribuir tudo igualmente.
+   */
+
+  normalizeColumnWidths();
+
+
+  for (
+    const row of rows
+  ) {
 
     await supabaseRequest(
       "torre_cells",
@@ -1477,11 +1853,12 @@ async function addColumn() {
 
         body:
           JSON.stringify({
+
             row_id:
               row.id,
 
             column_id:
-              column.id,
+              newColumn.id,
 
             value:
               null
@@ -1490,6 +1867,8 @@ async function addColumn() {
     );
   }
 
+
+  await saveColumnWidths();
 
   await render();
 }
@@ -1501,7 +1880,9 @@ async function addColumn() {
 
 async function removeColumn() {
 
-  if (columns.length <= 1) {
+  if (
+    columns.length <= 1
+  ) {
 
     alert(
       "É necessário manter pelo menos uma coluna."
@@ -1561,14 +1942,21 @@ async function removeColumn() {
 
         body:
           JSON.stringify({
-            position: i
+            position:
+              i
           })
       }
     );
   }
 
 
+  normalizeColumnWidths();
+
+  await saveColumnWidths();
+
   await loadColumns();
+
+  normalizeColumnWidths();
 
   await render();
 }
@@ -1588,7 +1976,9 @@ addColumnButton.addEventListener(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       alert(
         "Erro ao criar coluna."
@@ -1608,7 +1998,9 @@ removeColumnButton.addEventListener(
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       alert(
         "Erro ao remover coluna."
@@ -1665,12 +2057,15 @@ viewer.addEventListener(
       "open"
     );
 
-    viewerImage.src = "";
+    viewerImage.src =
+      "";
   }
 );
 
 
-function openImage(src) {
+function openImage(
+  src
+) {
 
   viewerImage.src =
     src;
@@ -1724,7 +2119,9 @@ function setTodayAsDefaultDate() {
 
 async function loadLogs() {
 
-  if (!currentCategory) {
+  if (
+    !currentCategory
+  ) {
     return;
   }
 
@@ -1751,27 +2148,36 @@ async function loadLogs() {
    RENDER LOGS
 ========================================================= */
 
-function renderLogs(logData) {
+function renderLogs(
+  logData
+) {
 
-  logs.innerHTML = "";
+  logs.innerHTML =
+    "";
 
 
-  if (!logData.length) {
+  if (
+    !logData.length
+  ) {
 
     const empty =
       document.createElement(
         "div"
       );
 
+
     empty.className =
       "log-entry";
+
 
     empty.textContent =
       "sem registos";
 
+
     logs.appendChild(
       empty
     );
+
 
     return;
   }
@@ -1785,17 +2191,9 @@ function renderLogs(logData) {
           "div"
         );
 
+
       entry.className =
         "log-entry";
-
-
-      const meta =
-        document.createElement(
-          "div"
-        );
-
-      meta.className =
-        "log-meta";
 
 
       const date =
@@ -1803,8 +2201,10 @@ function renderLogs(logData) {
           "span"
         );
 
+
       date.className =
         "log-date-display";
+
 
       date.textContent =
         formatDate(
@@ -1817,8 +2217,10 @@ function renderLogs(logData) {
           "span"
         );
 
+
       number.className =
         "log-number-display";
+
 
       number.textContent =
         `#${String(
@@ -1829,22 +2231,15 @@ function renderLogs(logData) {
         )}`;
 
 
-      meta.appendChild(
-        date
-      );
-
-      meta.appendChild(
-        number
-      );
-
-
       const note =
         document.createElement(
           "div"
         );
 
+
       note.className =
         "log-note-display";
+
 
       note.textContent =
         log.note;
@@ -1855,11 +2250,17 @@ function renderLogs(logData) {
           "button"
         );
 
+
       deleteButton.className =
         "delete-log";
 
+
       deleteButton.textContent =
         "×";
+
+
+      deleteButton.type =
+        "button";
 
 
       deleteButton.addEventListener(
@@ -1882,7 +2283,8 @@ function renderLogs(logData) {
             await supabaseRequest(
               `torre_logs?id=eq.${log.id}`,
               {
-                method: "DELETE"
+                method:
+                  "DELETE"
               }
             );
 
@@ -1904,7 +2306,11 @@ function renderLogs(logData) {
 
 
       entry.appendChild(
-        meta
+        date
+      );
+
+      entry.appendChild(
+        number
       );
 
       entry.appendChild(
@@ -1933,10 +2339,15 @@ function formatDate(
 ) {
 
   const parts =
-    dateString.split("-");
+    dateString.split(
+      "-"
+    );
 
 
-  if (parts.length !== 3) {
+  if (
+    parts.length !== 3
+  ) {
+
     return dateString;
   }
 
@@ -1997,7 +2408,9 @@ logForm.addEventListener(
       );
 
 
-    if (!rowExists) {
+    if (
+      !rowExists
+    ) {
 
       alert(
         "Esse número de inventário não existe nesta categoria."
@@ -2009,33 +2422,44 @@ logForm.addEventListener(
 
     try {
 
-      await supabaseRequest(
-        "torre_logs",
-        {
-          method: "POST",
+      const response =
+        await supabaseRequest(
+          "torre_logs",
+          {
+            method: "POST",
 
-          headers: {
-            "Prefer":
-              "return=representation"
-          },
+            headers: {
+              "Prefer":
+                "return=representation"
+            },
 
-          body:
-            JSON.stringify({
+            body:
+              JSON.stringify({
 
-              category_id:
-                currentCategory.id,
+                category_id:
+                  currentCategory.id,
 
-              inventory_number:
-                number,
+                inventory_number:
+                  number,
 
-              log_date:
-                date,
+                log_date:
+                  date,
 
-              note:
-                note
-            })
-        }
-      );
+                note:
+                  note
+              })
+          }
+        );
+
+
+      if (
+        !response.ok
+      ) {
+
+        throw new Error(
+          "Não foi possível guardar o log."
+        );
+      }
 
 
       logNote.value =
@@ -2050,11 +2474,12 @@ logForm.addEventListener(
     } catch (error) {
 
       console.error(
+        "LOG ERROR:",
         error
       );
 
       alert(
-        "Erro ao guardar o log."
+        "Erro ao guardar a nota."
       );
     }
   }
@@ -2110,6 +2535,9 @@ async function init() {
     `;
   }
 }
+
+
+init();
 
 
 init();
