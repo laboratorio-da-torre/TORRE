@@ -545,28 +545,84 @@ async function ensureRows() {
 
 async function repairInventoryNumbers() {
 
-  const used =
-    new Set();
+  /*
+   * O número visual corresponde à posição
+   * da linha no arquivo.
+   *
+   * Assim:
+   * primeira linha = 001
+   * segunda linha  = 002
+   * terceira linha = 003
+   *
+   * Isto também corrige números duplicados
+   * ou números antigos que ficaram errados.
+   */
+
+  const orderedRows =
+    [...rows].sort(
+      (a, b) =>
+        Number(a.position || 0) -
+        Number(b.position || 0)
+    );
 
 
-  rows.forEach(
-    row => {
+  for (
+    let index = 0;
+    index < orderedRows.length;
+    index++
+  ) {
 
-      const value =
-        Number(
-          row.inventory_number
-        );
+    const row =
+      orderedRows[index];
 
 
-      if (
-        Number.isFinite(value) &&
-        value > 0
-      ) {
+    const expectedNumber =
+      index + 1;
 
-        used.add(
-          Math.floor(value)
-        );
+
+    const currentNumber =
+      Number(
+        row.inventory_number
+      );
+
+
+    if (
+      currentNumber ===
+      expectedNumber
+    ) {
+      continue;
+    }
+
+
+    await supabaseRequest(
+      "torre_rows?id=eq." +
+      row.id,
+      {
+        method:
+          "PATCH",
+
+        body:
+          JSON.stringify({
+            inventory_number:
+              expectedNumber
+          })
       }
+    );
+
+
+    row.inventory_number =
+      expectedNumber;
+  }
+
+
+  /*
+   * Mantém também o estado principal
+   * actualizado.
+   */
+
+  rows =
+    orderedRows;
+}
     }
   );
 
@@ -2142,6 +2198,10 @@ document.addEventListener(
    IMAGE VIEWER
 ========================================================= */
 
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
 function openImageViewer(
   url
 ) {
@@ -2149,23 +2209,60 @@ function openImageViewer(
   viewerImage.src =
     url;
 
-
   imageViewer.classList.add(
     "open"
   );
 }
 
 
+function closeImageViewer() {
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+  viewerImage.src =
+    "";
+}
+
+
+imageViewerClose.addEventListener(
+  "click",
+  event => {
+
+    event.stopPropagation();
+
+    closeImageViewer();
+  }
+);
+
+
 imageViewer.addEventListener(
   "click",
-  () => {
+  event => {
 
-    imageViewer.classList.remove(
-      "open"
-    );
+    if (
+      event.target ===
+      imageViewer
+    ) {
 
-    viewerImage.src =
-      "";
+      closeImageViewer();
+    }
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+      "Escape"
+    ) {
+
+      closeImageViewer();
+    }
   }
 );
 
