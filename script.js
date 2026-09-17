@@ -1,265 +1,265 @@
 /* =========================================================
-   CONFIGURAÇÃO
-   ========================================================= */
+   SUPABASE
+========================================================= */
 
-const SUPABASE_URL = "https://rvfdobjhfwjdvufwrirp.supabase.co";
-const SUPABASE_ANON_KEY = "sb_secret_ta5Oz
-••••••••••••••••";
+const SUPABASE_URL =
+  "https://rvfdobjhfwjdvufwrirp.supabase.co";
 
-const STORAGE_BUCKET = "images";
+const SUPABASE_KEY =
+  "sb_publishable_aXh2UjT79AHJpjRXLVZeKA_UCRE96LL";
+
+const BUCKET =
+  "images";
+
+
+/* =========================================================
+   GOOGLE SHEETS
+========================================================= */
 
 const GOOGLE_SHEETS_URL =
   "https://docs.google.com/spreadsheets/d/1FO_BRYjuPgpVs3tVaeioE1YjDGEBtgrS5776_Q9-12I/edit?gid=1510436497#gid=1510436497";
 
 
 /* =========================================================
-   SUPABASE
-   ========================================================= */
+   ELEMENTOS
+========================================================= */
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const menuButton =
+  document.getElementById("menu-button");
 
+const menu =
+  document.getElementById("menu");
 
-/* =========================================================
-   DOM
-   ========================================================= */
+const archive =
+  document.getElementById("archive");
 
-const archive = document.getElementById("archive");
-const categoryTitle = document.getElementById("category-title");
-const categoryMenu = document.getElementById("category-menu");
+const addRowButton =
+  document.getElementById("add-row");
 
-const addRowButton = document.getElementById("add-row");
-const addColumnButton = document.getElementById("add-column");
-const removeColumnButton = document.getElementById("remove-column");
+const removeRowButton =
+  document.getElementById("remove-row");
 
-const imagePicker = document.getElementById("image-picker");
+const addColumnButton =
+  document.getElementById("add-column");
 
-const imageViewer = document.getElementById("image-viewer");
-const imageViewerImage = document.getElementById("image-viewer-image");
-const imageViewerClose = document.getElementById("image-viewer-close");
+const removeColumnButton =
+  document.getElementById("remove-column");
 
-const logSection = document.getElementById("log-section");
-const logToggle = document.getElementById("log-toggle");
-const logContent = document.getElementById("log-content");
-const logsContainer = document.getElementById("logs");
+const categoryTitle =
+  document.getElementById("category-title");
 
-const logForm = document.getElementById("log-form");
-const logNumber = document.getElementById("log-number");
-const logNote = document.getElementById("log-note");
+const imageFileInput =
+  document.getElementById("image-file-input");
 
-const sheetsLink = document.getElementById("sheets-link");
+const viewer =
+  document.getElementById("image-viewer");
+
+const viewerImage =
+  document.getElementById("viewer-image");
+
+const logs =
+  document.getElementById("logs");
+
+const logForm =
+  document.getElementById("log-form");
+
+const logDate =
+  document.getElementById("log-date");
+
+const logNumber =
+  document.getElementById("log-number");
+
+const logNote =
+  document.getElementById("log-note");
+
+const sheetsLink =
+  document.getElementById("sheets-link");
 
 const developmentNotice =
-  document.getElementById("development-notice");
+  document.getElementById(
+    "development-notice"
+  );
 
 const developmentNoticeClose =
-  document.getElementById("development-notice-close");
+  document.getElementById(
+    "development-notice-close"
+  );
 
 
 /* =========================================================
    ESTADO
-   ========================================================= */
+========================================================= */
 
 let categories = [];
 let columns = [];
 let rows = [];
-
 let currentCategory = null;
-
-let currentCells = [];
-
-let imageTarget = null;
-
-let resizing = false;
 
 
 /* =========================================================
-   HELPERS
-   ========================================================= */
+   AVISO DE DESENVOLVIMENTO
+========================================================= */
 
-function escapeHtml(value) {
+if (
+  developmentNoticeClose &&
+  developmentNotice
+) {
 
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  developmentNoticeClose.addEventListener(
+    "click",
+    function(event) {
 
-}
+      event.preventDefault();
+      event.stopPropagation();
 
-
-function formatInventoryNumber(value) {
-
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number <= 0) {
-    return "";
-  }
-
-  return String(Math.trunc(number)).padStart(3, "0");
-
-}
-
-
-function getColumnTitle(column, index) {
-
-  const title =
-    column.name ??
-    column.title ??
-    column.label ??
-    "";
-
-  if (String(title).trim()) {
-    return String(title);
-  }
-
-  return `COLUNA ${index + 1}`;
-
-}
-
-
-function getGridTemplate() {
-
-  if (!columns.length) {
-    return "70px";
-  }
-
-  const widths = columns.map(column => {
-
-    const width =
-      Number(column.width_percent);
-
-    if (
-      Number.isFinite(width) &&
-      width > 0
-    ) {
-      return `${width}%`;
-    }
-
-    return "1fr";
-  });
-
-  return `70px ${widths.join(" ")}`;
-
-}
-
-
-function applyGridTemplate() {
-
-  const template = getGridTemplate();
-
-  document.documentElement.style
-    .setProperty("--grid-columns", template);
-
-}
-
-
-async function supabaseRequest(endpoint, options = {}) {
-
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/${endpoint}`,
-    {
-      ...options,
-
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-
-        ...(options.headers || {})
-      }
+      developmentNotice.style.display =
+        "none";
     }
   );
+}
+
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+async function supabaseRequest(
+  endpoint,
+  options = {}
+) {
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/${endpoint}`,
+      {
+        ...options,
+
+        headers: {
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`,
+
+          "Content-Type":
+            "application/json",
+
+          ...(options.headers || {})
+        }
+      }
+    );
+
 
   if (!response.ok) {
 
-    const text = await response.text();
+    const error =
+      await response.text();
 
-    throw new Error(
-      `Supabase ${response.status}: ${text}`
+    console.error(
+      "SUPABASE ERROR:",
+      response.status,
+      error
     );
+
+    throw new Error(error);
   }
 
-  const text = await response.text();
 
-  return text ? JSON.parse(text) : null;
+  return response;
 }
 
 
 /* =========================================================
-   CATEGORIAS
-   ========================================================= */
+   CATEGORIES
+========================================================= */
 
 async function loadCategories() {
 
-  categories = await supabaseRequest(
-    "torre_categories?select=*&order=position.asc"
-  );
+  const response =
+    await supabaseRequest(
+      "torre_categories?select=*&order=position.asc"
+    );
 
+
+  categories =
+    await response.json();
+
+
+  if (!categories.length) {
+
+    throw new Error(
+      "Não existem categorias no Supabase."
+    );
+  }
 }
 
 
 function renderCategoryMenu() {
 
-  categoryMenu.innerHTML = "";
-
-  categories.forEach(category => {
-
-    const button = document.createElement("button");
-
-    button.type = "button";
-
-    button.className = "category-button";
-
-    button.textContent = category.name;
-
-    button.dataset.categoryId = category.id;
-
-    button.addEventListener("click", () => {
-
-      selectCategory(category);
-
-    });
-
-    categoryMenu.appendChild(button);
-
-  });
-
-}
+  menu.innerHTML = "";
 
 
-function updateActiveCategoryButton() {
+  categories.forEach(
+    category => {
 
-  document
-    .querySelectorAll(".category-button")
-    .forEach(button => {
+      const button =
+        document.createElement(
+          "button"
+        );
 
-      button.classList.toggle(
-        "active",
-        button.dataset.categoryId ===
-        String(currentCategory?.id)
+
+      button.className =
+        "category-button";
+
+
+      button.textContent =
+        category.name;
+
+
+      button.addEventListener(
+        "click",
+        async function(event) {
+
+          event.stopPropagation();
+
+          menu.classList.remove(
+            "open"
+          );
+
+          await selectCategory(
+            category
+          );
+        }
       );
 
-    });
 
+      menu.appendChild(
+        button
+      );
+    }
+  );
 }
 
 
 /* =========================================================
-   SELECCIONAR CATEGORIA
-   ========================================================= */
+   SELECT CATEGORY
+========================================================= */
 
-async function selectCategory(category) {
+async function selectCategory(
+  category
+) {
 
-  currentCategory = category;
+  currentCategory =
+    category;
+
 
   categoryTitle.textContent =
-    category.name || category.slug || "TORRE";
+    category.name;
 
-  updateActiveCategoryButton();
+
+  columns = [];
+  rows = [];
+
 
   await loadColumns();
 
@@ -267,472 +267,720 @@ async function selectCategory(category) {
 
   await ensureRows();
 
-  await loadCells();
-
-  applyGridTemplate();
-
-  render();
+  await render();
 
   await loadLogs();
 
+  setTodayAsDefaultDate();
 }
 
 
 /* =========================================================
-   COLUNAS
-   ========================================================= */
+   LOAD COLUMNS
+========================================================= */
 
 async function loadColumns() {
 
-  columns = await supabaseRequest(
-    `torre_columns?category_id=eq.${encodeURIComponent(currentCategory.id)}&select=*&order=position.asc`
-  );
+  const response =
+    await supabaseRequest(
+      `torre_columns?select=*` +
+      `&category_id=eq.${currentCategory.id}` +
+      `&order=position.asc`
+    );
+
+
+  columns =
+    await response.json();
+
 
   if (!columns.length) {
 
-    for (let i = 0; i < 6; i++) {
-
-      const created = await supabaseRequest(
-        "torre_columns",
-        {
-          method: "POST",
-
-          headers: {
-            "Prefer": "return=representation"
-          },
-
-          body: JSON.stringify({
-            category_id: currentCategory.id,
-            position: i,
-            name: `COLUNA ${i + 1}`,
-            width_px: 180
-          })
-        }
-      );
-
-      if (created?.[0]) {
-        columns.push(created[0]);
-      }
-    }
-  }
-
-  normalizeColumnWidths();
-
-}
-
-
-function normalizeColumnWidths() {
-
-  if (!columns.length) {
-    return;
-  }
-
-  const rawWidths = columns.map(column => {
-
-    const width =
-      Number(column.width_px);
-
-    if (
-      Number.isFinite(width) &&
-      width > 20
+    for (
+      let i = 0;
+      i < 6;
+      i++
     ) {
-      return width;
+
+      const response =
+        await supabaseRequest(
+          "torre_columns",
+          {
+            method: "POST",
+
+            headers: {
+              "Prefer":
+                "return=representation"
+            },
+
+            body:
+              JSON.stringify({
+
+                category_id:
+                  currentCategory.id,
+
+                position:
+                  i,
+
+                width_px:
+                  180,
+
+                name:
+                  i === 0
+                    ? "imagem"
+                    : `coluna ${i}`
+              })
+          }
+        );
+
+
+      const inserted =
+        await response.json();
+
+
+      columns.push(
+        inserted[0]
+      );
     }
+  }
 
-    return 180;
-  });
 
-  const total =
-    rawWidths.reduce(
-      (sum, value) => sum + value,
+  /*
+   * Garante títulos para instalações
+   * antigas onde name ainda esteja vazio.
+   */
+
+  columns =
+    columns.map(
+      (column, index) => {
+
+        if (
+          !column.name ||
+          !String(
+            column.name
+          ).trim()
+        ) {
+
+          column.name =
+            index === 0
+              ? "imagem"
+              : `coluna ${index}`;
+        }
+
+        return column;
+      }
+    );
+
+
+  /*
+   * Larguras existentes são convertidas
+   * para proporções.
+   */
+
+  let total =
+    columns.reduce(
+      (sum, column) =>
+        sum +
+        (
+          Number(
+            column.width_px
+          ) || 180
+        ),
       0
     );
 
-  columns.forEach((column, index) => {
 
-    column.width_percent =
-      (rawWidths[index] / total) * 100;
-
-  });
-
-}
-
-
-/* =========================================================
-   RENOMEAR COLUNAS
-   ========================================================= */
-
-async function saveColumnName(column, titleElement) {
-
-  const newName =
-    titleElement.textContent.trim();
-
-  const finalName =
-    newName || "SEM TÍTULO";
-
-  titleElement.dataset.saving = "true";
-
-  try {
-
-    await supabaseRequest(
-      `torre_columns?id=eq.${encodeURIComponent(column.id)}`,
-      {
-        method: "PATCH",
-
-        headers: {
-          "Prefer": "return=minimal"
-        },
-
-        body: JSON.stringify({
-          name: finalName
-        })
-      }
-    );
-
-    column.name = finalName;
-
-    titleElement.textContent = finalName;
-
-    titleElement.dataset.saved = "true";
-
-    setTimeout(() => {
-
-      delete titleElement.dataset.saved;
-
-    }, 700);
-
-  } catch (error) {
-
-    console.error(
-      "Erro ao guardar nome da coluna:",
-      error
-    );
-
-    titleElement.textContent =
-      getColumnTitle(
-        column,
-        columns.indexOf(column)
-      );
-
-    alert(
-      "Não foi possível guardar o título da coluna."
-    );
-
-  } finally {
-
-    delete titleElement.dataset.saving;
-
+  if (!total) {
+    total = 1;
   }
 
-}
 
+  columns =
+    columns.map(
+      column => ({
 
-function createColumnHeader(column, index) {
+        ...column,
 
-  const cell =
-    document.createElement("div");
-
-  cell.className =
-    "archive-header-cell archive-header-title";
-
-  cell.contentEditable = "true";
-
-  cell.spellcheck = false;
-
-  cell.textContent =
-    getColumnTitle(column, index);
-
-  cell.title =
-    "Clique para editar o título";
-
-  cell.addEventListener(
-    "blur",
-    () => saveColumnName(column, cell)
-  );
-
-  cell.addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Enter") {
-
-        event.preventDefault();
-
-        cell.blur();
-
-      }
-
-      if (event.key === "Escape") {
-
-        cell.textContent =
-          getColumnTitle(
-            column,
-            index
-          );
-
-        cell.blur();
-
-      }
-
-    }
-  );
-
-  createResizeHandle(
-    cell,
-    index
-  );
-
-  return cell;
+        width_percent:
+          (
+            (
+              Number(
+                column.width_px
+              ) || 180
+            ) /
+            total
+          ) *
+          100
+      })
+    );
 }
 
 
 /* =========================================================
-   LINHAS
-   ========================================================= */
+   GRID TEMPLATE
+========================================================= */
+
+function getGridTemplate() {
+
+  /*
+   * A primeira coluna é a coluna visual
+   * dos números.
+   *
+   * As percentagens das colunas originais
+   * são calculadas apenas dentro do espaço
+   * restante.
+   */
+
+  const contentColumns =
+    columns
+      .map(
+        column =>
+          `calc((100% - 36px) * ` +
+          `${column.width_percent / 100})`
+      )
+      .join(" ");
+
+
+  return (
+    `36px ${contentColumns}`
+  );
+}
+
+
+/* =========================================================
+   APPLY GRID
+========================================================= */
+
+function applyGridTemplate() {
+
+  const template =
+    getGridTemplate();
+
+
+  document
+    .querySelectorAll(
+      ".archive-row, .archive-header-row"
+    )
+    .forEach(
+      row => {
+
+        row.style.setProperty(
+          "--grid-columns",
+          template
+        );
+      }
+    );
+}
+
+
+/* =========================================================
+   LOAD ROWS
+========================================================= */
 
 async function loadRows() {
 
-  rows = await supabaseRequest(
-    `torre_rows?category_id=eq.${encodeURIComponent(currentCategory.id)}&select=*&order=position.asc`
-  );
+  const response =
+    await supabaseRequest(
+      `torre_rows?select=*` +
+      `&category_id=eq.${currentCategory.id}` +
+      `&order=position.asc`
+    );
 
+
+  rows =
+    await response.json();
 }
 
+
+/* =========================================================
+   ENSURE ROWS
+========================================================= */
 
 async function ensureRows() {
 
-  while (rows.length < 20) {
-
-    await createRow();
-
+  if (
+    rows.length >= 20
+  ) {
+    return;
   }
 
+
+  const missing =
+    20 -
+    rows.length;
+
+
+  for (
+    let i = 0;
+    i < missing;
+    i++
+  ) {
+
+    await createRow();
+  }
+
+
+  await loadRows();
 }
 
 
+/* =========================================================
+   CREATE ROW
+========================================================= */
+
 async function createRow() {
 
-  const highestInventoryNumber =
-    rows.reduce(
-      (highest, row) => {
+  /*
+   * O número é sempre o maior existente + 1.
+   * Nunca reutilizamos números apagados.
+   */
 
-        const number =
-          Number(row.inventory_number);
+  const numbers =
+    rows
+      .map(
+        row =>
+          Number(
+            row.inventory_number
+          )
+      )
+      .filter(
+        number =>
+          Number.isFinite(number)
+      );
 
-        if (
-          Number.isFinite(number) &&
-          number > highest
-        ) {
-          return number;
-        }
 
-        return highest;
+  const highest =
+    numbers.length
+      ? Math.max(
+          ...numbers
+        )
+      : 0;
 
-      },
-      0
-    );
 
-  const nextInventoryNumber =
-    highestInventoryNumber + 1;
+  const inventoryNumber =
+    highest + 1;
 
-  const highestPosition =
-    rows.reduce(
-      (highest, row) => {
 
-        const position =
-          Number(row.position);
-
-        if (
-          Number.isFinite(position) &&
-          position > highest
-        ) {
-          return position;
-        }
-
-        return highest;
-
-      },
-      -1
-    );
-
-  const createdRows =
+  const response =
     await supabaseRequest(
       "torre_rows",
       {
         method: "POST",
 
         headers: {
-          "Prefer": "return=representation"
+          "Prefer":
+            "return=representation"
         },
 
-        body: JSON.stringify({
-          category_id: currentCategory.id,
+        body:
+          JSON.stringify({
 
-          position:
-            highestPosition + 1,
+            category_id:
+              currentCategory.id,
 
-          inventory_number:
-            nextInventoryNumber
-        })
+            position:
+              rows.length,
+
+            inventory_number:
+              inventoryNumber
+          })
       }
     );
 
+
+  const inserted =
+    await response.json();
+
+
   const row =
-    createdRows?.[0];
+    inserted[0];
 
-  if (!row) {
-    throw new Error(
-      "Não foi possível criar a linha."
-    );
-  }
 
-  for (const column of columns) {
+  rows.push(
+    row
+  );
+
+
+  for (
+    const column of columns
+  ) {
 
     await supabaseRequest(
       "torre_cells",
       {
         method: "POST",
 
-        headers: {
-          "Prefer": "return=minimal"
-        },
+        body:
+          JSON.stringify({
 
-        body: JSON.stringify({
-          row_id: row.id,
-          column_id: column.id,
-          value: null
-        })
+            row_id:
+              row.id,
+
+            column_id:
+              column.id,
+
+            value:
+              null
+          })
       }
     );
-
   }
 
-  rows.push(row);
 
+  return row;
 }
 
 
 /* =========================================================
-   CELLS
-   ========================================================= */
+   LOAD CELLS
+========================================================= */
 
 async function loadCells() {
 
-  if (!rows.length) {
+  const response =
+    await supabaseRequest(
+      "torre_cells?select=*"
+    );
 
-    currentCells = [];
 
-    return;
-  }
-
-  const rowIds =
-    rows
-      .map(row => `"${row.id}"`)
-      .join(",");
-
-  currentCells = await supabaseRequest(
-    `torre_cells?row_id=in.(${rowIds})&select=*`
-  );
-
+  return await response.json();
 }
 
 
-function buildCellMap() {
+/* =========================================================
+   FORMAT INVENTORY NUMBER
+========================================================= */
 
-  const map = new Map();
+function formatInventoryNumber(
+  row,
+  rowIndex
+) {
 
-  currentCells.forEach(cell => {
-
-    map.set(
-      `${cell.row_id}:${cell.column_id}`,
-      cell
+  const number =
+    Number(
+      row.inventory_number
     );
 
-  });
 
-  return map;
+  /*
+   * Se existir número na base de dados,
+   * usamos sempre esse número.
+   */
 
+  if (
+    Number.isFinite(number) &&
+    number > 0
+  ) {
+
+    return String(
+      number
+    ).padStart(
+      3,
+      "0"
+    );
+  }
+
+
+  /*
+   * Fallback visual para registos antigos
+   * onde inventory_number está NULL.
+   *
+   * Assim a terceira linha, por exemplo,
+   * aparece como 003 em vez de null.
+   *
+   * Não altera automaticamente a base de dados.
+   */
+
+  return String(
+    rowIndex + 1
+  ).padStart(
+    3,
+    "0"
+  );
 }
 
 
 /* =========================================================
    RENDER
-   ========================================================= */
+========================================================= */
 
-function render() {
+async function render() {
 
-  archive.innerHTML = "";
+  const cells =
+    await loadCells();
 
-  applyGridTemplate();
+
+  archive.innerHTML =
+    "";
+
+
+  const cellMap =
+    new Map();
+
+
+  cells.forEach(
+    cell => {
+
+      cellMap.set(
+        `${cell.row_id}-${cell.column_id}`,
+        cell
+      );
+    }
+  );
+
 
   const template =
     getGridTemplate();
 
-  /* -------------------------
-     CABEÇALHO ESPECIAL
-     ------------------------- */
 
-  const header =
-    document.createElement("div");
-
-  header.className =
-    "archive-header-row";
-
-  header.style.gridTemplateColumns =
-    template;
-
-  const numberHeader =
-    document.createElement("div");
-
-  numberHeader.className =
-    "archive-header-cell archive-header-number";
-
-  numberHeader.textContent =
-    "nº";
-
-  header.appendChild(numberHeader);
-
-
-  columns.forEach(
-    (column, index) => {
-
-      header.appendChild(
-        createColumnHeader(
-          column,
-          index
-        )
-      );
-
-    }
+  createHeaderElement(
+    template
   );
 
-  archive.appendChild(header);
-
-
-  /* -------------------------
-     LINHAS
-     ------------------------- */
-
-  const cellMap =
-    buildCellMap();
 
   rows.forEach(
     (row, rowIndex) => {
 
-      archive.appendChild(
-        createRowElement(
-          row,
-          rowIndex,
-          cellMap,
-          template
-        )
+      createRowElement(
+        row,
+        rowIndex,
+        cellMap,
+        template
       );
-
     }
   );
 
+
+  applyGridTemplate();
 }
 
+
+/* =========================================================
+   HEADER ELEMENT
+========================================================= */
+
+function createHeaderElement(
+  template
+) {
+
+  const header =
+    document.createElement(
+      "div"
+    );
+
+
+  header.className =
+    "archive-header-row";
+
+
+  header.style.setProperty(
+    "--grid-columns",
+    template
+  );
+
+
+  /*
+   * PRIMEIRA COLUNA:
+   * número do inventário.
+   */
+
+  const numberHeader =
+    document.createElement(
+      "div"
+    );
+
+
+  numberHeader.className =
+    "archive-header-cell " +
+    "archive-header-number";
+
+
+  numberHeader.textContent =
+    "nº";
+
+
+  header.appendChild(
+    numberHeader
+  );
+
+
+  /*
+   * TÍTULOS DAS COLUNAS
+   */
+
+  columns.forEach(
+    (column, columnIndex) => {
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+
+      title.className =
+        "archive-header-cell " +
+        "archive-header-title";
+
+
+      title.contentEditable =
+        "true";
+
+
+      title.spellcheck =
+        false;
+
+
+      title.textContent =
+        column.name ||
+        (
+          columnIndex === 0
+            ? "imagem"
+            : `coluna ${columnIndex}`
+        );
+
+
+      title.dataset.columnId =
+        column.id;
+
+
+      title.addEventListener(
+        "keydown",
+        function(event) {
+
+          if (
+            event.key ===
+            "Enter"
+          ) {
+
+            event.preventDefault();
+
+            title.blur();
+          }
+        }
+      );
+
+
+      title.addEventListener(
+        "blur",
+        async function() {
+
+          const newName =
+            title.textContent
+              .trim();
+
+
+          if (!newName) {
+
+            title.textContent =
+              column.name ||
+              (
+                columnIndex === 0
+                  ? "imagem"
+                  : `coluna ${columnIndex}`
+              );
+
+            return;
+          }
+
+
+          if (
+            newName ===
+            column.name
+          ) {
+            return;
+          }
+
+
+          try {
+
+            await saveColumnName(
+              column,
+              newName
+            );
+
+          } catch (error) {
+
+            console.error(
+              "Erro ao guardar título:",
+              error
+            );
+
+            alert(
+              "Não foi possível guardar o título da coluna."
+            );
+
+            title.textContent =
+              column.name;
+          }
+        }
+      );
+
+
+      header.appendChild(
+        title
+      );
+
+
+      /*
+       * Resize:
+       * mantém a mesma lógica original,
+       * mas agora o handle fica no cabeçalho.
+       */
+
+      if (
+        columnIndex <
+        columns.length - 1
+      ) {
+
+        createResizeHandle(
+          title,
+          columnIndex
+        );
+      }
+    }
+  );
+
+
+  archive.appendChild(
+    header
+  );
+}
+
+
+/* =========================================================
+   SAVE COLUMN NAME
+========================================================= */
+
+async function saveColumnName(
+  column,
+  name
+) {
+
+  await supabaseRequest(
+    `torre_columns?id=eq.${column.id}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Prefer":
+          "return=minimal"
+      },
+
+      body:
+        JSON.stringify({
+          name
+        })
+    }
+  );
+
+
+  column.name =
+    name;
+}
+
+
+/* =========================================================
+   ROW ELEMENT
+========================================================= */
 
 function createRowElement(
   row,
@@ -742,621 +990,272 @@ function createRowElement(
 ) {
 
   const rowElement =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   rowElement.className =
     "archive-row";
 
-  rowElement.style.gridTemplateColumns =
-    template;
 
-
-  /* -------------------------
-     NÚMERO
-     ------------------------- */
-
-  const numberCell =
-    document.createElement("div");
-
-  numberCell.className =
-    "inventory-number-cell";
-
-  numberCell.textContent =
-    formatInventoryNumber(
-      row.inventory_number
-    );
-
-  rowElement.appendChild(
-    numberCell
+  rowElement.style.setProperty(
+    "--grid-columns",
+    template
   );
 
 
-  /* -------------------------
-     COLUNAS
-     ------------------------- */
+  /* NUMBER */
+
+  const number =
+    document.createElement(
+      "div"
+    );
+
+
+  number.className =
+    "row-number";
+
+
+  number.textContent =
+    formatInventoryNumber(
+      row,
+      rowIndex
+    );
+
+
+  rowElement.appendChild(
+    number
+  );
+
+
+  /* CELLS */
 
   columns.forEach(
     (column, columnIndex) => {
 
       const cell =
-        cellMap.get(
-          `${row.id}:${column.id}`
+        document.createElement(
+          "div"
         );
 
-      const value =
-        cell?.value ?? "";
 
-      let cellElement;
+      cell.className =
+        "cell";
 
-      if (columnIndex === 0) {
 
-        cellElement =
-          createImageCell(
-            value,
-            row,
-            column,
+      const data =
+        cellMap.get(
+          `${row.id}-${column.id}`
+        );
+
+
+      /* IMAGE */
+
+      if (
+        columnIndex === 0
+      ) {
+
+        cell.classList.add(
+          "image-cell"
+        );
+
+
+        if (
+          data &&
+          data.value
+        ) {
+
+          createImage(
+            data.value,
             cell
           );
+
+        } else {
+
+          createImagePlaceholder(
+            cell,
+            row.id,
+            column.id
+          );
+        }
+
+
+        cell.addEventListener(
+          "paste",
+          function(event) {
+
+            handleImagePaste(
+              event,
+              cell,
+              row.id,
+              column.id
+            );
+          }
+        );
+
+
+        cell.addEventListener(
+          "click",
+          function(event) {
+
+            const image =
+              cell.querySelector(
+                "img"
+              );
+
+
+            if (image) {
+
+              openImage(
+                image.src
+              );
+
+              return;
+            }
+
+
+            event.preventDefault();
+
+
+            openFilePicker(
+              row.id,
+              column.id,
+              cell
+            );
+          }
+        );
+
 
       } else {
 
-        cellElement =
-          createTextCell(
-            value,
-            row,
-            column,
-            cell
-          );
+        cell.contentEditable =
+          "true";
 
+
+        cell.textContent =
+          data?.value || "";
+
+
+        cell.addEventListener(
+          "blur",
+          async function() {
+
+            try {
+
+              await saveCell(
+                row.id,
+                column.id,
+                cell.textContent
+              );
+
+            } catch (error) {
+
+              console.error(
+                error
+              );
+            }
+          }
+        );
+
+
+        cell.addEventListener(
+          "keydown",
+          function(event) {
+
+            if (
+              event.key ===
+              "Enter"
+            ) {
+
+              event.preventDefault();
+
+              cell.blur();
+            }
+          }
+        );
       }
 
-      rowElement.appendChild(
-        cellElement
-      );
 
+      rowElement.appendChild(
+        cell
+      );
     }
   );
 
 
-  /* -------------------------
-     APAGAR LINHA
-     ------------------------- */
+  /* DELETE */
 
   const deleteButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
-  deleteButton.type = "button";
 
   deleteButton.className =
-    "delete-row-button";
+    "delete-row";
+
+
+  deleteButton.type =
+    "button";
+
 
   deleteButton.textContent =
     "×";
 
-  deleteButton.title =
-    "Apagar linha";
 
   deleteButton.addEventListener(
     "click",
-    async () => {
+    async function(event) {
 
-      await deleteRow(row);
+      event.preventDefault();
 
+      event.stopPropagation();
+
+
+      if (
+        !confirm(
+          "Apagar esta linha?"
+        )
+      ) {
+        return;
+      }
+
+
+      try {
+
+        await deleteRow(
+          row.id
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        alert(
+          "Erro ao apagar a linha."
+        );
+      }
     }
   );
+
 
   rowElement.appendChild(
     deleteButton
   );
 
 
-  return rowElement;
-
+  archive.appendChild(
+    rowElement
+  );
 }
 
 
 /* =========================================================
-   CÉLULA DE TEXTO
-   ========================================================= */
-
-function createTextCell(
-  value,
-  row,
-  column,
-  existingCell
-) {
-
-  const element =
-    document.createElement("div");
-
-  element.className =
-    "cell text-cell";
-
-  element.contentEditable =
-    "true";
-
-  element.spellcheck = false;
-
-  element.textContent =
-    value;
-
-  element.addEventListener(
-    "blur",
-    async () => {
-
-      const newValue =
-        element.textContent;
-
-      await saveCell(
-        row,
-        column,
-        existingCell,
-        newValue
-      );
-
-    }
-  );
-
-  return element;
-
-}
-
-
-/* =========================================================
-   CÉLULA DE IMAGEM
-   ========================================================= */
-
-function createImageCell(
-  value,
-  row,
-  column,
-  existingCell
-) {
-
-  const element =
-    document.createElement("div");
-
-  element.className =
-    "cell image-cell";
-
-
-  if (value) {
-
-    createImage(
-      element,
-      value
-    );
-
-  } else {
-
-    createImagePlaceholder(
-      element
-    );
-
-  }
-
-
-  element.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target.tagName === "IMG"
-      ) {
-
-        openImageViewer(
-          value
-        );
-
-        return;
-      }
-
-      openImagePicker(
-        row,
-        column,
-        existingCell
-      );
-
-    }
-  );
-
-
-  /*
-    Colar imagem directamente na célula.
-  */
-
-  element.addEventListener(
-    "paste",
-    async event => {
-
-      const items =
-        event.clipboardData?.items;
-
-      if (!items) {
-        return;
-      }
-
-      for (const item of items) {
-
-        if (
-          item.type.startsWith("image/")
-        ) {
-
-          event.preventDefault();
-
-          const file =
-            item.getAsFile();
-
-          if (file) {
-
-            await processImageFile(
-              file,
-              row,
-              column,
-              existingCell
-            );
-
-          }
-
-          break;
-        }
-
-      }
-
-    }
-  );
-
-
-  return element;
-
-}
-
-
-function createImagePlaceholder(
-  element
-) {
-
-  const placeholder =
-    document.createElement("div");
-
-  placeholder.className =
-    "image-placeholder";
-
-  placeholder.textContent =
-    "imagem";
-
-  element.appendChild(
-    placeholder
-  );
-
-}
-
-
-function createImage(
-  element,
-  url
-) {
-
-  const image =
-    document.createElement("img");
-
-  image.src = url;
-
-  image.alt = "";
-
-  image.loading = "lazy";
-
-  element.appendChild(
-    image
-  );
-
-}
-
-
-/* =========================================================
-   IMAGENS
-   ========================================================= */
-
-function openImagePicker(
-  row,
-  column,
-  cell
-) {
-
-  imageTarget = {
-    row,
-    column,
-    cell
-  };
-
-  imagePicker.value = "";
-
-  imagePicker.click();
-
-}
-
-
-imagePicker.addEventListener(
-  "change",
-  async () => {
-
-    const file =
-      imagePicker.files?.[0];
-
-    if (!file || !imageTarget) {
-      return;
-    }
-
-    const {
-      row,
-      column,
-      cell
-    } = imageTarget;
-
-    await processImageFile(
-      file,
-      row,
-      column,
-      cell
-    );
-
-    imageTarget = null;
-
-  }
-);
-
-
-async function processImageFile(
-  file,
-  row,
-  column,
-  existingCell
-) {
-
-  try {
-
-    const optimized =
-      await optimizeImage(file);
-
-    const url =
-      await uploadImage(
-        optimized,
-        row,
-        column
-      );
-
-    await saveCell(
-      row,
-      column,
-      existingCell,
-      url
-    );
-
-    await loadCells();
-
-    render();
-
-  } catch (error) {
-
-    console.error(
-      "Erro ao guardar imagem:",
-      error
-    );
-
-    alert(
-      "Não foi possível guardar a imagem."
-    );
-
-  }
-
-}
-
-
-/*
-  Compressão de imagens.
-
-  Máximo: 1600px
-  JPEG: 72%
-*/
-
-async function optimizeImage(file) {
-
-  if (!file.type.startsWith("image/")) {
-
-    throw new Error(
-      "O ficheiro não é uma imagem."
-    );
-
-  }
-
-  const bitmap =
-    await createImageBitmap(file);
-
-  const maxSize = 1600;
-
-  const scale =
-    Math.min(
-      1,
-      maxSize /
-      Math.max(
-        bitmap.width,
-        bitmap.height
-      )
-    );
-
-  const width =
-    Math.max(
-      1,
-      Math.round(bitmap.width * scale)
-    );
-
-  const height =
-    Math.max(
-      1,
-      Math.round(bitmap.height * scale)
-    );
-
-  const canvas =
-    document.createElement("canvas");
-
-  canvas.width = width;
-  canvas.height = height;
-
-  const context =
-    canvas.getContext("2d");
-
-  context.drawImage(
-    bitmap,
-    0,
-    0,
-    width,
-    height
-  );
-
-  const blob =
-    await new Promise(
-      resolve => {
-
-        canvas.toBlob(
-          resolve,
-          "image/jpeg",
-          0.72
-        );
-
-      }
-    );
-
-  bitmap.close();
-
-  if (!blob) {
-
-    throw new Error(
-      "Não foi possível comprimir a imagem."
-    );
-
-  }
-
-  return new File(
-    [blob],
-    "torre.jpg",
-    {
-      type: "image/jpeg"
-    }
-  );
-
-}
-
-
-async function uploadImage(
-  file,
-  row,
-  column
-) {
-
-  const fileName =
-    `${currentCategory.slug}/${row.id}-${column.id}-${Date.now()}.jpg`;
-
-  const uploadResponse =
-    await fetch(
-      `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${fileName}`,
-      {
-        method: "POST",
-
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "Content-Type": "image/jpeg",
-          "x-upsert": "true"
-        },
-
-        body: file
-      }
-    );
-
-  if (!uploadResponse.ok) {
-
-    const text =
-      await uploadResponse.text();
-
-    throw new Error(
-      `Upload falhou: ${text}`
-    );
-
-  }
-
-  return (
-    `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${fileName}`
-  );
-
-}
-
-
-/* =========================================================
-   GUARDAR CÉLULA
-   ========================================================= */
-
-async function saveCell(
-  row,
-  column,
-  existingCell,
-  value
-) {
-
-  if (existingCell?.id) {
-
-    await supabaseRequest(
-      `torre_cells?id=eq.${encodeURIComponent(existingCell.id)}`,
-      {
-        method: "PATCH",
-
-        headers: {
-          "Prefer": "return=minimal"
-        },
-
-        body: JSON.stringify({
-          value
-        })
-      }
-    );
-
-    existingCell.value = value;
-
-    return;
-  }
-
-
-  const created =
-    await supabaseRequest(
-      "torre_cells",
-      {
-        method: "POST",
-
-        headers: {
-          "Prefer": "return=representation"
-        },
-
-        body: JSON.stringify({
-          row_id: row.id,
-          column_id: column.id,
-          value
-        })
-      }
-    );
-
-  if (created?.[0]) {
-
-    currentCells.push(
-      created[0]
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   RESIZE DAS COLUNAS
-   ========================================================= */
+   RESIZE
+========================================================= */
 
 function createResizeHandle(
   cell,
@@ -1364,829 +1263,1645 @@ function createResizeHandle(
 ) {
 
   const handle =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   handle.className =
-    "resize-handle";
+    "column-resize-handle";
 
-  handle.addEventListener(
-    "mousedown",
-    event => {
-
-      event.preventDefault();
-
-      startResize(
-        event,
-        columnIndex
-      );
-
-    }
-  );
 
   cell.appendChild(
     handle
   );
 
-}
+
+  let startX = 0;
+  let startLeft = 0;
+  let startRight = 0;
 
 
-function startResize(
-  event,
-  columnIndex
-) {
+  handle.addEventListener(
+    "pointerdown",
+    function(event) {
 
-  if (
-    columnIndex < 0 ||
-    columnIndex >= columns.length
-  ) {
-    return;
-  }
+      event.preventDefault();
 
-  resizing = true;
-
-  const archiveRect =
-    archive.getBoundingClientRect();
-
-  const startX =
-    event.clientX;
-
-  const startWidth =
-    columns[columnIndex].width_percent;
-
-  const archiveWidth =
-    archiveRect.width - 70;
+      event.stopPropagation();
 
 
-  function onMove(moveEvent) {
+      const width =
+        archive.getBoundingClientRect()
+          .width;
 
-    if (!resizing) {
-      return;
-    }
 
-    const delta =
-      moveEvent.clientX -
-      startX;
+      startX =
+        event.clientX;
 
-    const deltaPercent =
-      (delta / archiveWidth) * 100;
 
-    let newWidth =
-      startWidth + deltaPercent;
+      startLeft =
+        columns[
+          columnIndex
+        ].width_percent;
 
-    newWidth =
-      Math.max(
-        5,
-        Math.min(
-          70,
-          newWidth
-        )
+
+      startRight =
+        columns[
+          columnIndex + 1
+        ].width_percent;
+
+
+      handle.classList.add(
+        "dragging"
       );
 
-    columns[columnIndex].width_percent =
-      newWidth;
 
-    applyGridTemplate();
+      function move(
+        moveEvent
+      ) {
 
-    document
-      .querySelectorAll(
-        ".archive-row, .archive-header-row"
-      )
-      .forEach(rowElement => {
-
-        rowElement.style.gridTemplateColumns =
-          getGridTemplate();
-
-      });
-
-  }
+        const deltaPx =
+          moveEvent.clientX -
+          startX;
 
 
-  async function onUp() {
-
-    resizing = false;
-
-    document.removeEventListener(
-      "mousemove",
-      onMove
-    );
-
-    document.removeEventListener(
-      "mouseup",
-      onUp
-    );
-
-    await saveColumnWidths();
-
-  }
+        const deltaPercent =
+          (
+            deltaPx /
+            width
+          ) *
+          100;
 
 
-  document.addEventListener(
-    "mousemove",
-    onMove
-  );
-
-  document.addEventListener(
-    "mouseup",
-    onUp
-  );
-
-}
+        let left =
+          startLeft +
+          deltaPercent;
 
 
-async function saveColumnWidths() {
+        let right =
+          startRight -
+          deltaPercent;
 
-  const totalWidth =
-    columns.reduce(
-      (sum, column) =>
-        sum +
-        Number(column.width_percent || 0),
-      0
-    );
 
-  for (const column of columns) {
+        const minimum =
+          8;
 
-    const normalized =
-      (
-        Number(column.width_percent) /
-        totalWidth
-      ) * 100;
 
-    column.width_percent =
-      normalized;
+        if (
+          left < minimum
+        ) {
 
-    const widthPx =
-      Math.round(
-        (normalized / 100) * 700
-      );
+          left =
+            minimum;
 
-    await supabaseRequest(
-      `torre_columns?id=eq.${encodeURIComponent(column.id)}`,
-      {
-        method: "PATCH",
+          right =
+            startLeft +
+            startRight -
+            minimum;
+        }
 
-        headers: {
-          "Prefer": "return=minimal"
-        },
 
-        body: JSON.stringify({
-          width_px: widthPx
-        })
+        if (
+          right < minimum
+        ) {
+
+          right =
+            minimum;
+
+          left =
+            startLeft +
+            startRight -
+            minimum;
+        }
+
+
+        columns[
+          columnIndex
+        ].width_percent =
+          left;
+
+
+        columns[
+          columnIndex + 1
+        ].width_percent =
+          right;
+
+
+        applyGridTemplate();
       }
-    );
 
-  }
 
+      function end() {
+
+        handle.classList.remove(
+          "dragging"
+        );
+
+
+        handle.removeEventListener(
+          "pointermove",
+          move
+        );
+
+
+        handle.removeEventListener(
+          "pointerup",
+          end
+        );
+
+
+        saveColumnWidths();
+      }
+
+
+      handle.addEventListener(
+        "pointermove",
+        move
+      );
+
+
+      handle.addEventListener(
+        "pointerup",
+        end
+      );
+    }
+  );
 }
 
 
 /* =========================================================
-   APAGAR LINHA
-   ========================================================= */
+   SAVE COLUMN WIDTHS
+========================================================= */
 
-async function deleteRow(row) {
+async function saveColumnWidths() {
 
-  const confirmed =
-    confirm(
-      `Apagar a linha ${formatInventoryNumber(row.inventory_number)}?`
+  const reference =
+    700;
+
+
+  for (
+    const column of columns
+  ) {
+
+    const width =
+      Math.round(
+        reference *
+        (
+          column.width_percent /
+          100
+        )
+      );
+
+
+    try {
+
+      await supabaseRequest(
+        `torre_columns?id=eq.${column.id}`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Prefer":
+              "return=minimal"
+          },
+
+          body:
+            JSON.stringify({
+              width_px:
+                width
+            })
+        }
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao guardar largura:",
+        error
+      );
+    }
+  }
+}
+
+
+/* =========================================================
+   IMAGE PLACEHOLDER
+========================================================= */
+
+function createImagePlaceholder(
+  cell,
+  rowId,
+  columnId
+) {
+
+  const placeholder =
+    document.createElement(
+      "div"
     );
 
-  if (!confirmed) {
-    return;
+
+  placeholder.className =
+    "image-placeholder";
+
+
+  placeholder.textContent =
+    ">img<";
+
+
+  placeholder.addEventListener(
+    "click",
+    function(event) {
+
+      event.stopPropagation();
+
+
+      openFilePicker(
+        rowId,
+        columnId,
+        cell
+      );
+    }
+  );
+
+
+  cell.appendChild(
+    placeholder
+  );
+}
+
+
+/* =========================================================
+   FILE PICKER
+========================================================= */
+
+function openFilePicker(
+  rowId,
+  columnId,
+  cell
+) {
+
+  imageFileInput.dataset.rowId =
+    rowId;
+
+  imageFileInput.dataset.columnId =
+    columnId;
+
+  imageFileInput._targetCell =
+    cell;
+
+
+  imageFileInput.click();
+}
+
+
+imageFileInput.addEventListener(
+  "change",
+  async function() {
+
+    const file =
+      imageFileInput.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const rowId =
+      imageFileInput.dataset.rowId;
+
+    const columnId =
+      imageFileInput.dataset.columnId;
+
+    const cell =
+      imageFileInput._targetCell;
+
+
+    try {
+
+      const optimized =
+        await optimizeImage(
+          file
+        );
+
+
+      const imageUrl =
+        await uploadImage(
+          optimized
+        );
+
+
+      await saveCell(
+        rowId,
+        columnId,
+        imageUrl
+      );
+
+
+      createImage(
+        imageUrl,
+        cell
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao carregar a imagem."
+      );
+    }
+
+
+    imageFileInput.value =
+      "";
+  }
+);
+
+
+/* =========================================================
+   PASTE IMAGE
+========================================================= */
+
+async function handleImagePaste(
+  event,
+  cell,
+  rowId,
+  columnId
+) {
+
+  const items =
+    event.clipboardData.items;
+
+
+  for (
+    const item of items
+  ) {
+
+    if (
+      !item.type.startsWith(
+        "image/"
+      )
+    ) {
+      continue;
+    }
+
+
+    event.preventDefault();
+
+
+    const file =
+      item.getAsFile();
+
+
+    if (!file) {
+      return;
+    }
+
+
+    try {
+
+      const optimized =
+        await optimizeImage(
+          file
+        );
+
+
+      const imageUrl =
+        await uploadImage(
+          optimized
+        );
+
+
+      await saveCell(
+        rowId,
+        columnId,
+        imageUrl
+      );
+
+
+      createImage(
+        imageUrl,
+        cell
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao carregar a imagem."
+      );
+    }
+
+
+    break;
+  }
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+function createImage(
+  src,
+  cell
+) {
+
+  const image =
+    document.createElement(
+      "img"
+    );
+
+
+  image.src =
+    src;
+
+  image.alt =
+    "Imagem";
+
+
+  image.addEventListener(
+    "click",
+    function(event) {
+
+      event.stopPropagation();
+
+      openImage(
+        image.src
+      );
+    }
+  );
+
+
+  cell.innerHTML =
+    "";
+
+  cell.appendChild(
+    image
+  );
+}
+
+
+/* =========================================================
+   IMAGE OPTIMIZATION
+========================================================= */
+
+function optimizeImage(
+  file
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(event) {
+
+          const image =
+            new Image();
+
+
+          image.onload =
+            function() {
+
+              let width =
+                image.naturalWidth;
+
+              let height =
+                image.naturalHeight;
+
+
+              /*
+               * Imagens mais pequenas para
+               * reduzir carga no sistema.
+               */
+
+              const MAX_SIZE =
+                1600;
+
+
+              if (
+                width > MAX_SIZE ||
+                height > MAX_SIZE
+              ) {
+
+                const ratio =
+                  Math.min(
+                    MAX_SIZE / width,
+                    MAX_SIZE / height
+                  );
+
+
+                width =
+                  Math.round(
+                    width * ratio
+                  );
+
+
+                height =
+                  Math.round(
+                    height * ratio
+                  );
+              }
+
+
+              const canvas =
+                document.createElement(
+                  "canvas"
+                );
+
+
+              canvas.width =
+                width;
+
+              canvas.height =
+                height;
+
+
+              const context =
+                canvas.getContext(
+                  "2d"
+                );
+
+
+              context.drawImage(
+                image,
+                0,
+                0,
+                width,
+                height
+              );
+
+
+              canvas.toBlob(
+                function(blob) {
+
+                  if (!blob) {
+
+                    reject(
+                      new Error(
+                        "Erro ao comprimir imagem."
+                      )
+                    );
+
+                    return;
+                  }
+
+
+                  resolve(
+                    new File(
+                      [blob],
+                      "torre.jpg",
+                      {
+                        type:
+                          "image/jpeg"
+                      }
+                    )
+                  );
+                },
+
+                "image/jpeg",
+
+                0.75
+              );
+            };
+
+
+          image.onerror =
+            reject;
+
+
+          image.src =
+            event.target.result;
+        };
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(
+        file
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   UPLOAD
+========================================================= */
+
+async function uploadImage(
+  file
+) {
+
+  const filename =
+    `${Date.now()}-` +
+    `${Math.random()
+      .toString(36)
+      .substring(2)}.jpg`;
+
+
+  const response =
+    await fetch(
+      `${SUPABASE_URL}` +
+      `/storage/v1/object/` +
+      `${BUCKET}/${filename}`,
+      {
+        method: "POST",
+
+        headers: {
+          "apikey":
+            SUPABASE_KEY,
+
+          "Authorization":
+            `Bearer ${SUPABASE_KEY}`,
+
+          "Content-Type":
+            "image/jpeg"
+        },
+
+        body:
+          file
+      }
+    );
+
+
+  if (!response.ok) {
+
+    const error =
+      await response.text();
+
+    console.error(
+      error
+    );
+
+    throw new Error(
+      "Upload falhou."
+    );
   }
 
+
+  return (
+    `${SUPABASE_URL}` +
+    `/storage/v1/object/public/` +
+    `${BUCKET}/${filename}`
+  );
+}
+
+
+/* =========================================================
+   SAVE CELL
+========================================================= */
+
+async function saveCell(
+  rowId,
+  columnId,
+  value
+) {
+
   await supabaseRequest(
-    `torre_rows?id=eq.${encodeURIComponent(row.id)}`,
+    `torre_cells?` +
+    `row_id=eq.${rowId}` +
+    `&column_id=eq.${columnId}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Prefer":
+          "return=minimal"
+      },
+
+      body:
+        JSON.stringify({
+          value
+        })
+    }
+  );
+}
+
+
+/* =========================================================
+   DELETE ROW
+========================================================= */
+
+async function deleteRow(
+  rowId
+) {
+
+  await supabaseRequest(
+    `torre_rows?id=eq.${rowId}`,
     {
       method: "DELETE"
     }
   );
 
+
   rows =
     rows.filter(
-      item => item.id !== row.id
+      row =>
+        row.id !== rowId
     );
 
 
   /*
-    Reorganizar posições.
-  */
+   * Só actualizamos a posição.
+   * inventory_number NÃO muda.
+   */
 
   for (
-    let index = 0;
-    index < rows.length;
-    index++
+    let i = 0;
+    i < rows.length;
+    i++
   ) {
 
-    rows[index].position =
-      index;
-
     await supabaseRequest(
-      `torre_rows?id=eq.${encodeURIComponent(rows[index].id)}`,
+      `torre_rows?id=eq.${rows[i].id}`,
       {
         method: "PATCH",
 
         headers: {
-          "Prefer": "return=minimal"
+          "Prefer":
+            "return=minimal"
         },
 
-        body: JSON.stringify({
-          position: index
-        })
+        body:
+          JSON.stringify({
+            position:
+              i
+          })
       }
     );
-
   }
 
 
   await loadRows();
 
-  await loadCells();
-
-  render();
-
+  await render();
 }
 
 
 /* =========================================================
-   ADICIONAR LINHA
-   ========================================================= */
+   ADD ROW
+========================================================= */
 
 addRowButton.addEventListener(
   "click",
-  async () => {
+  async function() {
 
     try {
 
       await createRow();
 
-      await loadCells();
+      await loadRows();
 
-      render();
+      await render();
 
     } catch (error) {
 
-      console.error(error);
-
-      alert(
-        "Não foi possível adicionar a linha."
+      console.error(
+        error
       );
 
+      alert(
+        "Erro ao criar linha."
+      );
     }
-
   }
 );
 
 
 /* =========================================================
-   ADICIONAR COLUNA
-   ========================================================= */
+   REMOVE ROW
+========================================================= */
 
-addColumnButton.addEventListener(
+removeRowButton.addEventListener(
   "click",
-  async () => {
+  async function() {
 
-    const position =
-      columns.length;
+    if (
+      rows.length <= 1
+    ) {
 
-    const created =
-      await supabaseRequest(
-        "torre_columns",
-        {
-          method: "POST",
+      alert(
+        "É necessário manter pelo menos uma linha."
+      );
 
-          headers: {
-            "Prefer": "return=representation"
-          },
+      return;
+    }
 
-          body: JSON.stringify({
+
+    const row =
+      rows[
+        rows.length - 1
+      ];
+
+
+    if (
+      !confirm(
+        "Apagar a última linha?"
+      )
+    ) {
+      return;
+    }
+
+
+    try {
+
+      await deleteRow(
+        row.id
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Erro ao apagar a linha."
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   ADD COLUMN
+========================================================= */
+
+async function addColumn() {
+
+  const position =
+    columns.length;
+
+
+  const response =
+    await supabaseRequest(
+      "torre_columns",
+      {
+        method: "POST",
+
+        headers: {
+          "Prefer":
+            "return=representation"
+        },
+
+        body:
+          JSON.stringify({
+
             category_id:
               currentCategory.id,
 
             position,
 
+            width_px:
+              180,
+
             name:
-              `COLUNA ${position + 1}`,
-
-            width_px: 180
+              position === 0
+                ? "imagem"
+                : `coluna ${position}`
           })
-        }
+      }
+    );
+
+
+  const inserted =
+    await response.json();
+
+
+  const newColumn =
+    inserted[0];
+
+
+  columns.push(
+    newColumn
+  );
+
+
+  /*
+   * TODAS as colunas passam a
+   * ter exactamente a mesma largura.
+   */
+
+  const equal =
+    100 /
+    columns.length;
+
+
+  columns.forEach(
+    column => {
+
+      column.width_percent =
+        equal;
+    }
+  );
+
+
+  for (
+    const row of rows
+  ) {
+
+    await supabaseRequest(
+      "torre_cells",
+      {
+        method: "POST",
+
+        body:
+          JSON.stringify({
+
+            row_id:
+              row.id,
+
+            column_id:
+              newColumn.id,
+
+            value:
+              null
+          })
+      }
+    );
+  }
+
+
+  await saveColumnWidths();
+
+  await render();
+}
+
+
+/* =========================================================
+   REMOVE COLUMN
+========================================================= */
+
+async function removeColumn() {
+
+  if (
+    columns.length <= 1
+  ) {
+
+    alert(
+      "É necessário manter pelo menos uma coluna."
+    );
+
+    return;
+  }
+
+
+  const column =
+    columns[
+      columns.length - 1
+    ];
+
+
+  if (
+    !confirm(
+      "Apagar a última coluna?"
+    )
+  ) {
+    return;
+  }
+
+
+  await supabaseRequest(
+    `torre_columns?id=eq.${column.id}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+
+  columns =
+    columns.slice(
+      0,
+      -1
+    );
+
+
+  const equal =
+    100 /
+    columns.length;
+
+
+  columns.forEach(
+    column => {
+
+      column.width_percent =
+        equal;
+    }
+  );
+
+
+  for (
+    let i = 0;
+    i < columns.length;
+    i++
+  ) {
+
+    await supabaseRequest(
+      `torre_columns?id=eq.${columns[i].id}`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "Prefer":
+            "return=minimal"
+        },
+
+        body:
+          JSON.stringify({
+            position:
+              i
+          })
+      }
+    );
+  }
+
+
+  await saveColumnWidths();
+
+  await render();
+}
+
+
+/* =========================================================
+   COLUMN BUTTONS
+========================================================= */
+
+addColumnButton.addEventListener(
+  "click",
+  async function() {
+
+    try {
+
+      await addColumn();
+
+    } catch (error) {
+
+      console.error(
+        error
       );
 
-    const column =
-      created?.[0];
-
-    if (!column) {
-      return;
-    }
-
-
-    for (const row of rows) {
-
-      await supabaseRequest(
-        "torre_cells",
-        {
-          method: "POST",
-
-          headers: {
-            "Prefer": "return=minimal"
-          },
-
-          body: JSON.stringify({
-            row_id: row.id,
-            column_id: column.id,
-            value: null
-          })
-        }
+      alert(
+        "Erro ao criar coluna."
       );
-
     }
-
-
-    await loadColumns();
-
-    await loadCells();
-
-    render();
-
   }
 );
 
 
-/* =========================================================
-   REMOVER COLUNA
-   ========================================================= */
-
 removeColumnButton.addEventListener(
   "click",
-  async () => {
+  async function() {
 
-    if (columns.length <= 1) {
+    try {
+
+      await removeColumn();
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
 
       alert(
-        "Tem de existir pelo menos uma coluna."
+        "Erro ao remover coluna."
       );
-
-      return;
     }
-
-
-    const column =
-      columns[columns.length - 1];
-
-
-    const confirmed =
-      confirm(
-        `Remover a coluna "${getColumnTitle(column, columns.length - 1)}"?`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-
-    /*
-      Primeiro apagamos as células
-      dessa coluna.
-    */
-
-    await supabaseRequest(
-      `torre_cells?column_id=eq.${encodeURIComponent(column.id)}`,
-      {
-        method: "DELETE"
-      }
-    );
-
-
-    await supabaseRequest(
-      `torre_columns?id=eq.${encodeURIComponent(column.id)}`,
-      {
-        method: "DELETE"
-      }
-    );
-
-
-    columns =
-      columns.filter(
-        item => item.id !== column.id
-      );
-
-
-    /*
-      Reposicionar colunas.
-    */
-
-    for (
-      let index = 0;
-      index < columns.length;
-      index++
-    ) {
-
-      await supabaseRequest(
-        `torre_columns?id=eq.${encodeURIComponent(columns[index].id)}`,
-        {
-          method: "PATCH",
-
-          headers: {
-            "Prefer": "return=minimal"
-          },
-
-          body: JSON.stringify({
-            position: index
-          })
-        }
-      );
-
-    }
-
-
-    await loadColumns();
-
-    await loadCells();
-
-    render();
-
   }
 );
 
 
 /* =========================================================
    MENU
-   ========================================================= */
+========================================================= */
 
-document
-  .getElementById("menu-toggle")
-  .addEventListener(
-    "click",
-    () => {
-
-      const visible =
-        categoryMenu.style.display !== "none";
-
-      categoryMenu.style.display =
-        visible ? "none" : "flex";
-
-    }
-  );
-
-
-/* =========================================================
-   IMAGE VIEWER
-   ========================================================= */
-
-function openImageViewer(url) {
-
-  if (!url) {
-    return;
-  }
-
-  imageViewerImage.src =
-    url;
-
-  imageViewer.classList.add(
-    "visible"
-  );
-
-  imageViewer.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-}
-
-
-function closeImageViewer() {
-
-  imageViewer.classList.remove(
-    "visible"
-  );
-
-  imageViewer.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  imageViewerImage.src = "";
-
-}
-
-
-imageViewerClose.addEventListener(
+menuButton.addEventListener(
   "click",
-  closeImageViewer
-);
+  function(event) {
 
+    event.stopPropagation();
 
-imageViewer.addEventListener(
-  "click",
-  event => {
-
-    if (
-      event.target === imageViewer
-    ) {
-
-      closeImageViewer();
-
-    }
-
+    menu.classList.toggle(
+      "open"
+    );
   }
 );
 
 
 document.addEventListener(
-  "keydown",
-  event => {
+  "click",
+  function(event) {
 
-    if (event.key === "Escape") {
+    if (
+      !event.target.closest(
+        "#header"
+      )
+    ) {
 
-      closeImageViewer();
-
+      menu.classList.remove(
+        "open"
+      );
     }
-
   }
 );
 
 
 /* =========================================================
-   LOG
-   ========================================================= */
+   IMAGE VIEWER
+========================================================= */
+
+viewer.addEventListener(
+  "click",
+  function() {
+
+    viewer.classList.remove(
+      "open"
+    );
+
+    viewerImage.src =
+      "";
+  }
+);
+
+
+function openImage(
+  src
+) {
+
+  viewerImage.src =
+    src;
+
+  viewer.classList.add(
+    "open"
+  );
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function setTodayAsDefaultDate() {
+
+  const today =
+    new Date();
+
+
+  const year =
+    today.getFullYear();
+
+
+  const month =
+    String(
+      today.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  const day =
+    String(
+      today.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+
+  logDate.value =
+    `${year}-${month}-${day}`;
+}
+
+
+/* =========================================================
+   LOAD LOGS
+========================================================= */
 
 async function loadLogs() {
 
-  if (!currentCategory) {
+  if (
+    !currentCategory
+  ) {
     return;
   }
 
-  const logs =
+
+  const response =
     await supabaseRequest(
-      `torre_logs?category_id=eq.${encodeURIComponent(currentCategory.id)}&select=*&order=date.desc`
+      `torre_logs?select=*` +
+      `&category_id=eq.${currentCategory.id}` +
+      `&order=log_date.desc,created_at.desc`
     );
 
-  renderLogs(logs);
 
+  const data =
+    await response.json();
+
+
+  renderLogs(
+    data
+  );
 }
 
 
-function renderLogs(logs) {
+/* =========================================================
+   RENDER LOGS
+========================================================= */
 
-  logsContainer.innerHTML = "";
+function renderLogs(
+  data
+) {
 
-  if (!logs.length) {
-
-    logsContainer.textContent =
-      "sem registos";
-
-    return;
-
-  }
+  logs.innerHTML =
+    "";
 
 
-  logs.forEach(log => {
+  if (
+    !data.length
+  ) {
 
-    const entry =
-      document.createElement("div");
-
-    entry.className =
-      "log-entry";
-
-
-    const date =
-      document.createElement("div");
-
-    date.className =
-      "log-date";
-
-    date.textContent =
-      formatLogDate(log.date);
-
-
-    const number =
-      document.createElement("div");
-
-    number.className =
-      "log-number";
-
-    number.textContent =
-      formatInventoryNumber(
-        log.inventory_number
+    const empty =
+      document.createElement(
+        "div"
       );
 
 
-    const note =
-      document.createElement("div");
-
-    note.className =
-      "log-note";
-
-    note.textContent =
-      log.note || "";
+    empty.className =
+      "log-entry";
 
 
-    const deleteButton =
-      document.createElement("button");
+    empty.textContent =
+      "sem registos";
 
-    deleteButton.className =
-      "log-delete";
 
-    deleteButton.type =
-      "button";
-
-    deleteButton.textContent =
-      "×";
-
-    deleteButton.addEventListener(
-      "click",
-      async () => {
-
-        await deleteLog(log);
-
-      }
+    logs.appendChild(
+      empty
     );
 
 
-    entry.appendChild(date);
-    entry.appendChild(number);
-    entry.appendChild(note);
-    entry.appendChild(deleteButton);
+    return;
+  }
 
-    logsContainer.appendChild(entry);
 
-  });
+  data.forEach(
+    log => {
 
+      const entry =
+        document.createElement(
+          "div"
+        );
+
+
+      entry.className =
+        "log-entry";
+
+
+      const date =
+        document.createElement(
+          "span"
+        );
+
+
+      date.className =
+        "log-date-display";
+
+
+      date.textContent =
+        formatDate(
+          log.log_date
+        );
+
+
+      const number =
+        document.createElement(
+          "span"
+        );
+
+
+      number.className =
+        "log-number-display";
+
+
+      number.textContent =
+        `#${formatLogNumber(
+          log.inventory_number
+        )}`;
+
+
+      const note =
+        document.createElement(
+          "div"
+        );
+
+
+      note.className =
+        "log-note-display";
+
+
+      note.textContent =
+        log.note;
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+
+      deleteButton.className =
+        "delete-log";
+
+
+      deleteButton.type =
+        "button";
+
+
+      deleteButton.textContent =
+        "×";
+
+
+      deleteButton.addEventListener(
+        "click",
+        async function() {
+
+          if (
+            !confirm(
+              "Apagar esta nota?"
+            )
+          ) {
+            return;
+          }
+
+
+          try {
+
+            await supabaseRequest(
+              `torre_logs?id=eq.${log.id}`,
+              {
+                method:
+                  "DELETE"
+              }
+            );
+
+
+            await loadLogs();
+
+          } catch (error) {
+
+            console.error(
+              error
+            );
+
+            alert(
+              "Erro ao apagar a nota."
+            );
+          }
+        }
+      );
+
+
+      entry.appendChild(
+        date
+      );
+
+      entry.appendChild(
+        number
+      );
+
+      entry.appendChild(
+        note
+      );
+
+      entry.appendChild(
+        deleteButton
+      );
+
+
+      logs.appendChild(
+        entry
+      );
+    }
+  );
 }
 
 
-function formatLogDate(value) {
+/* =========================================================
+   FORMAT LOG NUMBER
+========================================================= */
 
-  if (!value) {
+function formatLogNumber(
+  number
+) {
+
+  const numeric =
+    Number(
+      number
+    );
+
+
+  if (
+    !Number.isFinite(numeric)
+  ) {
     return "";
   }
 
-  const date =
-    new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-    return String(value);
-  }
-
-  return date.toLocaleDateString(
-    "pt-PT"
+  return String(
+    numeric
+  ).padStart(
+    3,
+    "0"
   );
-
 }
 
 
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+  dateString
+) {
+
+  const parts =
+    dateString.split(
+      "-"
+    );
+
+
+  if (
+    parts.length !== 3
+  ) {
+    return dateString;
+  }
+
+
+  return (
+    `${parts[2]}.` +
+    `${parts[1]}.` +
+    `${parts[0]}`
+  );
+}
+
+
+/* =========================================================
+   SAVE LOG
+========================================================= */
+
 logForm.addEventListener(
   "submit",
-  async event => {
+  async function(event) {
 
     event.preventDefault();
+
+
+    const date =
+      logDate.value;
+
 
     const number =
       Number(
         logNumber.value
-          .trim()
       );
+
 
     const note =
       logNote.value.trim();
 
 
     if (
-      !Number.isFinite(number) ||
-      number <= 0
+      !date ||
+      !number ||
+      !note
     ) {
 
       alert(
-        "Indica um número de inventário válido."
+        "É obrigatório indicar a data, o número do inventário e a nota."
       );
 
       return;
-
     }
 
 
-    const matchingRow =
-      rows.find(
-        row =>
-          Number(row.inventory_number) ===
-          number
+    const rowExists =
+      rows.some(
+        (
+          row,
+          rowIndex
+        ) => {
+
+          const effectiveNumber =
+            Number(
+              row.inventory_number
+            );
+
+
+          if (
+            Number.isFinite(
+              effectiveNumber
+            ) &&
+            effectiveNumber > 0
+          ) {
+
+            return (
+              effectiveNumber ===
+              number
+            );
+          }
+
+
+          return (
+            rowIndex + 1 ===
+            number
+          );
+        }
       );
 
 
-    if (!matchingRow) {
+    if (
+      !rowExists
+    ) {
 
       alert(
         "Esse número de inventário não existe nesta categoria."
       );
 
       return;
-
     }
 
 
-    await supabaseRequest(
-      "torre_logs",
-      {
-        method: "POST",
+    try {
 
-        headers: {
-          "Prefer": "return=minimal"
-        },
+      await supabaseRequest(
+        "torre_logs",
+        {
+          method: "POST",
 
-        body: JSON.stringify({
-          category_id:
-            currentCategory.id,
+          headers: {
+            "Prefer":
+              "return=representation"
+          },
 
-          inventory_number:
-            number,
+          body:
+            JSON.stringify({
 
-          note,
+              category_id:
+                currentCategory.id,
 
-          date:
-            new Date().toISOString()
-        })
-      }
-    );
+              inventory_number:
+                number,
 
+              log_date:
+                date,
 
-    logNumber.value = "";
-
-    logNote.value = "";
-
-    await loadLogs();
-
-  }
-);
+              note:
+                note
+            })
+        }
+      );
 
 
-async function deleteLog(log) {
+      logNumber.value =
+        "";
 
-  const confirmed =
-    confirm(
-      "Apagar este registo do LOG?"
-    );
+      logNote.value =
+        "";
 
-  if (!confirmed) {
-    return;
-  }
 
-  await supabaseRequest(
-    `torre_logs?id=eq.${encodeURIComponent(log.id)}`,
-    {
-      method: "DELETE"
+      await loadLogs();
+
+    } catch (error) {
+
+      console.error(
+        "LOG ERROR:",
+        error
+      );
+
+      alert(
+        "Erro ao guardar a nota."
+      );
     }
-  );
-
-  await loadLogs();
-
-}
-
-
-logToggle.addEventListener(
-  "click",
-  () => {
-
-    const closed =
-      logContent.style.display === "none";
-
-    logContent.style.display =
-      closed ? "block" : "none";
-
-    logToggle.textContent =
-      closed ? "−" : "+";
-
-  }
-);
-
-
-/* =========================================================
-   POPUP DE DESENVOLVIMENTO
-   ========================================================= */
-
-developmentNoticeClose.addEventListener(
-  "click",
-  () => {
-
-    developmentNotice.classList.add(
-      "hidden"
-    );
-
-    developmentNotice.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
   }
 );
 
 
 /* =========================================================
    GOOGLE SHEETS
-   ========================================================= */
+========================================================= */
 
 sheetsLink.href =
   GOOGLE_SHEETS_URL;
@@ -2194,7 +2909,7 @@ sheetsLink.href =
 
 /* =========================================================
    INIT
-   ========================================================= */
+========================================================= */
 
 async function init() {
 
@@ -2204,17 +2919,6 @@ async function init() {
 
     renderCategoryMenu();
 
-
-    if (!categories.length) {
-
-      categoryTitle.textContent =
-        "TORRE";
-
-      return;
-
-    }
-
-
     await selectCategory(
       categories[0]
     );
@@ -2222,26 +2926,27 @@ async function init() {
   } catch (error) {
 
     console.error(
-      "Erro ao iniciar TORRE:",
+      "TORRE ERROR:",
       error
     );
 
-    categoryTitle.textContent =
-      "Erro ao carregar TORRE";
 
-    archive.innerHTML = `
+    document.body.innerHTML = `
       <div style="
-        border:2px solid #0000ff;
-        padding:20px;
-        color:#0000ff;
+        padding:40px;
+        font-family:Arial, Helvetica, sans-serif;
+        color:#ffffff;
+        background:#0000ff;
+        min-height:100vh;
       ">
-        Não foi possível carregar os dados.
-        Consulte a consola do navegador.
+        <h2>TORRE — erro</h2>
+
+        <pre style="
+          white-space:pre-wrap;
+        ">${error.message}</pre>
       </div>
     `;
-
   }
-
 }
 
 
