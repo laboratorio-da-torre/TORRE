@@ -458,7 +458,7 @@ async function createRow() {
       .map(
         row =>
           Number(
-            row.
+            row.inventory_number
           )
       )
       .filter(
@@ -499,7 +499,7 @@ async function createRow() {
             position:
               rows.length,
 
-            :
+            inventory_number:
               inventoryNumber
           })
       }
@@ -654,14 +654,14 @@ function createRowElement(
     "row-number";
 
 
- if (rowIndex === 0) {
-  number.textContent = "";
-} else {
   number.textContent =
     String(
       row.inventory_number
-    ).padStart(3, "0");
-}
+    ).padStart(
+      3,
+      "0"
+    );
+
 
   rowElement.appendChild(
     number
