@@ -12,7 +12,10 @@
 <header id="header">
 
   <div class="header-left">
-    <button id="menu-button">log/torre</button>
+
+    <button id="menu-button">
+      log/torre
+    </button>
 
     <nav id="menu">
 
@@ -41,6 +44,7 @@
       </button>
 
     </nav>
+
   </div>
 
 
@@ -163,9 +167,15 @@
 </div>
 
 
-<!-- =====================================================
-     AVISO DE DESENVOLVIMENTO
-===================================================== -->
+<input
+  id="image-file-input"
+  type="file"
+  accept="image/*"
+  hidden
+>
+
+
+<!-- AVISO DE DESENVOLVIMENTO -->
 
 <div id="development-notice">
 
@@ -192,12 +202,12 @@
       <p>
         Depois de criar ou alterar dados, aguarde alguns segundos
         antes de actualizar a página, para permitir que os dados
-        sejam guardados e sincronizados.
+        sejam guardados e a sincronização seja processada.
       </p>
 
       <p>
-        Sempre que possível, utilize fotografias comprimidas ou
-        de pequena dimensão para aliviar o sistema.
+        Sempre que possível, utilize fotografias comprimidas
+        ou de pequena dimensão.
       </p>
 
     </div>
@@ -205,14 +215,6 @@
   </div>
 
 </div>
-
-
-<input
-  id="image-file-input"
-  type="file"
-  accept="image/*"
-  hidden
->
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
