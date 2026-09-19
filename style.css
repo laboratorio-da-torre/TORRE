@@ -194,6 +194,9 @@ main {
 .archive-row:first-child .cell {
   border-top: 2px solid #0000ff;
 }
+.archive-row:last-child .cell {
+  border-bottom: 2px solid #0000ff;
+}
 
 .cell:first-child {
   border-left: 2px solid #0000ff;
