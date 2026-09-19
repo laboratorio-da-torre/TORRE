@@ -203,7 +203,7 @@ main {
   border-left: 2px solid #0000ff;
 }
 
-.cell:last-child {
+.cell-last {
   border-right: 2px solid #0000ff;
 }
 
