@@ -78,11 +78,14 @@ const sheetsLink =
 const developmentNotice =
   document.getElementById("development-notice");
 
-const developmentNoticeBox =
-  document.getElementById("development-notice-box");
+const passwordForm =
+  document.getElementById("password-form");
 
-const developmentNoticeClose =
-  document.getElementById("development-notice-close");
+const passwordInput =
+  document.getElementById("password-input");
+
+const passwordError =
+  document.getElementById("password-error");
 
 
 /* =========================================================
@@ -1762,6 +1765,7 @@ async function deleteRow(
         row.id !== rowId
     );
 
+
   /*
    * Posição e número de inventário
    * são atualizados pela ordem atual.
@@ -1798,6 +1802,7 @@ async function deleteRow(
       }
     );
   }
+
 
   await loadRows();
 
@@ -2196,41 +2201,52 @@ function openImage(
 
 
 /* =========================================================
-   DEVELOPMENT NOTICE
+   DEVELOPMENT NOTICE / PALAVRA-PASSE
 ========================================================= */
+
+const SITE_PASSWORD =
+  "logtorre";
+
 
 developmentNotice.classList.add(
   "open"
 );
 
 
-developmentNoticeClose.addEventListener(
-  "click",
-  function() {
-
-    developmentNotice.classList.remove(
-      "open"
-    );
-  }
-);
-
-
-developmentNotice.addEventListener(
-  "click",
-  function() {
-
-    developmentNotice.classList.remove(
-      "open"
-    );
-  }
-);
-
-
-developmentNoticeBox.addEventListener(
-  "click",
+passwordForm.addEventListener(
+  "submit",
   function(event) {
 
-    event.stopPropagation();
+    event.preventDefault();
+
+
+    const value =
+      passwordInput.value
+        .trim()
+        .toLowerCase();
+
+
+    if (
+      value === SITE_PASSWORD
+    ) {
+
+      developmentNotice.classList.remove(
+        "open"
+      );
+
+      passwordError.textContent =
+        "";
+
+    } else {
+
+      passwordError.textContent =
+        "Palavra-passe incorreta.";
+
+      passwordInput.value =
+        "";
+
+      passwordInput.focus();
+    }
   }
 );
 
