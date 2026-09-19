@@ -1762,10 +1762,9 @@ async function deleteRow(
         row.id !== rowId
     );
 
-
   /*
-   * Só actualizamos a posição.
-   * inventory_number NÃO muda.
+   * Posição e número de inventário
+   * são atualizados pela ordem atual.
    */
 
   for (
@@ -1773,6 +1772,10 @@ async function deleteRow(
     i < rows.length;
     i++
   ) {
+
+    rows[i].inventory_number =
+      i + 1;
+
 
     await supabaseRequest(
       `torre_rows?id=eq.${rows[i].id}`,
@@ -1787,12 +1790,14 @@ async function deleteRow(
         body:
           JSON.stringify({
             position:
-              i
+              i,
+
+            inventory_number:
+              i + 1
           })
       }
     );
   }
-
 
   await loadRows();
 
