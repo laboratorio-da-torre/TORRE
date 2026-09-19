@@ -194,6 +194,7 @@ main {
 .archive-row:first-child .cell {
   border-top: 2px solid #0000ff;
 }
+
 .archive-row:last-child .cell {
   border-bottom: 2px solid #0000ff;
 }
@@ -577,22 +578,6 @@ main {
   padding: 24px 26px 20px;
 }
 
-#development-notice-close {
-  position: absolute;
-
-  top: 8px;
-  right: 12px;
-
-  color: #0000ff;
-
-  font-size: 18px;
-  line-height: 1;
-}
-
-#development-notice-close:hover {
-  text-decoration: underline;
-}
-
 #development-notice-title {
   font-size: 16px;
   font-weight: 700;
@@ -606,6 +591,47 @@ main {
 
 #development-notice-text p:last-child {
   margin-bottom: 0;
+}
+
+#password-form {
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+#password-input {
+  flex: 1;
+  min-width: 0;
+
+  border: 0;
+  border-bottom: 1px solid #0000ff;
+  border-radius: 0;
+
+  outline: none;
+
+  background: transparent;
+
+  padding: 3px 0;
+
+  color: #0000ff;
+}
+
+#password-submit {
+  color: #0000ff;
+}
+
+#password-submit:hover {
+  text-decoration: underline;
+}
+
+#password-error {
+  margin-top: 8px;
+
+  min-height: 16px;
+
+  font-size: 13px;
 }
 
 
