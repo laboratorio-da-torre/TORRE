@@ -669,10 +669,11 @@ function createHeaderRowElement(
       "div"
     );
 
-
-  numberCell.className =
-    "cell number-cell";
-
+   cell.className =
+        columnIndex ===
+          columns.length - 1
+          ? "cell cell-last"
+          : "cell";
 
   numberCell.textContent =
     "Nº";
